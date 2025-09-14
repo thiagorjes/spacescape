@@ -72,12 +72,12 @@ const MAX_FUEL = 10; // Combustível máximo em litros
 const FUEL_CONSUMPTION_THRUST = 0.5; // Consumo por segundo para avanço/recuo
 const FUEL_CONSUMPTION_TURN = 0.1; // Consumo por segundo para rotação
 const FRICTION = 0.3;
+const COLLISION_THRESHOLD = 200; // LIMIAR DE FORÇA DE IMPACTO PARA EXPLOSÃO
 
 // Estado do jogo e elementos do canvas
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const planetCountRange = document.getElementById('planetCount');
-const planetCountValueSpan = document.getElementById('planetCountValue');
 const messageOverlay = document.getElementById('message-overlay');
 const winOverlay = document.getElementById('win-overlay');
 
@@ -89,6 +89,7 @@ let startPlanet = null;
 let endPlanet = null;
 let keyMap = {};
 let difficultyLevel = 2; // Nível de dificuldade inicial
+let isExploding = false; // Estado da explosão
 
 // Mapeamento de teclas configurável
 let keyBindings = {
@@ -142,7 +143,6 @@ function init() {
         }
     });
 
-    // Inicia o jogo automaticamente
     startGame();
 }
 
@@ -150,7 +150,7 @@ function init() {
 function generatePlanets(count) {
     const minRadius = 20;
     const maxRadius = 80;
-    const minDistance = 150; // Distância mínima entre planetas
+    const minDistance = 150; 
     
     planets = [];
     
@@ -162,7 +162,7 @@ function generatePlanets(count) {
         position: new Vector(startX, startY),
         radius: startRadius,
         mass: PLANET_DENSITY * Math.pow(startRadius, 2),
-        color: '#4a8fe7'
+        color: '#fff73b'
     });
 
     // Gerar o planeta final o mais longe possível
@@ -217,7 +217,7 @@ function generatePlanets(count) {
             position: new Vector(x, y),
             radius: radius,
             mass: mass,
-            color: '#888888'
+            color: '#4a8fe7'
         });
     }
 
@@ -229,6 +229,7 @@ function generatePlanets(count) {
 function resetGame() {
     winOverlay.style.display = 'none';
     isRunning = false;
+    isExploding = false;
 
     // Reinicia o foguete
     rocket = {
@@ -245,7 +246,7 @@ function resetGame() {
     
     // Reposiciona o foguete em uma posição aleatória no planeta inicial
     if (startPlanet) {
-        const totalRadius = startPlanet.radius + ROCKET_RADIUS+5;
+        const totalRadius = startPlanet.radius + ROCKET_RADIUS + 5;
         const randomAngle = Math.random() * 2 * Math.PI;
 
         rocket.position.x = startPlanet.position.x + Math.cos(randomAngle) * totalRadius;
@@ -264,16 +265,15 @@ function resetGame() {
 
 // Função para aumentar a dificuldade e reiniciar
 function increaseDifficultyAndReset() {
-    difficultyLevel = Math.min(parseInt(planetCountRange.max), difficultyLevel + 1);
-    planetCountRange.value = difficultyLevel;
+    difficultyLevel = Math.min(parseInt(planetCount.max), difficultyLevel + 1);
+    planetCount.value = difficultyLevel;
     resetGame();
-    startGame(); // Inicia o próximo nível automaticamente
+    startGame();
 }
 
 // Atualiza a contagem de planetas e reinicia o jogo
 function updatePlanetCount(value) {
     difficultyLevel = parseInt(value);
-    planetCountValueSpan.textContent = value;
     resetGame();
 }
 
@@ -297,46 +297,52 @@ function displayMessage(text) {
 
 // Função para verificar e resolver colisões e a vitória
 function checkCollisions() {
-    // Verifica a vitória
-    const distanceToEndPlanet = rocket.position.clone().subtract(endPlanet.position).magnitude;
-    if (distanceToEndPlanet < ROCKET_RADIUS + endPlanet.radius) {
-        isRunning = false;
-        winOverlay.style.display = 'flex';
-        return;
-    }
-
     // Verifica colisões com outros planetas
     for (const planet of planets) {
-        if (planet === endPlanet) continue; // Ignora o planeta final na colisão
+        //if (planet === endPlanet) continue; // Ignora o planeta final na colisão
         const distanceVector = rocket.position.clone().subtract(planet.position);
         const distance = distanceVector.magnitude;
         
-        if (distance < ROCKET_RADIUS + planet.radius ) {
-                        
-            // Vetor de colisão (do planeta para o foguete)
+        if (distance < ROCKET_RADIUS + planet.radius) {
+            // Calcula a força de impacto com base na velocidade vetorial
+            const impactForce = rocket.velocity.magnitude * ROCKET_MASS;
+            
+            if (impactForce > COLLISION_THRESHOLD) {
+                isExploding = true;
+                isRunning = false;
+                displayMessage("Impacto catastrófico! Foguete destruído.");
+                setTimeout(() => {
+                    resetGame(); // Reinicia o jogo após a explosão
+                }, 2000);
+                return; // Encerra a função para não processar mais colisões
+            }
+            
+            // Colisão normal
             const collisionNormal = distanceVector.normalize;
-            
-            // Velocidade paralela ao vetor de colisão
             const parallelVelocity = rocket.velocity.projection(collisionNormal);
-            
-            // Velocidade ortogonal ao vetor de colisão
             const orthogonalVelocity = rocket.velocity.clone().subtract(parallelVelocity);
-            
-            // Inverte a velocidade paralela para simular o "quique" e aplica atrito reduzindo a velocidade total.
             rocket.velocity = orthogonalVelocity.subtract(parallelVelocity).multiply(1 - FRICTION);
             
             // Ajusta a posição para evitar que o foguete fique "preso"
             const overlap = ROCKET_RADIUS + planet.radius - distance;
             rocket.position.add(collisionNormal.multiply(overlap));
             
-            return; // Retorna para evitar processar múltiplos eventos de colisão
+            return;
         }
+    }
+
+    // Verifica a vitória
+    const distanceToEndPlanet = rocket.position.clone().subtract(endPlanet.position).magnitude;
+    if (distanceToEndPlanet < ROCKET_RADIUS + endPlanet.radius + 0.1) {
+        isRunning = false;
+        winOverlay.style.display = 'flex';
+        return;
     }
 }
 
 // O loop principal do jogo
 function gameLoop(timestamp) {
-    if (!isRunning) return;
+    if (!isRunning && !isExploding) return;
     
     const deltaTime = (timestamp - lastTimestamp) / 1000;
     lastTimestamp = timestamp;
@@ -349,6 +355,11 @@ function gameLoop(timestamp) {
 
 // Função de atualização (a "máquina de estados" de física)
 function update(deltaTime) {
+    if (isExploding) {
+        // Nada a atualizar, apenas a animação de explosão será renderizada
+        return;
+    }
+
     // Força resultante inicial no foguete
     let resultantForce = new Vector(0, 0);
 
@@ -358,14 +369,13 @@ function update(deltaTime) {
         const dy = planet.position.y - rocket.position.y;
         const distanceSq = dx * dx + dy * dy;
 
-        if (distanceSq > 10) { // Evita divisão por zero
+        if (distanceSq > 10) {
             const forceMagnitude = G * (ROCKET_MASS * planet.mass) / distanceSq;
             const forceDirection = new Vector(dx, dy).normalize;
             resultantForce.add(forceDirection.multiply(forceMagnitude));
         }
     }
 
-    // Aplica controle do usuário (força de propulsão e torque)
     let thrustDirection = new Vector(Math.cos(rocket.angle - Math.PI / 2), Math.sin(rocket.angle - Math.PI / 2));
     if (rocket.fuel > 0) {
         if (keyMap[keyBindings['forward']]) {
@@ -390,12 +400,10 @@ function update(deltaTime) {
         displayMessage("Combustível esgotado!");
     }
 
-    // Garante que o combustível não seja negativo
     if (rocket.fuel < 0) {
         rocket.fuel = 0;
     }
 
-    // Atualiza aceleração, velocidade e posição do foguete
     rocket.acceleration = resultantForce.divide(ROCKET_MASS);
     rocket.velocity.add(rocket.acceleration.multiply(deltaTime));
     rocket.position.add(rocket.velocity.clone().multiply(deltaTime));
@@ -403,13 +411,11 @@ function update(deltaTime) {
     
     checkCollisions();
 
-    // Lógica de "teletransporte" ao sair da tela
     if (rocket.position.x < 0) { rocket.position.x = canvas.width; }
     if (rocket.position.x > canvas.width) { rocket.position.x = 0; }
     if (rocket.position.y < 0) { rocket.position.y = canvas.height; }
     if (rocket.position.y > canvas.height) { rocket.position.y = 0; }
     
-    // Atualiza o HUD (informações na tela)
     const speed = rocket.velocity.magnitude;
     const distance = rocket.position.clone().subtract(endPlanet.position).magnitude;
     document.getElementById('speedValue').textContent = speed.toFixed(2);
@@ -432,6 +438,36 @@ function draw() {
         ctx.fill();
         ctx.closePath();
         ctx.shadowBlur = 0;
+    }
+
+    // Se o foguete estiver explodindo, desenha a explosão
+    if (isExploding) {
+        const explosionDuration = 2000; // Duração da explosão em milissegundos
+        const elapsed = performance.now() - lastTimestamp;
+        const progress = elapsed / explosionDuration;
+        const radius = ROCKET_RADIUS + progress * 50;
+        const opacity = 1 - progress;
+
+        ctx.globalAlpha = opacity;
+        
+        ctx.fillStyle = '#ffcc00';
+        ctx.beginPath();
+        ctx.arc(rocket.position.x, rocket.position.y, radius, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        ctx.fillStyle = '#ff6600';
+        ctx.beginPath();
+        ctx.arc(rocket.position.x + Math.random() * 20 - 10, rocket.position.y + Math.random() * 20 - 10, radius * 0.8, 0, 2 * Math.PI);
+        ctx.fill();
+
+        ctx.fillStyle = '#ff0000';
+        ctx.beginPath();
+        ctx.arc(rocket.position.x + Math.random() * 10 - 5, rocket.position.y + Math.random() * 10 - 5, radius * 0.5, 0, 2 * Math.PI);
+        ctx.fill();
+
+        ctx.globalAlpha = 1.0;
+        
+        return; // Sai da função para não desenhar o foguete
     }
 
     // Desenha o foguete

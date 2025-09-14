@@ -54,7 +54,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    height: 20vh;
+    height: 25vh;
     overflow-y: auto;
     background: #1a1a2e;
     border-top: 3px solid #3a3a5a;
