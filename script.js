@@ -140,6 +140,9 @@ function init() {
             draw();
         }
     });
+
+    // Inicia o jogo automaticamente
+    startGame();
 }
 
 // Função para gerar planetas aleatórios
@@ -263,6 +266,7 @@ function increaseDifficultyAndReset() {
     planetCountRange.value = difficultyLevel;
     planetCountValueSpan.textContent = difficultyLevel;
     resetGame();
+    startGame(); // Inicia o próximo nível automaticamente
 }
 
 // Atualiza a contagem de planetas e reinicia o jogo

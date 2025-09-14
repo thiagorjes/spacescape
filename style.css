@@ -167,3 +167,34 @@ button:hover {
     color: #4CAF50;
     margin: 0;
 }
+
+/* ---------------------------------- */
+/* Ajustes para Mobile/Tablet    */
+/* ---------------------------------- */
+@media (max-width: 768px) {
+    body {
+        justify-content: space-between;
+    }
+
+    .controls-container {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .control-group label, .control-group span, .stats span, #key-config-container p {
+        font-size: 0.8rem;
+    }
+
+    input[type="range"] {
+        width: 120px;
+    }
+
+    .key-input input {
+        width: 40px;
+        font-size: 0.8rem;
+    }
+
+    .stats {
+        gap: 10px;
+    }
+}
