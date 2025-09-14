@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Scape</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-area">
+        <canvas id="gameCanvas"></canvas>
+        <div id="message-overlay"></div>
+        <div id="win-overlay">
+            <h2>Vitória!</h2>
+            <p>Você chegou ao planeta final!</p>
+            <button onclick="increaseDifficultyAndReset()">Próximo Nível</button>
+        </div>
+    </div>
+
+    <div class="controls-container">
+        <h1 style="text-align: center;">Space Scape</h1>
+        
+        <div class="control-group">
+            <button onclick="startGame()">Iniciar</button>
+            <button onclick="resetGame()">Reiniciar</button>
+        </div>
+
+        <div class="control-group">
+            <label for="planetCount">Astros ($ < 30\%$ da área útil):</label>
+            <input type="range" id="planetCount" min="2" max="10" value="2" oninput="updatePlanetCount(this.value)">
+            <span id="planetCountValue">2</span>
+        </div>
+        
+        <div class="stats">
+            <span>Velocidade: <span id="speedValue">0.00</span> u/s</span>
+            <span>Distância ao Alvo: <span id="distanceValue">0.00</span> u</span>
+            <span>Combustível: <span id="fuelValue">100</span> L</span>
+        </div>
+        
+        <div id="key-config-container">
+            <p>Controles de Teclado:</p>
+            <div class="key-input">
+                <label for="key-forward">Avançar</label>
+                <input type="text" id="key-forward" value="ArrowUp" readonly>
+            </div>
+            <div class="key-input">
+                <label for="key-backward">Retroceder</label>
+                <input type="text" id="key-backward" value="ArrowDown" readonly>
+            </div>
+            <div class="key-input">
+                <label for="key-left">Virar Esq.</label>
+                <input type="text" id="key-left" value="ArrowLeft" readonly>
+            </div>
+            <div class="key-input">
+                <label for="key-right">Virar Dir.</label>
+                <input type="text" id="key-right" value="ArrowRight" readonly>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
