@@ -68,9 +68,10 @@ const ROCKET_THRUST = 500; // Força de avanço/recuo (Newtons)
 const ROCKET_TORQUE = 0.05; // Velocidade de rotação
 const PLANET_DENSITY = 10; // Densidade para calcular a massa do planeta
 const ROCKET_RADIUS = 10; // Raio do foguete para detecção de colisão
-const MAX_FUEL = 500; // Combustível máximo em litros
+const MAX_FUEL = 10; // Combustível máximo em litros
 const FUEL_CONSUMPTION_THRUST = 0.5; // Consumo por segundo para avanço/recuo
 const FUEL_CONSUMPTION_TURN = 0.1; // Consumo por segundo para rotação
+const FRICTION = 0.3;
 
 // Estado do jogo e elementos do canvas
 const canvas = document.getElementById('gameCanvas');
@@ -244,7 +245,7 @@ function resetGame() {
     
     // Reposiciona o foguete em uma posição aleatória no planeta inicial
     if (startPlanet) {
-        const totalRadius = startPlanet.radius + ROCKET_RADIUS;
+        const totalRadius = startPlanet.radius + ROCKET_RADIUS+5;
         const randomAngle = Math.random() * 2 * Math.PI;
 
         rocket.position.x = startPlanet.position.x + Math.cos(randomAngle) * totalRadius;
@@ -258,13 +259,13 @@ function resetGame() {
     }
 
     draw();
+    startGame();
 }
 
 // Função para aumentar a dificuldade e reiniciar
 function increaseDifficultyAndReset() {
     difficultyLevel = Math.min(parseInt(planetCountRange.max), difficultyLevel + 1);
     planetCountRange.value = difficultyLevel;
-    planetCountValueSpan.textContent = difficultyLevel;
     resetGame();
     startGame(); // Inicia o próximo nível automaticamente
 }
@@ -310,9 +311,8 @@ function checkCollisions() {
         const distanceVector = rocket.position.clone().subtract(planet.position);
         const distance = distanceVector.magnitude;
         
-        if (distance < ROCKET_RADIUS + planet.radius) {
-            displayMessage("Colisão! Trajetória invertida. Velocidade reduzida!");
-            
+        if (distance < ROCKET_RADIUS + planet.radius ) {
+                        
             // Vetor de colisão (do planeta para o foguete)
             const collisionNormal = distanceVector.normalize;
             
@@ -323,7 +323,7 @@ function checkCollisions() {
             const orthogonalVelocity = rocket.velocity.clone().subtract(parallelVelocity);
             
             // Inverte a velocidade paralela para simular o "quique" e aplica atrito reduzindo a velocidade total.
-            rocket.velocity = orthogonalVelocity.subtract(parallelVelocity).multiply(0.5);
+            rocket.velocity = orthogonalVelocity.subtract(parallelVelocity).multiply(1 - FRICTION);
             
             // Ajusta a posição para evitar que o foguete fique "preso"
             const overlap = ROCKET_RADIUS + planet.radius - distance;
