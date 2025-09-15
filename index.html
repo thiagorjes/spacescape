@@ -65,46 +65,44 @@
         screenWidth: window.innerWidth,
         screenHeight: window.innerHeight,
         referencePoints: [
-        { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+            { x: window.innerWidth / 2, y: window.innerHeight / 2 }
         ]
     };
-    
+
     const touchHandler = new TouchConnect(config);
 
     // Listener para o evento touchmove (para "pressionar" a tecla)
     touchHandler.onMove((results, event) => {
         if (results.length > 0) {
-        const [dx, dy] = results[0];
+            const [dx, dy] = results[0];
+            // Calcula ângulo em graus a partir do centro
+            const angle = Math.atan2(-dy, dx) * 180 / Math.PI;
+            let key = null;
+            if (angle >= 45 && angle < 135) key = 'ArrowUp';
+            else if (angle >= -45 && angle < 45) key = 'ArrowRight';
+            else if (angle >= -135 && angle < -45) key = 'ArrowDown';
+            else key = 'ArrowLeft';
 
-        // Lógica para determinar a tecla pressionada e disparar o keydown
-        if (Math.abs(dx) > Math.abs(dy)) { // Movimento horizontal é dominante
-            if (dx < -50) {
-            dispatchEvent('ArrowLeft', 'keydown');
-            lastKeyPressed = 'ArrowLeft';
-            } else if (dx > 50) {
-            dispatchEvent('ArrowRight', 'keydown');
-            lastKeyPressed = 'ArrowRight';
+            if (lastKeyPressed !== key) {
+                // Se mudou de região, solta a anterior
+                if (lastKeyPressed) {
+                    dispatchEvent(lastKeyPressed, 'keyup');
+                }
+                dispatchEvent(key, 'keydown');
+                lastKeyPressed = key;
             }
-        } else { // Movimento vertical é dominante
-            if (dy < -50) {
-            dispatchEvent('ArrowUp', 'keydown');
-            lastKeyPressed = 'ArrowUp';
-            } else if (dy > 50) {
-            dispatchEvent('ArrowDown', 'keydown');
-            lastKeyPressed = 'ArrowDown';
-            }
-        }
         }
     });
 
-    // Listener para o evento touchend (para "soltar" a tecla)
-    document.body.addEventListener('touchend', () => {
+    // Listener para o evento touchend/touchcancel (para "soltar" a tecla)
+    function releaseKey() {
         if (lastKeyPressed) {
-        dispatchEvent(lastKeyPressed, 'keyup');
-        console.log(`Evento de teclado disparado: ${lastKeyPressed} (keyup)`);
-        lastKeyPressed = null; // Limpa a variável
+            dispatchEvent(lastKeyPressed, 'keyup');
+            lastKeyPressed = null;
         }
-    });
+    }
+    document.body.addEventListener('touchend', releaseKey);
+    document.body.addEventListener('touchcancel', releaseKey);
 
     /**
      * Função auxiliar para disparar o evento de teclado.
@@ -113,10 +111,10 @@
      */
     function dispatchEvent(keyName, eventType) {
         const keyboardEvent = new KeyboardEvent(eventType, {
-        key: keyName,
-        code: keyName,
-        bubbles: true,
-        cancelable: true
+            key: keyName,
+            code: keyName,
+            bubbles: true,
+            cancelable: true
         });
         document.body.dispatchEvent(keyboardEvent);
     }

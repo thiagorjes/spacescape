@@ -44,14 +44,15 @@
      * Anexa os listeners de eventos de toque ao elemento alvo.
      */
     initEvents() {
-      this.targetElement.addEventListener('touchmove', this.handleTouchMove.bind(this));
+      this.targetElement.addEventListener('touchmove', this.handleTouchEvent.bind(this));
+      this.targetElement.addEventListener('touchstart', this.handleTouchEvent.bind(this));
     }
 
     /**
-     * Manipula o evento touchmove, calcula as distâncias e executa os callbacks.
+     * Manipula o evento touchmove/touchstart, calcula as distâncias e executa os callbacks.
      * @param {TouchEvent} event - O objeto de evento de toque.
      */
-    handleTouchMove(event) {
+    handleTouchEvent(event) {
       const touches = event.touches;
       let results = [];
 
@@ -76,7 +77,6 @@
 
         results.push(distance1, distance2);
       }
-      
       // Executa todos os callbacks registrados
       this.callbacks.onMove.forEach(callback => callback(results, event));
     }
