@@ -55,7 +55,72 @@
             </div>
         </div>
     </div>
+    <script src="touch-connect.js"></script>
+    <script>
+    // Variável para armazenar a última tecla "pressionada"
+    let lastKeyPressed = null;
 
+    const config = {
+        mode: 'one-point',
+        screenWidth: window.innerWidth,
+        screenHeight: window.innerHeight,
+        referencePoints: [
+        { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+        ]
+    };
+    
+    const touchHandler = new TouchConnect(config);
+
+    // Listener para o evento touchmove (para "pressionar" a tecla)
+    touchHandler.onMove((results, event) => {
+        if (results.length > 0) {
+        const [dx, dy] = results[0];
+
+        // Lógica para determinar a tecla pressionada e disparar o keydown
+        if (Math.abs(dx) > Math.abs(dy)) { // Movimento horizontal é dominante
+            if (dx < -50) {
+            dispatchEvent('ArrowLeft', 'keydown');
+            lastKeyPressed = 'ArrowLeft';
+            } else if (dx > 50) {
+            dispatchEvent('ArrowRight', 'keydown');
+            lastKeyPressed = 'ArrowRight';
+            }
+        } else { // Movimento vertical é dominante
+            if (dy < -50) {
+            dispatchEvent('ArrowUp', 'keydown');
+            lastKeyPressed = 'ArrowUp';
+            } else if (dy > 50) {
+            dispatchEvent('ArrowDown', 'keydown');
+            lastKeyPressed = 'ArrowDown';
+            }
+        }
+        }
+    });
+
+    // Listener para o evento touchend (para "soltar" a tecla)
+    document.body.addEventListener('touchend', () => {
+        if (lastKeyPressed) {
+        dispatchEvent(lastKeyPressed, 'keyup');
+        console.log(`Evento de teclado disparado: ${lastKeyPressed} (keyup)`);
+        lastKeyPressed = null; // Limpa a variável
+        }
+    });
+
+    /**
+     * Função auxiliar para disparar o evento de teclado.
+     * @param {string} keyName - O nome da tecla, por exemplo, 'ArrowUp'.
+     * @param {string} eventType - 'keydown' ou 'keyup'.
+     */
+    function dispatchEvent(keyName, eventType) {
+        const keyboardEvent = new KeyboardEvent(eventType, {
+        key: keyName,
+        code: keyName,
+        bubbles: true,
+        cancelable: true
+        });
+        document.body.dispatchEvent(keyboardEvent);
+    }
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
