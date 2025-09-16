@@ -31,7 +31,7 @@
             <button onclick="resetGame()">Reiniciar</button>
             <div class="control-group">
                 <label for="planetCount">Astros:</label>
-                <input type="number" id="planetCount" min="2" max="10" value="2" oninput="updatePlanetCount(this.value)">
+                <input type="number" id="planetCount" min="1" max="100" value="1"  onfocusout="updatePlanetCount(this.value)">
             </div>
         </div>
         
@@ -120,5 +120,27 @@
     }
     </script>
     <script src="assets/js/script.js"></script>
+    <script>
+        // Detecta se é mobile (tela <= 768px ou userAgent)
+        function isMobileDevice() {
+            return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        let minR, maxR, minDist;
+        if (isMobileDevice()) {
+            minR = 10;
+            maxR = 30;
+            minDist = 150;
+            rocketSize = 6; // Tamanho do foguete menor para mobile
+            colisionThreshold = 100; // Limite de colisão menor para mobile
+        } else {
+            minR = 20;
+            maxR = 90;
+            minDist = 200;
+            rocketSize = 10; // Tamanho do foguete maior para desktop
+            colisionThreshold = 150; // Limite de colisão maior para desktop
+        }
+        init(minR, maxR, minDist, rocketSize, colisionThreshold);
+    </script>
 </body>
 </html>

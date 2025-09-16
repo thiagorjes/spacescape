@@ -67,12 +67,12 @@ const ROCKET_MASS = 1; // Massa do foguete (kg)
 const ROCKET_THRUST = 500; // Força de avanço/recuo (Newtons)
 const ROCKET_TORQUE = 0.05; // Velocidade de rotação
 const PLANET_DENSITY = 10; // Densidade para calcular a massa do planeta
-const ROCKET_RADIUS = 10; // Raio do foguete para detecção de colisão
+const ROCKET_RADIUS = 8; // Raio do foguete para detecção de colisão
 const MAX_FUEL = 10; // Combustível máximo em litros
 const FUEL_CONSUMPTION_THRUST = 0.5; // Consumo por segundo para avanço/recuo
 const FUEL_CONSUMPTION_TURN = 0.1; // Consumo por segundo para rotação
 const FRICTION = 0.3;
-const COLLISION_THRESHOLD = 200; // LIMIAR DE FORÇA DE IMPACTO PARA EXPLOSÃO
+const MAX_PERCENTAGE = 0.30; // Porcentagem máxima da área do canvas que pode ser ocupada por planetas
 
 // Estado do jogo e elementos do canvas
 const canvas = document.getElementById('gameCanvas');
@@ -81,6 +81,17 @@ const planetCountRange = document.getElementById('planetCount');
 const messageOverlay = document.getElementById('message-overlay');
 const winOverlay = document.getElementById('win-overlay');
 
+//calcula a area disponivel
+const area = canvas.width * canvas.height;
+let maxPossiblePlanetArea = area*MAX_PERCENTAGE/2;
+
+let COLLISION_THRESHOLD = 200; // LIMIAR DE FORÇA DE IMPACTO PARA EXPLOSÃO
+
+let ROCKET_RATIO = 10;
+let minRadius = 20;
+let maxRadius = 80;
+let minDistance = 150; 
+
 let isRunning = false;
 let lastTimestamp = 0;
 let rocket = {};
@@ -88,7 +99,7 @@ let planets = [];
 let startPlanet = null;
 let endPlanet = null;
 let keyMap = {};
-let difficultyLevel = 2; // Nível de dificuldade inicial
+let difficultyLevel = 1; // Nível de dificuldade inicial
 let isExploding = false; // Estado da explosão
 
 // Mapeamento de teclas configurável
@@ -100,7 +111,14 @@ let keyBindings = {
 };
 
 // Função de inicialização
-function init() {
+function init( minR,maxR, minDist, rocketRatio, collisionThreshold ) {
+
+    COLLISION_THRESHOLD = collisionThreshold; 
+    minRadius = minR;
+    maxRadius = maxR;
+    minDistance = minDist; 
+    ROCKET_RATIO = rocketRatio;
+
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight * 0.8;
     resetGame();
@@ -147,65 +165,26 @@ function init() {
 }
 
 // Função para gerar planetas aleatórios
-function generatePlanets(count) {
-    const minRadius = 20;
-    const maxRadius = 80;
-    const minDistance = 150; 
+function generatePlanets(count) {    
+    
+    maxPossiblePlanetArea = area*MAX_PERCENTAGE/count; // recalcula a area disponivel
+    maxPossibleRadius = Math.sqrt(maxPossiblePlanetArea/Math.PI); // recalcula o raio maximo possivel
+    if (maxRadius>maxPossibleRadius) maxRadius = maxPossibleRadius; // ajusta o raio maximo se necessario
     
     planets = [];
     
-    // Gerar o planeta inicial
-    let startRadius = minRadius + Math.random() * (maxRadius - minRadius);
-    let startX = Math.random() * (canvas.width - startRadius * 2) + startRadius;
-    let startY = Math.random() * (canvas.height - startRadius * 2) + startRadius;
-    planets.push({
-        position: new Vector(startX, startY),
-        radius: startRadius,
-        mass: PLANET_DENSITY * Math.pow(startRadius, 2),
-        color: '#fff73b'
-    });
-
-    // Gerar o planeta final o mais longe possível
-    let endPlanetCandidate = { position: new Vector(0, 0), dist: 0 };
-    const attempts = 100;
-    for (let i = 0; i < attempts; i++) {
-        let x = Math.random() * (canvas.width - maxRadius * 2) + maxRadius;
-        let y = Math.random() * (canvas.height - maxRadius * 2) + maxRadius;
-        let dist = Math.sqrt(Math.pow(x - startX, 2) + Math.pow(y - startY, 2));
-
-        let isTooClose = false;
-        for (const existingPlanet of planets) {
-            const existingDist = Math.sqrt(Math.pow(x - existingPlanet.position.x, 2) + Math.pow(y - existingPlanet.position.y, 2));
-            if (existingDist < maxRadius + existingPlanet.radius + minDistance) {
-                isTooClose = true;
-                break;
-            }
-        }
-        if (!isTooClose && dist > endPlanetCandidate.dist) {
-            endPlanetCandidate = { position: new Vector(x, y), dist: dist };
-        }
-    }
-    let endRadius = minRadius + Math.random() * (maxRadius - minRadius);
-    planets.push({
-        position: endPlanetCandidate.position,
-        radius: endRadius,
-        mass: PLANET_DENSITY * Math.pow(endRadius, 2),
-        color: '#e74a4a'
-    });
-
-    // Gerar planetas intermediários
-    for (let i = 2; i < count; i++) {
+    // Gerar todos os planetas aleatórios
+    let tempPlanets = [];
+    for (let i = 0; i < count; i++) {
         let radius = minRadius + Math.random() * (maxRadius - minRadius);
         let mass = PLANET_DENSITY * Math.pow(radius, 2);
         let x, y;
         let isTooClose = true;
-
         while(isTooClose) {
             isTooClose = false;
             x = Math.random() * (canvas.width - radius * 2) + radius;
             y = Math.random() * (canvas.height - radius * 2) + radius;
-
-            for (const existingPlanet of planets) {
+            for (const existingPlanet of tempPlanets) {
                 const dist = Math.sqrt(Math.pow(x - existingPlanet.position.x, 2) + Math.pow(y - existingPlanet.position.y, 2));
                 if (dist < radius + existingPlanet.radius + minDistance) {
                     isTooClose = true;
@@ -213,7 +192,7 @@ function generatePlanets(count) {
                 }
             }
         }
-        planets.push({
+        tempPlanets.push({
             position: new Vector(x, y),
             radius: radius,
             mass: mass,
@@ -221,8 +200,28 @@ function generatePlanets(count) {
         });
     }
 
-    startPlanet = planets[0];
-    endPlanet = planets[1];
+    // Encontrar o par de planetas com maior distância
+    let maxDist = 0;
+    let idxA = 0, idxB = 1;
+    for (let i = 0; i < tempPlanets.length; i++) {
+        for (let j = i + 1; j < tempPlanets.length; j++) {
+            const dist = tempPlanets[i].position.clone().subtract(tempPlanets[j].position).magnitude;
+            if (dist > maxDist) {
+                maxDist = dist;
+                idxA = i;
+                idxB = j;
+            }
+        }
+    }
+
+    // Define startPlanet e endPlanet com cores distintas
+    tempPlanets[idxA].color = '#fff73b';
+    tempPlanets[idxB].color = '#e74a4a';
+
+    // Adiciona todos os planetas à lista principal
+    planets = tempPlanets;
+    startPlanet = tempPlanets[idxA];
+    endPlanet = tempPlanets[idxB];
 }
 
 // Função para reiniciar o jogo
@@ -242,7 +241,7 @@ function resetGame() {
     };
     
     // Gera planetas novamente com o nível de dificuldade atual
-    generatePlanets(difficultyLevel);
+    generatePlanets(difficultyLevel + 1);
     
     // Reposiciona o foguete em uma posição aleatória no planeta inicial
     if (startPlanet) {
@@ -475,47 +474,47 @@ function draw() {
     ctx.translate(rocket.position.x, rocket.position.y);
     ctx.rotate(rocket.angle);
     
-    // Desenha o motor e o fogo apenas se houver combustível
-    if (rocket.fuel > 0) {
-      ctx.fillStyle = '#ffcc00'; // Cor do fogo do motor
-      ctx.beginPath();
-      ctx.moveTo(0, 15);
-      ctx.lineTo(-5, 25);
-      ctx.lineTo(5, 25);
-      ctx.fill();
-    }
-    
-    ctx.fillStyle = '#b0b0b0';
-    ctx.strokeStyle = '#555555';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, -15);
-    ctx.lineTo(-10, 15);
-    ctx.lineTo(10, 15);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+        // Fator de escala para caber em raio 6 (original era raio ~10)
+        const scale = ROCKET_RATIO / ROCKET_RADIUS;
 
-    // Asas do foguete
-    ctx.fillStyle = '#808080';
-    ctx.beginPath();
-    ctx.moveTo(-10, 10);
-    ctx.lineTo(-15, 10);
-    ctx.lineTo(-10, 5);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+        // Desenha o motor e o fogo apenas se houver combustível
+        if (rocket.fuel > 0) {
+            ctx.fillStyle = '#ffcc00'; // Cor do fogo do motor
+            ctx.beginPath();
+            ctx.moveTo(0, 9 * scale);
+            ctx.lineTo(-3 * scale, 15 * scale);
+            ctx.lineTo(3 * scale, 15 * scale);
+            ctx.fill();
+        }
 
-    ctx.beginPath();
-    ctx.moveTo(10, 10);
-    ctx.lineTo(15, 10);
-    ctx.lineTo(10, 5);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+        ctx.fillStyle = '#b0b0b0';
+        ctx.strokeStyle = '#555555';
+        ctx.lineWidth = 1.2 * scale;
+        ctx.beginPath();
+        ctx.moveTo(0, -9 * scale);
+        ctx.lineTo(-6 * scale, 9 * scale);
+        ctx.lineTo(6 * scale, 9 * scale);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Asas do foguete
+        ctx.fillStyle = '#808080';
+        ctx.beginPath();
+        ctx.moveTo(-6 * scale, 6 * scale);
+        ctx.lineTo(-9 * scale, 6 * scale);
+        ctx.lineTo(-6 * scale, 3 * scale);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(6 * scale, 6 * scale);
+        ctx.lineTo(9 * scale, 6 * scale);
+        ctx.lineTo(6 * scale, 3 * scale);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
 
     ctx.restore();
 }
-
-// Inicia a aplicação quando a janela carrega
-window.onload = init;
