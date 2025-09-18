@@ -119,10 +119,14 @@ function init( minR,maxR, minDist, rocketRatio, collisionThreshold ) {
     minDistance = minDist; 
     ROCKET_RATIO = rocketRatio;
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight * 0.8;
+    function resizeCanvasToGameArea() {
+        const gameArea = document.getElementById('game-area');
+        canvas.width = gameArea.clientWidth;
+        canvas.height = gameArea.clientHeight;
+    }
+    resizeCanvasToGameArea();
     resetGame();
-    
+
     // Event listeners para teclas
     document.addEventListener('keydown', (e) => {
         if (Object.values(keyBindings).includes(e.key)) {
@@ -134,7 +138,7 @@ function init( minR,maxR, minDist, rocketRatio, collisionThreshold ) {
             keyMap[e.key] = false;
         }
     });
-    
+
     // Event listener para configuração de teclas
     document.querySelectorAll('.key-input input').forEach(input => {
         input.addEventListener('click', () => {
@@ -151,11 +155,10 @@ function init( minR,maxR, minDist, rocketRatio, collisionThreshold ) {
             }
         });
     });
-    
+
     // Event listener para redimensionamento da janela
     window.addEventListener('resize', () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight * 0.8;
+        resizeCanvasToGameArea();
         if (!isRunning) {
             draw();
         }
