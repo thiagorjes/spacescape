@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Scape</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body>
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7408688486649567"
+        crossorigin="anonymous"></script>
     <header class="main-header">
         <h1>Space Scape</h1>
     </header>
@@ -15,9 +20,12 @@
         <div class="ads-container" id="ads-desktop">
             <!-- Google Ads desktop -->
             <div id="google-ads-desktop">
-                <!-- Insira aqui o código do Google Ads -->
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7408688486649567"
-                    crossorigin="anonymous"></script>
+                <ins class="adsbygoogle" style="display:block" data-ad-format="autorelaxed"
+                    data-ad-client="ca-pub-7408688486649567" data-ad-slot="2255244502"></ins>
+                <script>
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+
             </div>
         </div>
         <div id="game-area">
@@ -32,14 +40,18 @@
         <div class="controls-container" id="controls-desktop">
             <div class="stats-and-controls">
                 <div class="stats">
-                    <span class="stat-label">Velocidade: <span class="stat-value" id="speedValue">0.00</span> <span class="stat-unit">u/s</span></span>
-                    <span class="stat-label">Distância ao Alvo: <span class="stat-value" id="distanceValue">0.00</span> <span class="stat-unit">u</span></span>
-                    <span class="stat-label">Combustível: <span class="stat-value" id="fuelValue">100</span> <span class="stat-unit">L</span></span>
+                    <span class="stat-label">Velocidade: <span class="stat-value" id="speedValue">0.00</span> <span
+                            class="stat-unit">u/s</span></span>
+                    <span class="stat-label">Distância ao Alvo: <span class="stat-value" id="distanceValue">0.00</span>
+                        <span class="stat-unit">u</span></span>
+                    <span class="stat-label">Combustível: <span class="stat-value" id="fuelValue">100</span> <span
+                            class="stat-unit">L</span></span>
                 </div>
                 <button onclick="resetGame()">Reiniciar</button>
                 <div class="control-group">
                     <label for="planetCount">Astros:</label>
-                    <input type="number" id="planetCount" min="1" max="100" value="1"  onfocusout="updatePlanetCount(this.value)">
+                    <input type="number" id="planetCount" min="1" max="100" value="1"
+                        onfocusout="updatePlanetCount(this.value)">
                 </div>
             </div>
             <div id="key-config-container">
@@ -67,76 +79,78 @@
             <div class="ads-container" id="ads-mobile">
                 <!-- Google Ads mobile -->
                 <div id="google-ads-mobile">
-                    <!-- Insira aqui o código do Google Ads -->
-                     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7408688486649567"
-                        crossorigin="anonymous"></script>
+                    <ins class="adsbygoogle" style="display:block" data-ad-format="autorelaxed"
+                        data-ad-client="ca-pub-7408688486649567" data-ad-slot="9291426140"></ins>
+                    <script>
+                        (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
                 </div>
             </div>
         </div>
     </div>
     <script src="assets/js/touch-connect.js"></script>
     <script>
-    // Variável para armazenar a última tecla "pressionada"
-    let lastKeyPressed = null;
+        // Variável para armazenar a última tecla "pressionada"
+        let lastKeyPressed = null;
 
-    const config = {
-        mode: 'one-point',
-        screenWidth: window.innerWidth,
-        screenHeight: window.innerHeight,
-        referencePoints: [
-            { x: window.innerWidth / 2, y: window.innerHeight / 2 }
-        ]
-    };
+        const config = {
+            mode: 'one-point',
+            screenWidth: window.innerWidth,
+            screenHeight: window.innerHeight,
+            referencePoints: [
+                { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+            ]
+        };
 
-    const touchHandler = new TouchConnect(config);
+        const touchHandler = new TouchConnect(config);
 
-    // Listener para o evento touchmove (para "pressionar" a tecla)
-    touchHandler.onMove((results, event) => {
-        if (results.length > 0) {
-            const [dx, dy] = results[0];
-            // Calcula ângulo em graus a partir do centro
-            const angle = Math.atan2(-dy, dx) * 180 / Math.PI;
-            let key = null;
-            if (angle >= 45 && angle < 135) key = 'ArrowUp';
-            else if (angle >= -45 && angle < 45) key = 'ArrowRight';
-            else if (angle >= -135 && angle < -45) key = 'ArrowDown';
-            else key = 'ArrowLeft';
+        // Listener para o evento touchmove (para "pressionar" a tecla)
+        touchHandler.onMove((results, event) => {
+            if (results.length > 0) {
+                const [dx, dy] = results[0];
+                // Calcula ângulo em graus a partir do centro
+                const angle = Math.atan2(-dy, dx) * 180 / Math.PI;
+                let key = null;
+                if (angle >= 45 && angle < 135) key = 'ArrowUp';
+                else if (angle >= -45 && angle < 45) key = 'ArrowRight';
+                else if (angle >= -135 && angle < -45) key = 'ArrowDown';
+                else key = 'ArrowLeft';
 
-            if (lastKeyPressed !== key) {
-                // Se mudou de região, solta a anterior
-                if (lastKeyPressed) {
-                    dispatchEvent(lastKeyPressed, 'keyup');
+                if (lastKeyPressed !== key) {
+                    // Se mudou de região, solta a anterior
+                    if (lastKeyPressed) {
+                        dispatchEvent(lastKeyPressed, 'keyup');
+                    }
+                    dispatchEvent(key, 'keydown');
+                    lastKeyPressed = key;
                 }
-                dispatchEvent(key, 'keydown');
-                lastKeyPressed = key;
+            }
+        });
+
+        // Listener para o evento touchend/touchcancel (para "soltar" a tecla)
+        function releaseKey() {
+            if (lastKeyPressed) {
+                dispatchEvent(lastKeyPressed, 'keyup');
+                lastKeyPressed = null;
             }
         }
-    });
+        document.body.addEventListener('touchend', releaseKey);
+        document.body.addEventListener('touchcancel', releaseKey);
 
-    // Listener para o evento touchend/touchcancel (para "soltar" a tecla)
-    function releaseKey() {
-        if (lastKeyPressed) {
-            dispatchEvent(lastKeyPressed, 'keyup');
-            lastKeyPressed = null;
+        /**
+         * Função auxiliar para disparar o evento de teclado.
+         * @param {string} keyName - O nome da tecla, por exemplo, 'ArrowUp'.
+         * @param {string} eventType - 'keydown' ou 'keyup'.
+         */
+        function dispatchEvent(keyName, eventType) {
+            const keyboardEvent = new KeyboardEvent(eventType, {
+                key: keyName,
+                code: keyName,
+                bubbles: true,
+                cancelable: true
+            });
+            document.body.dispatchEvent(keyboardEvent);
         }
-    }
-    document.body.addEventListener('touchend', releaseKey);
-    document.body.addEventListener('touchcancel', releaseKey);
-
-    /**
-     * Função auxiliar para disparar o evento de teclado.
-     * @param {string} keyName - O nome da tecla, por exemplo, 'ArrowUp'.
-     * @param {string} eventType - 'keydown' ou 'keyup'.
-     */
-    function dispatchEvent(keyName, eventType) {
-        const keyboardEvent = new KeyboardEvent(eventType, {
-            key: keyName,
-            code: keyName,
-            bubbles: true,
-            cancelable: true
-        });
-        document.body.dispatchEvent(keyboardEvent);
-    }
     </script>
     <script src="assets/js/script.js"></script>
     <script>
@@ -162,4 +176,5 @@
         init(minR, maxR, minDist, rocketSize, colisionThreshold);
     </script>
 </body>
+
 </html>

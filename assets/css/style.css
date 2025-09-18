@@ -176,7 +176,7 @@ body {
     flex-grow: 1;
 }
 .stat-label {
-    min-width: 300px; 
+    min-width: 220px; 
 }
 
 .stats span {
