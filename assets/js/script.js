@@ -6,27 +6,27 @@ class Vector {
     }
 
     add(vector) {
-        this.x += vector.x;
-        this.y += vector.y;
+        this.x = Number((this.x + vector.x).toFixed(4));
+        this.y = Number((this.y + vector.y).toFixed(4));
         return this;
     }
 
     subtract(vector) {
-        this.x -= vector.x;
-        this.y -= vector.y;
+        this.x = Number((this.x - vector.x).toFixed(4));
+        this.y = Number((this.y - vector.y).toFixed(4));
         return this;
     }
 
     multiply(scalar) {
-        this.x *= scalar;
-        this.y *= scalar;
+        this.x = Number((this.x * scalar).toFixed(4));
+        this.y = Number((this.y * scalar).toFixed(4));
         return this;
     }
 
     divide(scalar) {
         if (scalar !== 0) {
-            this.x /= scalar;
-            this.y /= scalar;
+            this.x = Number((this.x / scalar).toFixed(4));
+            this.y = Number((this.y / scalar).toFixed(4));
         }
         return this;
     }
@@ -166,8 +166,7 @@ function init( minR,maxR, minDist, rocketRatio, collisionThreshold ) {
 
 // Função para gerar planetas aleatórios
 function generatePlanets(count) {    
-    
-    maxPossiblePlanetArea = area*MAX_PERCENTAGE/count; // recalcula a area disponivel
+    maxPossiblePlanetArea = (area*MAX_PERCENTAGE)/count; // recalcula a area disponivel
     maxPossibleRadius = Math.sqrt(maxPossiblePlanetArea/Math.PI); // recalcula o raio maximo possivel
     if (maxRadius>maxPossibleRadius) maxRadius = maxPossibleRadius; // ajusta o raio maximo se necessario
     
@@ -403,18 +402,65 @@ function update(deltaTime) {
         rocket.fuel = 0;
     }
 
+    // Movimento uniformemente acelerado: x = x0 + v0*dt + 0.5*a*dt^2
     rocket.acceleration = resultantForce.divide(ROCKET_MASS);
-    rocket.velocity.add(rocket.acceleration.multiply(deltaTime));
-    rocket.position.add(rocket.velocity.clone().multiply(deltaTime));
+
+    // Encontra planeta mais próximo
+    let nearestPlanet = null;
+    let minDist = Infinity;
+    for (const planet of planets) {
+        const dist = rocket.position.clone().subtract(planet.position).magnitude;
+        if (dist < minDist) {
+            minDist = dist;
+            nearestPlanet = planet;
+        }
+    }
+
+    // Se muito próximo, bloqueia componente radial da aceleração/velocidade
+    if (nearestPlanet && minDist < ROCKET_RADIUS + nearestPlanet.radius ) {
+        const radial = rocket.position.clone().subtract(nearestPlanet.position).normalize;
+        const aRadial = rocket.acceleration.projection(radial);
+        const vRadial = rocket.velocity.projection(radial);
+        // Se aceleração ou velocidade radial apontam para o planeta, bloqueia componente
+        if (aRadial.dot(radial) < 0 || vRadial.dot(radial) < 0) {
+            rocket.acceleration = rocket.acceleration.clone().subtract(aRadial);
+            rocket.velocity = rocket.velocity.clone().subtract(vRadial);
+        }
+    }
+
+    // Calcula nova posição
+    let proposedPosition = rocket.position.clone()
+        .add(rocket.velocity.clone().multiply(deltaTime))
+        .add(rocket.acceleration.clone().multiply(0.5 * deltaTime * deltaTime));
+
+    // // Verifica se pode avançar (não invade planeta)
+    // let canAdvance = true;
+    // for (const planet of planets) {
+    //     const dist = proposedPosition.clone().subtract(planet.position).magnitude;
+    //     if (dist < ROCKET_RADIUS + planet.radius) {
+    //         canAdvance = false;
+    //         break;
+    //     }
+    // }
+
+    // if (canAdvance) {
+        rocket.position = proposedPosition;
+        // Atualiza velocidade: v = v0 + a*dt
+        rocket.velocity.add(rocket.acceleration.clone().multiply(deltaTime));
+    // } else {
+        // Se não pode avançar, mantém posição e zera velocidade
+        // rocket.velocity = new Vector(0, 0);
+    // }
+
     rocket.angle += rocket.angularVelocity;
-    
+
     checkCollisions();
 
     if (rocket.position.x < 0) { rocket.position.x = canvas.width; }
     if (rocket.position.x > canvas.width) { rocket.position.x = 0; }
     if (rocket.position.y < 0) { rocket.position.y = canvas.height; }
     if (rocket.position.y > canvas.height) { rocket.position.y = 0; }
-    
+
     const speed = rocket.velocity.magnitude;
     const distance = rocket.position.clone().subtract(endPlanet.position).magnitude;
     document.getElementById('speedValue').textContent = speed.toFixed(2);
