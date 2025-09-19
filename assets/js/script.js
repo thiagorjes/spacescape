@@ -470,7 +470,6 @@ function update(deltaTime) {
     const speed = rocket.velocity.magnitude;
     const distance = rocket.position.clone().subtract(endPlanet.position).magnitude;
     document.getElementById('speedValue').textContent = speed.toFixed(2);
-    document.getElementById('distanceValue').textContent = distance.toFixed(2);
     document.getElementById('fuelValue').textContent = rocket.fuel.toFixed(2);
 }
 
