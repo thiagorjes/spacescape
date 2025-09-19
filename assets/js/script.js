@@ -73,6 +73,7 @@ const FUEL_CONSUMPTION_THRUST = 0.5; // Consumo por segundo para avanço/recuo
 const FUEL_CONSUMPTION_TURN = 0.1; // Consumo por segundo para rotação
 const FRICTION = 0.3;
 const MAX_PERCENTAGE = 0.30; // Porcentagem máxima da área do canvas que pode ser ocupada por planetas
+const MAX_ANGULAR_VELOCITY = 0.08;
 
 // Estado do jogo e elementos do canvas
 const canvas = document.getElementById('gameCanvas');
@@ -391,10 +392,10 @@ function update(deltaTime) {
             rocket.fuel -= FUEL_CONSUMPTION_THRUST * deltaTime;
         }
         if (keyMap[keyBindings['left']]) {
-            rocket.angularVelocity = -ROCKET_TORQUE;
+            rocket.angularVelocity = Math.max(-MAX_ANGULAR_VELOCITY, -ROCKET_TORQUE);
             rocket.fuel -= FUEL_CONSUMPTION_TURN * deltaTime;
         } else if (keyMap[keyBindings['right']]) {
-            rocket.angularVelocity = ROCKET_TORQUE;
+            rocket.angularVelocity = Math.min(MAX_ANGULAR_VELOCITY, ROCKET_TORQUE);
             rocket.fuel -= FUEL_CONSUMPTION_TURN * deltaTime;
         } else {
             rocket.angularVelocity = 0;
