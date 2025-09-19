@@ -17,15 +17,14 @@
     </header>
 
     <div class="layout-container">
-        <div class="ads-container" id="ads-desktop">
+        <div class="ads-container" id="ads-desktop" style="min-width:430px;width:430px;">
             <!-- Google Ads desktop -->
-            <div id="google-ads-desktop">
-                <ins class="adsbygoogle" style="display:block" data-ad-format="autorelaxed"
+            <div id="google-ads-desktop" style="min-width:430px;width:430px;">
+                <ins class="adsbygoogle" style="display:block;min-width:430px;width:430px;" data-ad-format="autorelaxed"
                     data-ad-client="ca-pub-7408688486649567" data-ad-slot="2255244502"></ins>
                 <script>
                     (adsbygoogle = window.adsbygoogle || []).push({});
                 </script>
-
             </div>
         </div>
         <div id="game-area">
@@ -34,7 +33,7 @@
             <div id="win-overlay">
                 <h2>Vitória!</h2>
                 <p>Você chegou ao destino!</p>
-                <button onclick="increaseDifficultyAndReset()">Próximo Nível</button>
+                <button onclick="increaseDifficultyAndReset()" id="next-level-btn">Próximo Nível</button>
             </div>
         </div>
         <div class="controls-container" id="controls-desktop">
@@ -47,7 +46,6 @@
                     <span class="stat-label">Combustível: <span class="stat-value" id="fuelValue">100</span> <span
                             class="stat-unit">L</span></span>
                 </div>
-                <button onclick="resetGame()">Reiniciar</button>
                 <div class="control-group">
                     <label for="planetCount">Astros:</label>
                     <input type="number" id="planetCount" min="1" max="100" value="1"
@@ -75,11 +73,30 @@
             </div>
         </div>
         <div class="controls-container" id="controls-mobile">
-            <button onclick="resetGame()">Reiniciar</button>
-            <div class="ads-container" id="ads-mobile">
+            <div id="mobile-arrow-pad"
+                style="display: grid; grid-template-rows: 1fr 1fr 1fr; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 100%; max-width: 320px; margin: auto auto; z-index: 100;">
+                <div></div>
+                <button class="arrow-btn" id="arrow-up" data-key="ArrowUp"
+                    style="grid-row: 1; grid-column: 2; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: #2c2c4c; color: #fff; border: 2px solid #3a3a5a; height: 60px; width: 60px;">
+                    ▲</button>
+                <div></div>
+                <button class="arrow-btn" id="arrow-left" data-key="ArrowLeft"
+                    style="grid-row: 2; grid-column: 1; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: #2c2c4c; color: #fff; border: 2px solid #3a3a5a; height: 60px; width: 60px;">
+                    ◀</button>
+                <div></div>
+                <button class="arrow-btn" id="arrow-right" data-key="ArrowRight"
+                    style="grid-row: 2; grid-column: 3; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: #2c2c4c; color: #fff; border: 2px solid #3a3a5a; height: 60px; width: 60px;">
+                    ▶</button>
+                <div></div>
+                <button class="arrow-btn" id="arrow-down" data-key="ArrowDown"
+                    style="grid-row: 3; grid-column: 2; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: #2c2c4c; color: #fff; border: 2px solid #3a3a5a; height: 60px; width: 60px;">
+                    ▼</button>
+                <div></div>
+            </div>
+            <div class="ads-container" id="ads-mobile" style="display:block;min-width:320px;width:320px;z-index: 10;">
                 <!-- Google Ads mobile -->
-                <div id="google-ads-mobile">
-                    <ins class="adsbygoogle" style="display:block" data-ad-format="autorelaxed"
+                <div id="google-ads-mobile" style="min-width:320px;width:320px;">
+                    <ins class="adsbygoogle" style="display:block;min-width:320px;width:320px;" data-ad-format="autorelaxed"
                         data-ad-client="ca-pub-7408688486649567" data-ad-slot="9291426140"></ins>
                     <script>
                         (adsbygoogle = window.adsbygoogle || []).push({});
@@ -88,61 +105,9 @@
             </div>
         </div>
     </div>
-    <script src="assets/js/touch-connect.js"></script>
+    <!-- <script src="assets/js/touch-connect.js"></script> -->
     <script>
-        // Variável para armazenar a última tecla "pressionada"
-        let lastKeyPressed = null;
-
-        const config = {
-            mode: 'one-point',
-            screenWidth: window.innerWidth,
-            screenHeight: window.innerHeight,
-            referencePoints: [
-                { x: window.innerWidth / 2, y: window.innerHeight / 2 }
-            ]
-        };
-
-        const touchHandler = new TouchConnect(config);
-
-        // Listener para o evento touchmove (para "pressionar" a tecla)
-        touchHandler.onMove((results, event) => {
-            if (results.length > 0) {
-                const [dx, dy] = results[0];
-                // Calcula ângulo em graus a partir do centro
-                const angle = Math.atan2(-dy, dx) * 180 / Math.PI;
-                let key = null;
-                if (angle >= 45 && angle < 135) key = 'ArrowUp';
-                else if (angle >= -45 && angle < 45) key = 'ArrowRight';
-                else if (angle >= -135 && angle < -45) key = 'ArrowDown';
-                else key = 'ArrowLeft';
-
-                if (lastKeyPressed !== key) {
-                    // Se mudou de região, solta a anterior
-                    if (lastKeyPressed) {
-                        dispatchEvent(lastKeyPressed, 'keyup');
-                    }
-                    dispatchEvent(key, 'keydown');
-                    lastKeyPressed = key;
-                }
-            }
-        });
-
-        // Listener para o evento touchend/touchcancel (para "soltar" a tecla)
-        function releaseKey() {
-            if (lastKeyPressed) {
-                dispatchEvent(lastKeyPressed, 'keyup');
-                lastKeyPressed = null;
-            }
-        }
-        document.body.addEventListener('touchend', releaseKey);
-        document.body.addEventListener('touchcancel', releaseKey);
-
-        /**
-         * Função auxiliar para disparar o evento de teclado.
-         * @param {string} keyName - O nome da tecla, por exemplo, 'ArrowUp'.
-         * @param {string} eventType - 'keydown' ou 'keyup'.
-         */
-        function dispatchEvent(keyName, eventType) {
+        function dispatchKeyboardEvent(keyName, eventType) {
             const keyboardEvent = new KeyboardEvent(eventType, {
                 key: keyName,
                 code: keyName,
@@ -150,6 +115,37 @@
                 cancelable: true
             });
             document.body.dispatchEvent(keyboardEvent);
+        }
+
+        function setupMobileArrowPad() {
+            const arrows = [
+                { id: 'arrow-up', key: 'ArrowUp', log: 'botao arrow-up' },
+                { id: 'arrow-down', key: 'ArrowDown', log: 'botao arrow-down' },
+                { id: 'arrow-left', key: 'ArrowLeft', log: 'botao arrow-left' },
+                { id: 'arrow-right', key: 'ArrowRight', log: 'botao arrow-right' }
+            ];
+            arrows.forEach(({ id, key, log }) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.onmousedown = el.ontouchstart = function(e) {
+                    e.preventDefault();
+                    console.log(log);
+                    dispatchKeyboardEvent(key, 'keydown');
+                };
+                el.onmouseup = el.ontouchend = el.onmouseleave = function(e) {
+                    e.preventDefault();
+                    dispatchKeyboardEvent(key, 'keyup');
+                };
+                el.onclick = function(e) { 
+                    e.preventDefault();
+                    dispatchKeyboardEvent(key, 'keydown');
+                };
+            });
+        }
+
+        // Inicializa controles mobile se existir
+        if (window.innerWidth <= 768 && document.getElementById('mobile-arrow-pad')) {
+            setupMobileArrowPad();
         }
     </script>
     <script src="assets/js/script.js"></script>

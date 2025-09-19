@@ -80,6 +80,7 @@ const ctx = canvas.getContext('2d');
 const planetCountRange = document.getElementById('planetCount');
 const messageOverlay = document.getElementById('message-overlay');
 const winOverlay = document.getElementById('win-overlay');
+const adsmobile = document.getElementById('ads-mobile');
 
 //calcula a area disponivel
 const area = canvas.width * canvas.height;
@@ -229,6 +230,7 @@ function generatePlanets(count) {
 // Função para reiniciar o jogo
 function resetGame() {
     winOverlay.style.display = 'none';
+    adsmobile.style.zIndex = '90';
     isRunning = false;
     isExploding = false;
 
@@ -337,6 +339,7 @@ function checkCollisions() {
     if (distanceToEndPlanet < ROCKET_RADIUS + endPlanet.radius + 0.1) {
         isRunning = false;
         winOverlay.style.display = 'flex';
+        adsmobile.style.zIndex = '100';
         return;
     }
 }
