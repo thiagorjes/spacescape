@@ -1,0 +1,347 @@
+/* Font declarations */
+@font-face {
+    font-family: 'Starjedi';
+    src: url('../fonts/Starjedi.woff') format('woff'),
+        url('../fonts/Starjedi.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Orbitron', monospace;
+    background-color: #0d0d26;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+}
+
+.header {
+    position: absolute;
+    right: 0px;
+    width: 100%;
+    height: 50px;
+    top: 0px;
+    z-index: 1000;
+    justify-content: flex-end;
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    flex-wrap: wrap;
+}
+
+.user-name {
+    display: flex;
+    justify-self: flex-end;
+    color: #4a8fe7;
+    font-family: 'Orbitron', 'monospace';
+    font-weight: bold;
+    line-height: 30px;
+    cursor: pointer;
+}
+
+.profile {
+    cursor: pointer;
+    position: relative;
+    width: 34px;
+    height: 34px;
+    margin: auto 10px auto 10px;
+    padding: 5px 5px;
+    color: #4a8fe7;
+    font-size: 20px;
+    border: 2px solid #4a8fe7;
+    border-radius: 50%;
+}
+
+.profile img {
+    color: #4a8fe7;
+    width: 20px;
+    height: 20px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 1;
+    z-index: 1;
+}
+
+/* Main app container */
+#app {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* Mobile View Styles (default) */
+.mobile-view {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    background-color: #0d0d26;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.desktop-view {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    background-color: #0d0d26;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.desktop-content {
+    position: absolute;
+    width: 100%;
+    bottom: 0px;
+    background-color: #0d0d26;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    overflow: hidden;
+    top: 0px;
+}
+
+/* Starfield */
+.starfield-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.starfield-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.starfield-container-desktop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.starfield-canvas-desktop {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Title Styles */
+.title-container {
+    position: absolute;
+    top: 16.5%;
+    /* 200/1212 */
+    z-index: 10;
+}
+
+.game-title {
+    font-size: 6.67vw;
+    /* 48/720 */
+    color: #fff73b;
+    font-family: 'Starjedi', 'Orbitron', monospace;
+    font-weight: 900;
+    margin-bottom: 30px;
+    /* text-shadow: 0 0 5px #fff73b, 0 0 5px #fff73b, 0 0 5px #fff73b; */
+    text-align: center;
+}
+
+.title-container-desktop {
+    position: absolute;
+    top: 16.5%;
+    /* 200/1212 */
+    z-index: 10;
+}
+
+.game-title-desktop {
+    font-size: 48px;
+    color: #fff73b;
+    font-family: 'Starjedi', 'Orbitron', monospace;
+    font-weight: 900;
+    margin-bottom: 30px;
+    /* text-shadow: 0 0 10px #fff73b, 0 0 20px #fff73b, 0 0 30px #fff73b; */
+    text-align: center;
+}
+
+/* Rocket Styles */
+.rocket-container {
+    position: absolute;
+    top: 48.7%;
+    /* 590/1212 */
+    z-index: 5;
+}
+
+.rocket-svg {
+    width: 30vh;
+    height: auto;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+}
+
+.rocket-container-desktop {
+    position: absolute;
+    top: 48.7%;
+    /* 590/1212 */
+    z-index: 5;
+}
+
+.rocket-svg-desktop {
+    width: 300px;
+    height: auto;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+}
+
+/* Button Styles */
+.button-container {
+    position: absolute;
+    bottom: 50px;
+    z-index: 10;
+}
+
+.launch-button {
+    background-color: #4a8fe7;
+    color: #fff;
+    font-size: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: 'Orbitron', monospace;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(74, 143, 231, 0.5);
+    transition: all 0.3s ease;
+}
+
+.launch-button:hover {
+    background-color: #3a7bd5;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(74, 143, 231, 0.7);
+    transform: translateY(-2px);
+}
+
+.launch-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 15px rgba(74, 143, 231, 0.4);
+}
+
+.button-container-desktop {
+    position: absolute;
+    bottom: 50px;
+    z-index: 10;
+}
+
+.launch-button-desktop {
+    background-color: #4a8fe7;
+    color: #fff;
+    font-size: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: 'Orbitron', monospace;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(74, 143, 231, 0.5);
+    transition: all 0.3s ease;
+}
+
+.launch-button-desktop:hover {
+    background-color: #3a7bd5;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(74, 143, 231, 0.7);
+    transform: translateY(-2px);
+}
+
+.launch-button-desktop:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 15px rgba(74, 143, 231, 0.4);
+}
+
+/* Animation classes */
+.fade-out {
+    animation: fadeOut 0.5s ease-in forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+.rocket-launch {
+    animation: rocketLaunch 1.5s ease-in-out forwards;
+}
+
+@keyframes rocketLaunch {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-100vh);
+    }
+}
+
+.flame-flicker {
+    animation: flameFlicker 0.1s ease-in-out infinite alternate;
+}
+
+@keyframes flameFlicker {
+    0% {
+        opacity: 0.7;
+        transform: scaleY(1);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scaleY(1.2);
+    }
+}
+
+/* Responsive breakpoints */
+@media (min-width: 768px) {
+    .mobile-view {
+        display: none;
+    }
+
+    .desktop-view {
+        display: flex;
+    }
+}
+
+/* Star styles for canvas */
+.star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background-color: white;
+    border-radius: 50%;
+}
+
+/* Loading animation */
+.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}

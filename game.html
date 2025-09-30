@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpaceScape Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="assets/css/game.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        @font-face {
+            font-family: 'Starjedi';
+            src: url('assets/fonts/Starjedi.ttf') format('truetype');
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="header">
+            <div class="user-name">Login</div>
+            <div class="profile"><img src="assets/img/account.svg" /></div>
+        </div>
+        <div class="safe-area">
+            <div class="background-gradient">
+                <div class="starfield" id="starfield"></div>
+                <div class="container">
+                    <div class="game-area" id="gameArea">
+                        <!-- Game entities will be added here dynamically -->
+                        <div id="gameEntities"></div>
+
+                        <!-- Start Screen -->
+                        <div id="startScreen" class="popup-overlay">
+                            <div class="popup-content">
+                                <div class="rocket-icon"><i class="fas fa-rocket"></i></div>
+                                <div class="stage-title" id="stageTitle">STAGE 01</div>
+                                <button id="startButton" class="start-button">LET'S GO</button>
+                            </div>
+                        </div>
+
+                        <!-- Fuel Exhausted Popup -->
+                        <div id="fuelEmptyPopup" class="popup-overlay" style="display: none;">
+                            <div class="popup-content fuel-popup">
+                                <div class="fuel-icon"><i class="fas fa-gas-pump"></i></div>
+                                <div class="fuel-title">FUEL EXHAUSTED</div>
+                                <div class="fuel-subtitle">You reached Stage <span id="finalStage">1</span></div>
+                                <div class="fuel-subtitle">Deaths: <span id="finalDeaths">0</span></div>
+                                <button id="restartButton" class="restart-button">RESTART</button>
+                            </div>
+                        </div>
+
+                        <!-- Overheated Alert -->
+                        <div id="overheatAlert" class="overheat-alert" style="display: none;">
+                            <div class="overheat-content">
+                                <span>OVERHEATED!</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Controls Section -->
+                    <div class="controls-container">
+                        <div class="left-controls">
+                            <div class="progress-bar vertical" id="temperatureBar">
+                                <div class="progress-fill" id="temperatureFill"></div>
+                                <div class="progress-icon"><i class="fas fa-temperature-high"></i></div>
+                            </div>
+                        </div>
+
+                        <div class="control-col">
+                            <div class="display" id="stageDisplay">
+                                <div class="display-label">STAGES</div>
+                                <div class="display-segments">
+                                    <div class="segment" data-digit="0">0</div>
+                                    <div class="segment" data-digit="1">1</div>
+                                </div>
+                            </div>
+                            <button id="leftButton" class="key-button">
+                                <span class="key-icon"><i class="fas fa-arrow-left"></i></span>
+                            </button>
+                        </div>
+
+                        <div class="control-col">
+                            <button id="upButton" class="key-button">
+                                <span class="key-icon"><i class="fas fa-arrow-up"></i></span>
+                            </button>
+                            <button id="downButton" class="key-button">
+                                <span class="key-icon"><i class="fas fa-arrow-down"></i></span>
+                            </button>
+                        </div>
+
+                        <div class="control-col">
+                            <div class="display" id="deathDisplay">
+                                <div class="display-label">DEATHS</div>
+                                <div class="display-segments">
+                                    <div class="segment" data-digit="0">0</div>
+                                    <div class="segment" data-digit="1">0</div>
+                                </div>
+                            </div>
+                            <button id="rightButton" class="key-button">
+                                <span class="key-icon"><i class="fas fa-arrow-right"></i></span>
+                            </button>
+                        </div>
+
+                        <div class="right-controls">
+                            <div class="progress-bar vertical" id="fuelBar">
+                                <div class="progress-fill" id="fuelFill"></div>
+                                <div class="progress-icon"><i class="fas fa-gas-pump"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-background" class="modal-overlay">
+        <div id="profile-stats" class="modal-content">
+            <div id="loading-screen" class="loading-container">
+                <div class="loader"></div>
+                <p class="loading-text">Carregando...</p>
+            </div>
+
+            <!-- Container de Login -->
+            <div id="login-container" class="login-modal hidden">
+                <!-- Conteúdo é inserido dinamicamente pelo JS -->
+            </div>
+
+            <!-- Container de Boas-vindas (Logado) -->
+            <div id="welcome-container" class="welcome-modal hidden">
+                <div id="modal-close" class="close-button">x</div>
+                <h2 class="welcome-title">Bem-vindo(a)!</h2>
+                <p id="user-name" class="user-display-name"></p>
+                <button id="logout-button" class="logout-btn">
+                    Sair (Logout)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/game.js"></script>
+    <script type="module" src="assets/js/scripts.js"></script>
+    <script type="module" src="assets/js/login.js"></script>
+    <script type="module" src="assets/js/auth-utils.js"></script>
+</body>
+</html>
