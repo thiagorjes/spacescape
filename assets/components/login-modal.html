@@ -1,0 +1,23 @@
+<div id="modal-background" class="modal-overlay">
+    <div id="profile-stats" class="modal-content">
+        <div id="loading-screen" class="loading-container">
+            <div class="loader"></div>
+            <p class="loading-text">Carregando...</p>
+        </div>
+
+        <!-- Container de Login -->
+        <div id="login-container" class="login-modal bg-white rounded-xl hidden">
+            <!-- Conteúdo é inserido dinamicamente pelo JS -->
+        </div>
+
+        <!-- Container de Boas-vindas (Logado) -->
+        <div id="welcome-container" class="welcome-modal text-center w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg hidden">
+            <div id="modal-close" class="close-button">x</div>
+            <h2 class="welcome-title font-bold">Welcome!</h2>
+            <p id="user-name" class="user-display-name"></p>
+            <button id="logout-button" class="logout-btn w-full px-4 py-2 text-lg font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-300">
+                Logout
+            </button>
+        </div>
+    </div>
+</div>

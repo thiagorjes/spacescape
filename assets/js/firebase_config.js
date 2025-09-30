@@ -24,6 +24,14 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const googleProvider = new GoogleAuthProvider();
-const analytics = getAnalytics(app); // Analytics também inicializado
+
+// Inicializa o Analytics com tratamento de erro para não bloquear a aplicação
+let analytics;
+try {
+    analytics = getAnalytics(app);
+} catch (error) {
+    console.warn("Analytics initialization failed:", error);
+    analytics = null; // Define como null se falhar
+}
 
 export { auth, db, googleProvider, analytics };

@@ -20,12 +20,8 @@ import {
 
 // O restante do código de lógica da UI permanece o mesmo...
 
-// Elementos da UI
-const loadingScreen = document.getElementById('loading-screen');
-const loginContainer = document.getElementById('login-container');
-const welcomeContainer = document.getElementById('welcome-container');
-const userNameDisplay = document.getElementById('user-name');
-const logoutButton = document.getElementById('logout-button');
+// Elementos da UI - serão inicializados quando o DOM estiver pronto
+let loadingScreen, loginContainer, welcomeContainer, userNameDisplay, logoutButton;
 
 // --- TEMPLATES HTML ---
 const loginTemplate = `
@@ -225,24 +221,99 @@ function clearAuthCache() {
     localStorage.removeItem('spacescape_user');
 }
 
-logoutButton.addEventListener('click', () => {
-    clearAuthCache();
-    signOut(auth);
-});
+// Initialize DOM elements and event listeners
+function initializeDOM() {
+    console.log('Initializing DOM elements...');
+
+    // Keep trying to find elements until they exist
+    const findElements = () => {
+        loadingScreen = document.getElementById('loading-screen');
+        loginContainer = document.getElementById('login-container');
+        welcomeContainer = document.getElementById('welcome-container');
+        userNameDisplay = document.getElementById('user-name');
+        logoutButton = document.getElementById('logout-button');
+
+        if (loadingScreen && loginContainer && welcomeContainer && userNameDisplay) {
+            console.log('All DOM elements found, setting up logout button');
+            if (logoutButton) {
+                logoutButton.addEventListener('click', () => {
+                    clearAuthCache();
+                    signOut(auth);
+                });
+            }
+            return true;
+        }
+        return false;
+    };
+
+    // Try immediately, then retry a few times
+    if (!findElements()) {
+        let attempts = 0;
+        const retryInterval = setInterval(() => {
+            attempts++;
+            if (findElements() || attempts >= 10) {
+                clearInterval(retryInterval);
+                if (attempts >= 10) {
+                    console.warn('Could not find all DOM elements after 10 attempts');
+                }
+            }
+        }, 200);
+    }
+}
 
 onAuthStateChanged(auth, user => {
+    console.log('Auth state changed:', user ? 'User logged in' : 'No user');
     saveAuthStateToCache(user);
-    if (user) {
-        showWelcomeScreen(user);
-        // Dispatch custom event to notify other scripts
-        document.dispatchEvent(new CustomEvent('authStateChange', {
-            detail: { user: user }
-        }));
-    } else {
-        showLoginScreen();
-        // Dispatch custom event to notify other scripts
-        document.dispatchEvent(new CustomEvent('authStateChange', {
-            detail: { user: null }
-        }));
-    }
+
+    // Wait for DOM elements to be available with timeout
+    const waitForDOM = (retryCount = 0) => {
+        if (loadingScreen && loginContainer && welcomeContainer && userNameDisplay) {
+            console.log('DOM elements found, showing appropriate screen');
+            if (user) {
+                showWelcomeScreen(user);
+                // Dispatch custom event to notify other scripts
+                document.dispatchEvent(new CustomEvent('authStateChange', {
+                    detail: { user: user }
+                }));
+            } else {
+                showLoginScreen();
+                // Dispatch custom event to notify other scripts
+                document.dispatchEvent(new CustomEvent('authStateChange', {
+                    detail: { user: null }
+                }));
+            }
+        } else if (retryCount < 50) { // Max 5 seconds retry
+            // Retry after a short delay
+            setTimeout(() => waitForDOM(retryCount + 1), 100);
+        } else {
+            console.error('DOM elements not found after timeout, forcing login screen');
+            // Fallback: force show login screen even if DOM elements are missing
+            if (document.getElementById('login-container')) {
+                showLoginScreen();
+            }
+        }
+    };
+
+    waitForDOM();
+});
+
+// Initialize DOM when components are loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Delay initialization to ensure components are loaded
+    setTimeout(() => {
+        initializeDOM();
+        // Force check for auth state after components should be loaded
+        if (loadingScreen && loginContainer && welcomeContainer && userNameDisplay) {
+            console.log('Components loaded, triggering auth state check');
+            // Manually trigger auth state check if needed
+        }
+    }, 500);
+});
+
+// Also listen for component loading events
+document.addEventListener('componentsLoaded', () => {
+    console.log('Components loaded event received');
+    setTimeout(() => {
+        initializeDOM();
+    }, 100);
 });

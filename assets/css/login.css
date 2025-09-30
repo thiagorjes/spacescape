@@ -29,18 +29,26 @@ body {
 }
 
 #modal-background {
-    position: relative;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
     height: 100vh;
     z-index: 100000;
     background-color: rgba(0, 0, 0, 0.5);
-    /* width: 100hw; */
     display: none;
+    justify-content: center;
+    align-items: center;
 }
 
 #profile-stats {
     position: relative;
     display: flex;
     z-index: 100000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 300px;
 }
 
 #modal-close {
@@ -50,4 +58,28 @@ body {
     font-family: monospace;
     font-size: 15px;
     cursor: pointer;
+}
+
+#loading-screen {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.loading-text {
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
 }

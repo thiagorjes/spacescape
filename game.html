@@ -19,10 +19,8 @@
 </head>
 <body>
     <div id="app">
-        <div class="header">
-            <div class="user-name">Login</div>
-            <div class="profile"><img src="assets/img/account.svg" /></div>
-        </div>
+        <!-- Header will be loaded here -->
+        <div id="header-container"></div>
         <div class="safe-area">
             <div class="background-gradient">
                 <div class="starfield" id="starfield"></div>
@@ -115,30 +113,24 @@
         </div>
     </div>
 
-    <div id="modal-background" class="modal-overlay">
-        <div id="profile-stats" class="modal-content">
-            <div id="loading-screen" class="loading-container">
-                <div class="loader"></div>
-                <p class="loading-text">Carregando...</p>
-            </div>
+    <!-- Modal will be loaded here -->
+    <div id="modal-container"></div>
 
-            <!-- Container de Login -->
-            <div id="login-container" class="login-modal hidden">
-                <!-- Conteúdo é inserido dinamicamente pelo JS -->
-            </div>
+    <script type="module" src="assets/js/component-loader.js"></script>
+    <script type="module">
+        // Load common components
+        import { ComponentLoader } from './assets/js/component-loader.js';
 
-            <!-- Container de Boas-vindas (Logado) -->
-            <div id="welcome-container" class="welcome-modal hidden">
-                <div id="modal-close" class="close-button">x</div>
-                <h2 class="welcome-title">Bem-vindo(a)!</h2>
-                <p id="user-name" class="user-display-name"></p>
-                <button id="logout-button" class="logout-btn">
-                    Sair (Logout)
-                </button>
-            </div>
-        </div>
-    </div>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loader = new ComponentLoader();
 
+            // Load header
+            await loader.replaceWithComponent('header', '#header-container');
+
+            // Load login modal
+            await loader.replaceWithComponent('login-modal', '#modal-container');
+        });
+    </script>
     <script src="assets/js/game.js"></script>
     <script type="module" src="assets/js/scripts.js"></script>
     <script type="module" src="assets/js/login.js"></script>

@@ -29,6 +29,19 @@ class SpaceScape {
     }
 
     setupEventListeners() {
+        // Set up launch button listeners
+        this.setupLaunchButtonListeners();
+
+        // Set up header element listeners (for dynamically loaded components)
+        this.setupHeaderListeners();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            this.isMobile = window.innerWidth < 768;
+        });
+    }
+
+    setupLaunchButtonListeners() {
         const launchBtnMobile = document.getElementById('launch-btn-mobile');
         const launchBtnDesktop = document.getElementById('launch-btn-desktop');
 
@@ -39,7 +52,26 @@ class SpaceScape {
         if (launchBtnDesktop) {
             launchBtnDesktop.addEventListener('click', () => this.handleLaunch('desktop'));
         }
+    }
 
+    setupHeaderListeners() {
+        // Try to find and set up header elements immediately
+        this.attachHeaderEventListeners();
+
+        // Also set up event delegation for dynamically loaded elements
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('user-name') || e.target.classList.contains('profile')) {
+                this.openProfileModal();
+            }
+        });
+
+        // Listen for components being loaded and reattach listeners
+        document.addEventListener('componentsLoaded', () => {
+            this.attachHeaderEventListeners();
+        });
+    }
+
+    attachHeaderEventListeners() {
         // Add click listeners for user name and profile icon to open modal
         const userNameElement = document.querySelector('.user-name');
         const profileElement = document.querySelector('.profile');
@@ -51,11 +83,6 @@ class SpaceScape {
         if (profileElement) {
             profileElement.addEventListener('click', () => this.openProfileModal());
         }
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            this.isMobile = window.innerWidth < 768;
-        });
     }
 
     createStarfield() {
@@ -286,8 +313,15 @@ class SpaceScape {
     }
 
     openProfileModal() {
-        document.getElementById('profile-stats').style.display = 'flex';
-        document.getElementById('modal-background').style.display = 'flex';
+        const modalBackground = document.getElementById('modal-background');
+        const profileStats = document.getElementById('profile-stats');
+
+        if (modalBackground && profileStats) {
+            modalBackground.style.display = 'flex';
+            profileStats.style.display = 'flex';
+        } else {
+            console.error('Modal elements not found');
+        }
     }
 
     checkAuthenticationStatus() {

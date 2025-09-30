@@ -19,10 +19,8 @@
 
 <body>
     <div id="app">
-        <div class="header">
-            <div class="user-name">Login</div>
-            <div class="profile"><img src="assets/img/account.svg" /></div>
-        </div>
+        <!-- Header will be loaded here -->
+        <div id="header-container"></div>
         <!-- Mobile View -->
         <div id="mobile-view" class="mobile-view">
             <div class="starfield-container">
@@ -34,12 +32,7 @@
             </div>
 
             <div class="rocket-container">
-                <svg id="rocket-mobile" class="rocket-svg" viewBox="0 0 24 36" xmlns="http://www.w3.org/2000/svg">
-                    <polygon id="flame" points="12,21 9,27 15,27" fill="#ffcc00" opacity="0" />
-                    <polygon points="12,3 6,21 18,21" fill="#b0b0b0" stroke="#555555" stroke-width="1.2" />
-                    <polygon points="7,21 3,21 7,17" fill="#808080" stroke="#555555" stroke-width="1.2" />
-                    <polygon points="17,21 21,21 17,17" fill="#808080" stroke="#555555" stroke-width="1.2" />
-                </svg>
+                <div id="rocket-mobile-container"></div>
             </div>
 
             <div class="button-container">
@@ -59,13 +52,7 @@
                 </div>
 
                 <div class="rocket-container-desktop">
-                    <svg id="rocket-desktop" class="rocket-svg-desktop" viewBox="0 0 24 36"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <polygon id="flame" points="12,21 9,27 15,27" fill="#ffcc00" opacity="0" />
-                        <polygon points="12,3 6,21 18,21" fill="#b0b0b0" stroke="#555555" stroke-width="1.2" />
-                        <polygon points="7,21 3,21 7,17" fill="#808080" stroke="#555555" stroke-width="1.2" />
-                        <polygon points="17,21 21,21 17,17" fill="#808080" stroke="#555555" stroke-width="1.2" />
-                    </svg>
+                    <div id="rocket-desktop-container"></div>
                 </div>
 
                 <div class="button-container-desktop">
@@ -74,31 +61,27 @@
             </div>
         </div>
     </div>
-    <div id="modal-background" class="flex flex-col items-center justify-center h-screen ">
-        <div id="profile-stats" >
-            <div id="loading-screen" class="flex flex-col items-center justify-center">
-                <div class="loader"></div>
-                <p class="mt-4 text-gray-600">Carregando...</p>
-            </div>
+    <!-- Modal will be loaded here -->
+    <div id="modal-container"></div>
+    <script type="module" src="assets/js/component-loader.js"></script>
+    <script type="module">
+        // Load common components
+        import { ComponentLoader } from './assets/js/component-loader.js';
 
-            <!-- Container de Login -->
-            <div id="login-container" class="hidden flex flex-col items-center justify-center bg-white rounded-xl shadow-lg">
-                <!-- Conteúdo é inserido dinamicamente pelo JS -->
-            </div>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loader = new ComponentLoader();
 
-            <!-- Container de Boas-vindas (Logado) -->
-            <div id="welcome-container"
-                class="hidden text-center w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
-                <div id="modal-close">x</div>
-                <h2 class="text-3xl font-bold text-gray-800">Bem-vindo(a)!</h2>
-                <p id="user-name" class="text-xl text-gray-600"></p>
-                <button id="logout-button"
-                    class="w-full px-4 py-2 text-lg font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-300">
-                    Sair (Logout)
-                </button>
-            </div>
-        </div>
-    </div>
+            // Load header
+            await loader.replaceWithComponent('header', '#header-container');
+
+            // Load login modal
+            await loader.replaceWithComponent('login-modal', '#modal-container');
+
+            // Load rocket components
+            await loader.replaceWithComponent('rocket', '#rocket-mobile-container');
+            await loader.replaceWithComponent('rocket', '#rocket-desktop-container');
+        });
+    </script>
     <script type="module" src="assets/js/scripts.js"></script>
     <script type="module" src="assets/js/login.js"></script>
     <script type="module" src="assets/js/auth-utils.js"></script>
