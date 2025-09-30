@@ -15,7 +15,11 @@ import {
 import {
     doc,
     setDoc,
-    getDoc
+    getDoc,
+    collection,
+    query,
+    where,
+    getDocs
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 // O restante do código de lógica da UI permanece o mesmo...
@@ -25,7 +29,7 @@ let loadingScreen, loginContainer, welcomeContainer, userNameDisplay, logoutButt
 
 // --- TEMPLATES HTML ---
 const loginTemplate = `
-    <div id="modal-close">x</div>
+    <div id="modal-close" class="close-button">x</div>
     <h1 class="text-2xl font-bold text-center text-gray-800">Login</h1>
     <form id="login-form" class="space-y-4">
         <div>
@@ -55,7 +59,7 @@ const loginTemplate = `
 `;
 
 const registerTemplate = `
-    <div id="modal-close">x</div>
+    <div id="modal-close" class="close-button">x</div>
     <h1 class="text-2xl font-bold text-center text-gray-800">Cadastro</h1>
     <form id="register-form" class="space-y-4">
         <div>
@@ -78,6 +82,28 @@ const registerTemplate = `
     </p>
 `;
 
+const createUsernameTemplate = `
+    <div id="modal-close" class="close-button">x</div>
+    <h1 class="text-2xl font-bold text-center text-gray-800">Crie seu Username</h1>
+    <p class="text-sm text-center text-gray-600 mb-4">Este nome será exibido para outros jogadores.</p>
+    <form id="username-form" class="space-y-4">
+        <div>
+            <label for="username-input" class="text-sm font-medium text-gray-700">Username</label>
+            <input id="username-input" name="username" type="text" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="SeuUsername123" minlength="3" maxlength="15" pattern="[a-zA-Z0-9_]+">
+            <p class="text-xs text-gray-500 mt-1">3-15 caracteres, apenas letras, números e _.</p>
+        </div>
+        <button type="submit" class="w-full px-4 py-2 text-lg font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">Salvar e Continuar</button>
+    </form>
+    <p id="auth-error" class="text-sm text-center text-red-500 mt-2 h-4"></p>
+`;
+
+const closeModal = () => {
+    const modalBackground = document.getElementById('modal-background');
+    if (modalBackground) {
+        modalBackground.style.display = 'none';
+    }
+};
+
 function showLoginScreen() {
     loginContainer.innerHTML = loginTemplate;
     welcomeContainer.classList.add('hidden');
@@ -90,10 +116,7 @@ function showLoginScreen() {
         e.preventDefault();
         showRegisterScreen();
     });
-    document.getElementById("modal-close").addEventListener('pointerup', (e) => {
-        document.getElementById('profile-stats').style.display = 'none';
-        document.getElementById('modal-background').style.display = 'none';
-    });
+    document.getElementById('modal-close').addEventListener('pointerup', closeModal);
 }
 
 function showRegisterScreen() {
@@ -103,21 +126,58 @@ function showRegisterScreen() {
         e.preventDefault();
         showLoginScreen();
     });
-    document.getElementById("modal-close").addEventListener('pointerup', (e) => {
-        document.getElementById('profile-stats').style.display = 'none';
-        document.getElementById('modal-background').style.display = 'none';
-    });
+    document.getElementById('modal-close').addEventListener('pointerup', closeModal);
 }
 
-function showWelcomeScreen(user) {
-    userNameDisplay.textContent = user.displayName || user.email;
+function showCreateUsernameScreen(user) {
+    loginContainer.innerHTML = createUsernameTemplate;
+    welcomeContainer.classList.add('hidden');
+    loadingScreen.classList.add('hidden');
+    loginContainer.classList.remove('hidden');
+
+    document.getElementById('username-form').addEventListener('submit', (e) => handleCreateUsername(e, user));
+    document.getElementById("modal-close").addEventListener('pointerup', closeModal);
+}
+
+
+async function handleCreateUsername(e, user) {
+    e.preventDefault();
+    const usernameInput = e.target.username;
+    const newUsername = usernameInput.value.trim();
+    displayError('');
+
+    if (!newUsername || newUsername.length < 3 || newUsername.length > 15 || !/^[a-zA-Z0-9_]+$/.test(newUsername)) {
+        displayError('Username inválido. Verifique as regras.');
+        return;
+    }
+
+    try {
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, where("username", "==", newUsername));
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            displayError('Este username já está em uso.');
+            return;
+        }
+
+        const userRef = doc(db, "users", user.uid);
+        await setDoc(userRef, { username: newUsername }, { merge: true });
+
+        checkUserSetup(user);
+
+    } catch (error) {
+        console.error("Erro ao criar username:", error);
+        displayError('Não foi possível salvar o username.');
+    }
+}
+
+
+function showWelcomeScreen(user, userData) {
+    userNameDisplay.textContent = userData.username || user.displayName || user.email;
     loginContainer.classList.add('hidden');
     loadingScreen.classList.add('hidden');
     welcomeContainer.classList.remove('hidden');
-    document.getElementById("modal-close").addEventListener('pointerup', (e) => {
-        document.getElementById('profile-stats').style.display = 'none';
-        document.getElementById('modal-background').style.display = 'none';
-    });
 }
 
 function displayError(message) {
@@ -131,12 +191,16 @@ async function createUserDocument(user, additionalData) {
     const userDoc = await getDoc(userRef);
     if (!userDoc.exists()) {
         const { displayName, email } = user;
-        await setDoc(userRef, {
-            name: displayName,
-            email: email,
-            createdAt: new Date(),
-            ...additionalData
-        });
+        try {
+            await setDoc(userRef, {
+                name: displayName,
+                email: email,
+                createdAt: new Date(),
+                ...additionalData
+            });
+        } catch (error) {
+            console.error("Error creating user document:", error);
+        }
     }
 }
 
@@ -185,7 +249,7 @@ const handleGoogleSignIn = () => {
     displayError('');
     signInWithPopup(auth, googleProvider)
         .then(result => {
-            createUserDocument(result.user, { score: 0 });
+             // A verificação de username e criação do doc será feita pelo onAuthStateChanged
         })
         .catch(error => {
             console.error("Erro com login Google:", error);
@@ -193,18 +257,17 @@ const handleGoogleSignIn = () => {
         });
 };
 
-// Initialize authentication persistence
 setPersistence(auth, browserLocalPersistence).catch(error => {
     console.error("Erro ao configurar persistência:", error);
 });
 
-// Cache management functions
-function saveAuthStateToCache(user) {
-    if (user) {
+function saveAuthStateToCache(userProfile) {
+    if (userProfile) {
         localStorage.setItem('spacescape_user', JSON.stringify({
-            uid: user.uid,
-            displayName: user.displayName,
-            email: user.email,
+            uid: userProfile.uid,
+            displayName: userProfile.displayName,
+            email: userProfile.email,
+            username: userProfile.username, // Adiciona username ao cache
             lastLogin: new Date().toISOString()
         }));
     } else {
@@ -212,108 +275,80 @@ function saveAuthStateToCache(user) {
     }
 }
 
-function getAuthStateFromCache() {
-    const cached = localStorage.getItem('spacescape_user');
-    return cached ? JSON.parse(cached) : null;
-}
-
 function clearAuthCache() {
     localStorage.removeItem('spacescape_user');
 }
 
-// Initialize DOM elements and event listeners
 function initializeDOM() {
-    console.log('Initializing DOM elements...');
-
-    // Keep trying to find elements until they exist
     const findElements = () => {
         loadingScreen = document.getElementById('loading-screen');
         loginContainer = document.getElementById('login-container');
         welcomeContainer = document.getElementById('welcome-container');
-        userNameDisplay = document.getElementById('user-name');
+        userNameDisplay = welcomeContainer ? welcomeContainer.querySelector('#user-name') : null;
         logoutButton = document.getElementById('logout-button');
 
-        if (loadingScreen && loginContainer && welcomeContainer && userNameDisplay) {
-            console.log('All DOM elements found, setting up logout button');
-            if (logoutButton) {
-                logoutButton.addEventListener('click', () => {
-                    clearAuthCache();
-                    signOut(auth);
-                });
-            }
+        if (loadingScreen && loginContainer && welcomeContainer && userNameDisplay && logoutButton) {
+            logoutButton.addEventListener('click', () => {
+                clearAuthCache();
+                signOut(auth);
+            });
+            const closeButton = welcomeContainer.querySelector('#modal-close');
+            if(closeButton) closeButton.addEventListener('pointerup', closeModal);
             return true;
         }
         return false;
     };
 
-    // Try immediately, then retry a few times
     if (!findElements()) {
         let attempts = 0;
         const retryInterval = setInterval(() => {
             attempts++;
             if (findElements() || attempts >= 10) {
                 clearInterval(retryInterval);
-                if (attempts >= 10) {
-                    console.warn('Could not find all DOM elements after 10 attempts');
-                }
+                if (attempts >= 10) console.warn('Could not find all DOM elements for login modal');
             }
         }, 200);
     }
 }
 
-onAuthStateChanged(auth, user => {
-    console.log('Auth state changed:', user ? 'User logged in' : 'No user');
-    saveAuthStateToCache(user);
+async function checkUserSetup(user) {
+    if (!user) {
+        showLoginScreen();
+        document.dispatchEvent(new CustomEvent('authStateChange', { detail: { user: null } }));
+        return;
+    }
 
-    // Wait for DOM elements to be available with timeout
+    const userRef = doc(db, "users", user.uid);
+    const userDoc = await getDoc(userRef);
+
+    if (userDoc.exists() && userDoc.data().username) {
+        const userData = userDoc.data();
+        const fullUserProfile = { ...user, ...userData };
+
+        saveAuthStateToCache(fullUserProfile);
+        showWelcomeScreen(user, userData);
+        document.dispatchEvent(new CustomEvent('authStateChange', { detail: { user: fullUserProfile } }));
+    } else {
+        if (!userDoc.exists()) {
+            await createUserDocument(user);
+        }
+        showCreateUsernameScreen(user);
+    }
+}
+
+
+onAuthStateChanged(auth, user => {
     const waitForDOM = (retryCount = 0) => {
-        if (loadingScreen && loginContainer && welcomeContainer && userNameDisplay) {
-            console.log('DOM elements found, showing appropriate screen');
-            if (user) {
-                showWelcomeScreen(user);
-                // Dispatch custom event to notify other scripts
-                document.dispatchEvent(new CustomEvent('authStateChange', {
-                    detail: { user: user }
-                }));
-            } else {
-                showLoginScreen();
-                // Dispatch custom event to notify other scripts
-                document.dispatchEvent(new CustomEvent('authStateChange', {
-                    detail: { user: null }
-                }));
-            }
-        } else if (retryCount < 50) { // Max 5 seconds retry
-            // Retry after a short delay
+        if (loadingScreen && loginContainer && welcomeContainer) {
+             checkUserSetup(user);
+        } else if (retryCount < 50) {
             setTimeout(() => waitForDOM(retryCount + 1), 100);
         } else {
-            console.error('DOM elements not found after timeout, forcing login screen');
-            // Fallback: force show login screen even if DOM elements are missing
-            if (document.getElementById('login-container')) {
-                showLoginScreen();
-            }
+            console.error('Login modal DOM elements not found after timeout.');
         }
     };
-
     waitForDOM();
 });
 
-// Initialize DOM when components are loaded
-document.addEventListener('DOMContentLoaded', () => {
-    // Delay initialization to ensure components are loaded
-    setTimeout(() => {
-        initializeDOM();
-        // Force check for auth state after components should be loaded
-        if (loadingScreen && loginContainer && welcomeContainer && userNameDisplay) {
-            console.log('Components loaded, triggering auth state check');
-            // Manually trigger auth state check if needed
-        }
-    }, 500);
-});
-
-// Also listen for component loading events
-document.addEventListener('componentsLoaded', () => {
-    console.log('Components loaded event received');
-    setTimeout(() => {
-        initializeDOM();
-    }, 100);
-});
+document.addEventListener('DOMContentLoaded', initializeDOM);
+document.addEventListener('componentsLoaded', initializeDOM);

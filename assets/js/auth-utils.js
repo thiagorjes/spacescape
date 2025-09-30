@@ -1,6 +1,8 @@
 // Authentication utilities for cross-page access
-import { auth } from "./firebase_config.js";
+import { auth, db } from "./firebase_config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
 
 // Cache management functions
 function getAuthStateFromCache() {
@@ -23,23 +25,26 @@ function clearAuthCache() {
 
 // Function to check auth state and execute callback
 function checkAuthState(callback) {
-    const cachedUser = getAuthStateFromCache();
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            // User is authenticated, now get profile from Firestore
+            const userRef = doc(db, "users", user.uid);
+            const userDoc = await getDoc(userRef);
 
-    if (cachedUser) {
-        // Verify with Firebase if needed
-        onAuthStateChanged(auth, user => {
-            if (user && user.uid === cachedUser.uid) {
-                callback(user);
+            if (userDoc.exists()) {
+                // Combine auth data with firestore data
+                const userProfile = { ...user, ...userDoc.data() };
+                callback(userProfile);
             } else {
-                clearAuthCache();
-                callback(null);
+                // No profile doc yet, just return auth user
+                callback(user);
             }
-        });
-    } else {
-        onAuthStateChanged(auth, user => {
-            callback(user);
-        });
-    }
+        } else {
+            // No user, clear cache and callback null
+            clearAuthCache();
+            callback(null);
+        }
+    });
 }
 
 // Export functions for use in other modules

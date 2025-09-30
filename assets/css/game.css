@@ -11,55 +11,12 @@
     height: 100vh;
 }
 
+/* Estilos do Header removidos para usar o styles.css, mantendo apenas personalizações */
 .header {
-    position: absolute;
-    right: 0px;
-    width: 100%;
-    height: 50px;
-    top: 0px;
-    z-index: 1000;
-    justify-content: flex-end;
-    display: flex;
-    flex-direction: row;
-    align-content: center;
-    flex-wrap: wrap;
     z-index: 10000;
     background-color: #121212;
 }
 
-.user-name {
-    display: flex;
-    justify-self: flex-end;
-    color: #4a8fe7;
-    font-family: 'Orbitron', 'monospace';
-    font-weight: bold;
-    line-height: 30px;
-    cursor: pointer;
-}
-
-.profile {
-    cursor: pointer;
-    position: relative;
-    width: 34px;
-    height: 34px;
-    margin: auto 10px auto 10px;
-    padding: 5px 5px;
-    color: #4a8fe7;
-    font-size: 20px;
-    border: 2px solid #4a8fe7;
-    border-radius: 50%;
-}
-
-.profile img {
-    color: #4a8fe7;
-    width: 20px;
-    height: 20px;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    opacity: 1;
-    z-index: 1;
-}
 
 body {
     font-family: 'Orbitron', monospace;
@@ -89,24 +46,31 @@ body {
     width: 100%;
     height: 100%;
     background: radial-gradient(2px 2px at 20px 30px, #eee, transparent),
-                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
-                radial-gradient(1px 1px at 90px 40px, #fff, transparent);
+        radial-gradient(2px 2px at 40px 70px, rgba(255, 255, 255, 0.8), transparent),
+        radial-gradient(1px 1px at 90px 40px, #fff, transparent);
     background-size: 200px 200px, 300px 300px, 150px 150px;
     animation: drift 60s linear infinite;
 }
 
 @keyframes drift {
-    from { transform: translateY(0px); }
-    to { transform: translateY(-200px); }
+    from {
+        transform: translateY(0px);
+    }
+
+    to {
+        transform: translateY(-200px);
+    }
 }
 
-.container {
+/* Classe renomeada para evitar conflito com a classe 'container' do Tailwind CSS */
+.game-container-wrapper {
     display: flex;
     flex-direction: column;
-    height: 100%;    
-    z-index: 1000;
-    position: relative;
+    height: 100%; /* Ajustado para preencher a safe-area */
+    position: absolute;
+    width: 100%; /* Garante que o container ocupe a largura total */
 }
+
 
 .game-area {
     flex: 1;
@@ -114,13 +78,44 @@ body {
     overflow: hidden;
 }
 
-/* Header styles for mobile */
+/* Header styles for mobile - a altura da safe-area é ajustada baseada no header */
 @media (max-width: 768px) {
-    .header {
-        height: 30px;
-        font-family: 'Starjedi', fantasy;
+    .safe-area {
+        height: calc(100vh - 50px); /* Mantendo a altura do header de styles.css */
+        top: 50px;
+    }
+
+    .controls-container {
+        padding: 5px;
+    }
+
+    .key-button {
+        width: 68px;
+        height: 68px;
+        font-size: 16px;
+        margin: 0px;
+    }
+
+    .progress-bar {
+        width: 25px;
+        height: 100px;
+    }
+
+    .display {
+        padding: 5px;
+    }
+
+    .display-label {
+        font-size: 10px;
+    }
+
+    .segment {
+        width: 15px;
+        height: 25px;
+        font-size: 14px;
     }
 }
+
 
 /* Popup overlays */
 .popup-overlay {
@@ -145,12 +140,14 @@ body {
     color: #61dafb;
 }
 
-.rocket-icon, .fuel-icon {
+.rocket-icon,
+.fuel-icon {
     font-size: 60px;
     margin-bottom: 20px;
 }
 
-.stage-title, .fuel-title {
+.stage-title,
+.fuel-title {
     font-size: 28px;
     font-weight: bold;
     margin-bottom: 10px;
@@ -164,7 +161,8 @@ body {
     font-family: 'Orbitron', monospace;
 }
 
-.start-button, .restart-button {
+.start-button,
+.restart-button {
     background: #61dafb;
     color: #1a1a1a;
     border: none;
@@ -177,7 +175,8 @@ body {
     transition: all 0.1s;
 }
 
-.start-button:active, .restart-button:active {
+.start-button:active,
+.restart-button:active {
     transform: scale(0.98);
 }
 
@@ -220,7 +219,8 @@ body {
     flex-wrap: wrap;
 }
 
-.left-controls, .right-controls {
+.left-controls,
+.right-controls {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -320,7 +320,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    overflow: hidden;    
+    overflow: hidden;
     border-top: 4px solid;
     border-left: 4px solid;
     border-right: 4px solid;
@@ -351,168 +351,7 @@ body {
     z-index: 2;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .header {
-        height: 30px;
-        font-family: 'Starjedi', fantasy;
-    }
-
-    .safe-area {
-        height: calc(100vh - 30px);
-        top: 30px;
-    }
-
-    .controls-container {
-        padding: 5px;
-    }
-
-    .key-button {
-        width: 68px;
-        height: 68px;
-        font-size: 16px;
-        margin: 0px;
-    }
-
-    .progress-bar {
-        width: 25px;
-        height: 100px;
-    }
-
-    .display {
-        padding: 5px;
-    }
-
-    .display-label {
-        font-size: 10px;
-    }
-
-    .segment {
-        width: 15px;
-        height: 25px;
-        font-size: 14px;
-    }
-}
-
-/* Modal styles */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 10000;
-}
-
-.modal-content {
-    position: relative;
-    width: 100%;
-    max-width: 400px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 200px;
-    padding: 40px 20px;
-}
-
-.loader {
-    width: 40px;
-    height: 40px;
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid #3498db;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 16px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.loading-text {
-    color: #666;
-    font-size: 14px;
-    font-family: 'Orbitron', monospace;
-}
-
-.login-modal, .welcome-modal {
-    background: #ffffff;
-    padding: 32px;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    color: #333;
-    max-width: 400px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.close-button {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    background: none;
-    border: none;
-    color: #666;
-    font-size: 24px;
-    cursor: pointer;
-    font-family: 'Orbitron', monospace;
-    line-height: 1;
-}
-
-.close-button:hover {
-    color: #333;
-}
-
-.welcome-title {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 24px;
-    font-family: 'Orbitron', monospace;
-    color: #333;
-}
-
-.user-display-name {
-    color: #666;
-    font-size: 18px;
-    margin-bottom: 24px;
-    font-family: 'Orbitron', monospace;
-}
-
-.logout-btn {
-    background: #dc2626;
-    color: #ffffff;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 500;
-    font-family: 'Orbitron', monospace;
-    cursor: pointer;
-    transition: all 0.2s;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.logout-btn:hover {
-    background: #b91c1c;
-    transform: translateY(-1px);
-}
-
-.logout-btn:active {
-    transform: translateY(0);
-}
+/* Estilos do Modal de Login removidos pois são carregados de login.css */
 
 .hidden {
     display: none !important;

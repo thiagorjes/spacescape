@@ -37,14 +37,25 @@ body {
     flex-wrap: wrap;
 }
 
+.home {
+    color: #fff73b;
+    justify-self: flex-start;
+    cursor: pointer;
+    line-height: 30px;
+    position: absolute;
+    left:10px;
+    margin: 10px 10px;
+}
+
 .user-name {
     display: flex;
     justify-self: flex-end;
-    color: #4a8fe7;
+    color: #fff73b;
     font-family: 'Orbitron', 'monospace';
     font-weight: bold;
     line-height: 30px;
     cursor: pointer;
+    margin: 5px;
 }
 
 .profile {
@@ -54,14 +65,14 @@ body {
     height: 34px;
     margin: auto 10px auto 10px;
     padding: 5px 5px;
-    color: #4a8fe7;
+    color: #fff73b;
     font-size: 20px;
-    border: 2px solid #4a8fe7;
+    border: 2px solid #fff73b;
     border-radius: 50%;
 }
 
 .profile img {
-    color: #4a8fe7;
+    color: #fff73b;
     width: 20px;
     height: 20px;
     background-size: cover;

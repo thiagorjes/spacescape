@@ -15,17 +15,11 @@ class SpaceScape {
     }
 
     init() {
-        console.log("entrou");
         this.setupEventListeners();
-        console.log("events");
         this.createStarfield();
-        console.log("starfield");
         this.animate();
-        console.log("animate");
         this.checkAuthenticationStatus();
-        console.log("checkaut");
         this.setupAuthStateListener();
-        console.log("auth events");
     }
 
     setupEventListeners() {
@@ -60,7 +54,7 @@ class SpaceScape {
 
         // Also set up event delegation for dynamically loaded elements
         document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('user-name') || e.target.classList.contains('profile')) {
+            if (e.target.closest('.user-name') || e.target.closest('.profile')) {
                 this.openProfileModal();
             }
         });
@@ -213,7 +207,7 @@ class SpaceScape {
 
     updateMobileAnimation(progress) {
         const title = document.querySelector('.game-title');
-        const rocket = document.getElementById('rocket-mobile');
+        const rocket = document.querySelector('.rocket-container .rocket-svg');
         const flame = rocket ? rocket.querySelector('#flame') : null;
 
         const button = document.getElementById('launch-btn-mobile');
@@ -229,18 +223,15 @@ class SpaceScape {
         }
 
         if (rocket) {
-            // Faz o foguete começar a se mover depois das estrelas (delay de 0.2s)
-            const rocketDelay = 0.3; // 20% da animação
+            const rocketDelay = 0.3;
             const adjustedRocketProgress = Math.max(0, (progress - rocketDelay) / (1 - rocketDelay));
 
             if (adjustedRocketProgress > 0) {
-                // Aplica easing para movimento com inércia (começa lento, acelera)
-                const easedProgress = adjustedRocketProgress * adjustedRocketProgress; // Curva quadrática
+                const easedProgress = adjustedRocketProgress * adjustedRocketProgress;
                 const translateY = -easedProgress * window.innerHeight;
                 rocket.style.transform = `translateY(${translateY}px)`;
             }
 
-            // Show flame when rocket starts moving
             if (flame) {
                 flame.style.opacity = '1';
                 if (adjustedRocketProgress > 0) {
@@ -252,10 +243,9 @@ class SpaceScape {
 
     updateDesktopAnimation(progress) {
         const title = document.querySelector('.game-title-desktop');
-        const rocket = document.getElementById('rocket-desktop');
+        const rocket = document.querySelector('.rocket-container-desktop .rocket-svg');
         const flame = rocket ? rocket.querySelector('#flame') : null;
         const button = document.getElementById('launch-btn-desktop');
-        const desktopContent = document.querySelector('.desktop-content');
 
         if (title) {
             const opacity = Math.max(0, 1 - (progress * 2));
@@ -268,18 +258,15 @@ class SpaceScape {
         }
 
         if (rocket) {
-            // Faz o foguete começar a se mover depois das estrelas (delay de 0.2s)
-            const rocketDelay = 0.3; // 30% da animação
+            const rocketDelay = 0.3;
             const adjustedRocketProgress = Math.max(0, (progress - rocketDelay) / (1 - rocketDelay));
 
             if (adjustedRocketProgress > 0) {
-                // Aplica easing para movimento com inércia (começa lento, acelera)
-                const easedProgress = adjustedRocketProgress * adjustedRocketProgress; // Curva quadrática
-                const translateY = -easedProgress * 1212; // Desktop container height
+                const easedProgress = adjustedRocketProgress * adjustedRocketProgress;
+                const translateY = -easedProgress * 1212;
                 rocket.style.transform = `translateY(${translateY}px)`;
             }
 
-            // Show flame when rocket starts moving
             if (flame) {
                 flame.style.opacity = '1';
                 if (adjustedRocketProgress > 0) {
@@ -294,13 +281,11 @@ class SpaceScape {
 
         if (!this.loggedIn) {
             this.openProfileModal();
-        }
-        else {
+        } else {
             this.isMobile = viewType === 'mobile';
             this.animationInProgress = true;
             this.progress = 0;
 
-            // Add loading state to button
             const button = this.isMobile ?
                 document.getElementById('launch-btn-mobile') :
                 document.getElementById('launch-btn-desktop');
@@ -314,13 +299,10 @@ class SpaceScape {
 
     openProfileModal() {
         const modalBackground = document.getElementById('modal-background');
-        const profileStats = document.getElementById('profile-stats');
-
-        if (modalBackground && profileStats) {
+        if (modalBackground) {
             modalBackground.style.display = 'flex';
-            profileStats.style.display = 'flex';
         } else {
-            console.error('Modal elements not found');
+            console.error('Modal background not found');
         }
     }
 
@@ -339,24 +321,18 @@ class SpaceScape {
     }
 
     updateUIForLoggedInUser(user) {
-        // Update header with user name
         const userNameElement = document.querySelector('.user-name');
         if (userNameElement) {
-            userNameElement.textContent = user.displayName || user.email;
+            userNameElement.textContent = user.username || user.displayName || user.email;
         }
-
-        // Update button text for logged in users
         this.updateButtonText('Start Game');
     }
 
     updateUIForLoggedOutUser() {
-        // Update header to show login
         const userNameElement = document.querySelector('.user-name');
         if (userNameElement) {
             userNameElement.textContent = 'Login';
         }
-
-        // Update button text for logged out users
         this.updateButtonText('Identify yourself');
     }
 
@@ -364,33 +340,19 @@ class SpaceScape {
         const mobileButton = document.getElementById('launch-btn-mobile');
         const desktopButton = document.getElementById('launch-btn-desktop');
 
-        if (mobileButton) {
-            mobileButton.textContent = text;
-        }
-
-        if (desktopButton) {
-            desktopButton.textContent = text;
-        }
+        if (mobileButton) mobileButton.textContent = text;
+        if (desktopButton) desktopButton.textContent = text;
     }
 
     setupAuthStateListener() {
-        // Listen for custom events from the login modal
-        document.addEventListener('authStateChange', (event) => {
-            const { user } = event.detail;
-            if (user) {
-                this.loggedIn = true;
-                this.currentUser = user;
-                this.updateUIForLoggedInUser(user);
-            } else {
-                this.loggedIn = false;
-                this.currentUser = null;
-                this.updateUIForLoggedOutUser();
-            }
+        document.addEventListener('authStateChange', () => {
+            // Quando o estado de autenticação muda (ex: login, logout, ou criação de username),
+            // nós re-executamos a verificação completa para garantir que temos os dados mais recentes.
+            this.checkAuthenticationStatus();
         });
     }
 
     onAnimationComplete() {
-        // Reset button state
         const button = this.isMobile ?
             document.getElementById('launch-btn-mobile') :
             document.getElementById('launch-btn-desktop');
@@ -400,50 +362,37 @@ class SpaceScape {
             button.textContent = this.loggedIn ? 'Start Game' : 'Identify yourself';
         }
 
-        // Reset flame opacity for external SVG
         const rocket = this.isMobile ?
-            document.getElementById('rocket-mobile') :
-            document.getElementById('rocket-desktop');
+            document.querySelector('.rocket-container .rocket-svg') :
+            document.querySelector('.rocket-container-desktop .rocket-svg');
 
         const flame = rocket ? rocket.querySelector('#flame') : null;
-
         if (flame) {
             flame.style.opacity = '0';
             flame.classList.remove('flame-flicker');
         }
 
-        // Reset rocket position
-        if (rocket) {
-            rocket.style.transform = 'translateY(0)';
-        }
+        if (rocket) rocket.style.transform = 'translateY(0)';
 
-        // Reset title and button opacity
         const title = this.isMobile ?
             document.querySelector('.game-title') :
             document.querySelector('.game-title-desktop');
 
-        if (title) {
-            title.style.opacity = '1';
-        }
+        if (title) title.style.opacity = '1';
+        if (button) button.style.opacity = '1';
 
-        if (button) {
-            button.style.opacity = '1';
-        }
-
-        // Navigate to game.html after animation completes
         window.location.href = 'game.html';
     }
 }
 
-// Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new SpaceScape();
+    window.spaceScapeInstance = new SpaceScape();
 });
 
-// Handle window resize
 window.addEventListener('resize', () => {
-    const spaceScape = window.spaceScapeInstance;
-    if (spaceScape) {
-        spaceScape.createStarfield();
+    if (window.spaceScapeInstance) {
+        window.spaceScapeInstance.createStarfield();
     }
 });
+
+

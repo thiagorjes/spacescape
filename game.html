@@ -1,15 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpaceScape Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="assets/css/game.css">
+    <!-- Links de CSS padronizados -->
+    <link rel="stylesheet" href="assets/css/styles.css"> <!-- Estilos compartilhados (header) -->
+    <link rel="stylesheet" href="assets/css/login.css"> <!-- Estilos do modal de login -->
+    <link rel="stylesheet" href="assets/css/game.css"> <!-- Estilos específicos do jogo -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         @font-face {
             font-family: 'Starjedi';
@@ -17,6 +23,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="app">
         <!-- Header will be loaded here -->
@@ -24,38 +31,46 @@
         <div class="safe-area">
             <div class="background-gradient">
                 <div class="starfield" id="starfield"></div>
-                <div class="container">
+                <!-- Classe container renomeada para evitar conflito com o Tailwind -->
+                <div class="game-container-wrapper">
                     <div class="game-area" id="gameArea">
-                        <!-- Game entities will be added here dynamically -->
-                        <div id="gameEntities"></div>
+                        <canvas id="gameCanvas"></canvas>
+                        <!-- Overlays são gerenciados pelo game.js -->
+                    </div>
 
-                        <!-- Start Screen -->
-                        <div id="startScreen" class="popup-overlay">
-                            <div class="popup-content">
-                                <div class="rocket-icon"><i class="fas fa-rocket"></i></div>
-                                <div class="stage-title" id="stageTitle">STAGE 01</div>
-                                <button id="startButton" class="start-button">LET'S GO</button>
-                            </div>
-                        </div>
-
-                        <!-- Fuel Exhausted Popup -->
-                        <div id="fuelEmptyPopup" class="popup-overlay" style="display: none;">
-                            <div class="popup-content fuel-popup">
-                                <div class="fuel-icon"><i class="fas fa-gas-pump"></i></div>
-                                <div class="fuel-title">FUEL EXHAUSTED</div>
-                                <div class="fuel-subtitle">You reached Stage <span id="finalStage">1</span></div>
-                                <div class="fuel-subtitle">Deaths: <span id="finalDeaths">0</span></div>
-                                <button id="restartButton" class="restart-button">RESTART</button>
-                            </div>
-                        </div>
-
-                        <!-- Overheated Alert -->
-                        <div id="overheatAlert" class="overheat-alert" style="display: none;">
-                            <div class="overheat-content">
-                                <span>OVERHEATED!</span>
-                            </div>
+                    <!-- Popups e Overlays -->
+                    <div id="win-overlay" class="popup-overlay" style="display: none;">
+                        <div class="popup-content">
+                            <h2>Vitória!</h2>
+                            <p>Você chegou ao destino!</p>
+                            <button id="next-level-btn" class="start-button">Próximo Nível</button>
                         </div>
                     </div>
+
+                    <div id="startScreen" class="popup-overlay">
+                        <div class="popup-content">
+                            <div class="rocket-icon"><i class="fas fa-rocket"></i></div>
+                            <div class="stage-title" id="stageTitle">STAGE 01</div>
+                            <button id="startButton" class="start-button">LET'S GO</button>
+                        </div>
+                    </div>
+
+                    <div id="fuelEmptyPopup" class="popup-overlay" style="display: none;">
+                        <div class="popup-content fuel-popup">
+                            <div class="fuel-icon"><i class="fas fa-gas-pump"></i></div>
+                            <div class="fuel-title">FUEL EXHAUSTED</div>
+                            <div class="fuel-subtitle">You reached Stage <span id="finalStage">1</span></div>
+                            <div class="fuel-subtitle">Deaths: <span id="finalDeaths">0</span></div>
+                            <button id="restartButton" class="restart-button">RESTART</button>
+                        </div>
+                    </div>
+
+                    <div id="overheatAlert" class="overheat-alert" style="display: none;">
+                        <div class="overheat-content">
+                            <span>OVERHEATED!</span>
+                        </div>
+                    </div>
+
 
                     <!-- Controls Section -->
                     <div class="controls-container">
@@ -70,8 +85,8 @@
                             <div class="display" id="stageDisplay">
                                 <div class="display-label">STAGES</div>
                                 <div class="display-segments">
-                                    <div class="segment" data-digit="0">0</div>
-                                    <div class="segment" data-digit="1">1</div>
+                                    <div class="segment">0</div>
+                                    <div class="segment">1</div>
                                 </div>
                             </div>
                             <button id="leftButton" class="key-button">
@@ -92,8 +107,8 @@
                             <div class="display" id="deathDisplay">
                                 <div class="display-label">DEATHS</div>
                                 <div class="display-segments">
-                                    <div class="segment" data-digit="0">0</div>
-                                    <div class="segment" data-digit="1">0</div>
+                                    <div class="segment">0</div>
+                                    <div class="segment">0</div>
                                 </div>
                             </div>
                             <button id="rightButton" class="key-button">
@@ -118,22 +133,17 @@
 
     <script type="module" src="assets/js/component-loader.js"></script>
     <script type="module">
-        // Load common components
         import { ComponentLoader } from './assets/js/component-loader.js';
-
         document.addEventListener('DOMContentLoaded', async () => {
             const loader = new ComponentLoader();
-
-            // Load header
             await loader.replaceWithComponent('header', '#header-container');
-
-            // Load login modal
             await loader.replaceWithComponent('login-modal', '#modal-container');
         });
     </script>
-    <script src="assets/js/game.js"></script>
-    <script type="module" src="assets/js/scripts.js"></script>
+    <script type="module" src="assets/js/game.js"></script>
     <script type="module" src="assets/js/login.js"></script>
     <script type="module" src="assets/js/auth-utils.js"></script>
 </body>
+
 </html>
+
