@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | UltimateForce</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/login.css">
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+    <!-- Tela de Carregamento Inicial -->
+    <div id="loading-screen" class="flex flex-col items-center justify-center">
+        <div class="loader"></div>
+        <p class="mt-4 text-gray-600">Carregando...</p>
+    </div>
+
+    <!-- Container de Login -->
+    <div id="login-container" class="hidden w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
+        <!-- Conteúdo é inserido dinamicamente pelo JS -->
+    </div>
+
+    <!-- Container de Boas-vindas (Logado) -->
+    <div id="welcome-container" class="hidden text-center w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
+        <h2 class="text-3xl font-bold text-gray-800">Bem-vindo(a)!</h2>
+        <p id="user-name" class="text-xl text-gray-600"></p>
+        <button id="logout-button" class="w-full px-4 py-2 text-lg font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-300">
+            Sair (Logout)
+        </button>
+    </div>
+
+    <!-- Firebase SDKs and custom script -->
+    <script type="module" src="assets/js/login.js"></script>
+</body>
+</html>

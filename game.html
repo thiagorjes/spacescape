@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpaceScape Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Links de CSS padronizados -->
+    <link rel="stylesheet" href="assets/css/styles.css"> <!-- Estilos compartilhados (header) -->
+    <link rel="stylesheet" href="assets/css/login.css"> <!-- Estilos do modal de login -->
+    <link rel="stylesheet" href="assets/css/game.css"> <!-- Estilos específicos do jogo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- SCRIPT PRINCIPAL DO GOOGLE ADSENSE ADICIONADO -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7408688486649567"
+        crossorigin="anonymous"></script>
+
+    <style>
+        @font-face {
+            font-family: 'Starjedi';
+            src: url('assets/fonts/Starjedi.ttf') format('truetype');
+        }
+    </style>
+</head>
+
+<body>
+    <!-- O #app agora é o container flex principal (veja game.css) -->
+    <div id="app">
+        <!-- Adicionado um <main> para agrupar o conteúdo do jogo e permitir que ele cresça -->
+        <main class="flex-grow h-full relative flex flex-col">
+            <!-- Header will be loaded here -->
+            <div id="header-container"></div>
+
+            <div class="safe-area">
+                <div class="background-gradient">
+                    <div class="starfield" id="starfield"></div>
+                    <div class="game-container-wrapper">
+                        <div class="game-area" id="gameArea">
+                            <canvas id="gameCanvas"></canvas>
+                        </div>
+
+                        <!-- Popups e Overlays do Jogo -->
+                        <div id="win-overlay" class="popup-overlay" style="display: none;">
+                            <div class="popup-content">
+                                <h1>Vitória!</h1>
+                                <p>Você chegou ao destino!</p>
+                                <br>
+                                <button id="next-level-btn" class="start-button">Próximo Nível</button>
+                            </div>
+                        </div>
+
+                        <!-- POPUP DE INÍCIO DE FASE AGORA CONTÉM O ANÚNCIO MOBILE -->
+                        <div id="startScreen" class="popup-overlay">
+                            <div class="popup-content">
+                                <!-- ANÚNCIO MOBILE MOVIDO PARA CÁ -->
+                                <div id="ads-mobile-container" class="mb-4">
+                                    <div class="ads-container" id="ads-mobile"
+                                        style="min-width:300px; height: 300px; width:100%; z-index: 10;">
+                                        <div id="google-ads-mobile" style="min-width:300px; height: 300px; width:100%;">
+                                            <ins class="adsbygoogle" style="display:block;"
+                                                data-ad-client="ca-pub-7408688486649567" data-ad-slot="9291426140"
+                                                data-ad-format="autorelaxed"></ins>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="stage-title" id="stageTitle">STAGE 01</div>
+                                <button id="startButton" class="start-button">LET'S GO</button>
+                            </div>
+                        </div>
+
+                        <div id="fuelEmptyPopup" class="popup-overlay" style="display: none;">
+                            <div class="popup-content fuel-popup">
+                                <div class="fuel-icon"><i class="fas fa-gas-pump"></i></div>
+                                <div class="fuel-title">FUEL EXHAUSTED</div>
+                                <div class="fuel-subtitle">You reached Stage <span id="finalStage">1</span></div>
+                                <div class="fuel-subtitle">Deaths: <span id="finalDeaths">0</span></div>
+                                <button id="restartButton" class="restart-button">RESTART</button>
+                            </div>
+                        </div>
+
+                        <div id="overheatAlert" class="overheat-alert" style="display: none;">
+                            <div class="overheat-content">
+                                <span>OVERHEATED!</span>
+                            </div>
+                        </div>
+
+
+                        <!-- Controls Section -->
+                        <div class="controls-container">
+                            <div class="left-controls">
+                                <div class="progress-bar vertical" id="temperatureBar">
+                                    <div class="progress-fill" id="temperatureFill"></div>
+                                    <div class="progress-icon"><i class="fas fa-temperature-high"></i></div>
+                                </div>
+                            </div>
+                            <div class="control-col">
+                                <div class="display" id="stageDisplay">
+                                    <div class="display-label">STAGES</div>
+                                    <div class="display-segments">
+                                        <div class="segment">0</div>
+                                        <div class="segment">1</div>
+                                    </div>
+                                </div>
+                                <button id="leftButton" class="key-button">
+                                    <span class="key-icon"><i class="fas fa-arrow-left"></i></span>
+                                </button>
+                            </div>
+                            <div class="control-col">
+                                <button id="upButton" class="key-button">
+                                    <span class="key-icon"><i class="fas fa-arrow-up"></i></span>
+                                </button>
+                                <button id="downButton" class="key-button">
+                                    <span class="key-icon"><i class="fas fa-arrow-down"></i></span>
+                                </button>
+                            </div>
+                            <div class="control-col">
+                                <div class="display" id="deathDisplay">
+                                    <div class="display-label">DEATHS</div>
+                                    <div class="display-segments">
+                                        <div class="segment">0</div>
+                                        <div class="segment">0</div>
+                                    </div>
+                                </div>
+                                <button id="rightButton" class="key-button">
+                                    <span class="key-icon"><i class="fas fa-arrow-right"></i></span>
+                                </button>
+                            </div>
+                            <div class="right-controls">
+                                <div class="progress-bar vertical" id="fuelBar">
+                                    <div class="progress-fill" id="fuelFill"></div>
+                                    <div class="progress-icon"><i class="fas fa-gas-pump"></i></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal will be loaded here -->
+    <div id="modal-container"></div>
+
+    <!-- O SCRIPT DE CONTROLE DE ANÚNCIOS FOI REMOVIDO DAQUI E INTEGRADO AO game.js -->
+
+    <script type="module" src="assets/js/component-loader.js"></script>
+    <script type="module">
+        import { ComponentLoader } from './assets/js/component-loader.js';
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loader = new ComponentLoader();
+            await loader.replaceWithComponent('header', '#header-container');
+            await loader.replaceWithComponent('login-modal', '#modal-container');
+        });
+    </script>
+    <script type="module" src="assets/js/game.js"></script>
+    <script type="module" src="assets/js/login.js"></script>
+    <script type="module" src="assets/js/auth-utils.js"></script>
+
+</body>
+
+</html>

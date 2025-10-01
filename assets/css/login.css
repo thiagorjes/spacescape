@@ -1,0 +1,96 @@
+/* Define a fonte Inter como padrão */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Estilo para o loader */
+.loader {
+    border: 4px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 4px solid #3498db;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+#login-container {    
+    min-width: 300px;
+    width: fit-content;
+    padding: 30px;
+    margin: auto auto;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#welcome-container {
+    min-width: 300px;
+    width: fit-content;
+    padding: 30px;
+    margin: auto auto;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#modal-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 100000;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+#profile-stats {
+    position: relative;
+    display: flex;
+    z-index: 100000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 300px;
+}
+
+#modal-close {
+    position: absolute;
+    top: 10px;
+    right: 25px;
+    font-family: monospace;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+#loading-screen {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.loading-text {
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+}

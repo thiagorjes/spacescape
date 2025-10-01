@@ -1,0 +1,498 @@
+/* Font declarations */
+@font-face {
+    font-family: 'Starjedi';
+    src: url('../fonts/Starjedi.woff') format('woff'),
+        url('../fonts/Starjedi.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Orbitron', monospace;
+    background-color: #0d0d26;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+}
+
+.header {
+    position: absolute;
+    right: 0px;
+    width: 100%;
+    height: 50px;
+    top: 0px;
+    z-index: 1000;
+    display: flex;
+    align-items: center; /* Alinha verticalmente */
+    justify-content: space-between; /* Espaço entre título e user-name no desktop */
+    padding: 0 10px; /* Adiciona padding */
+}
+
+.header-title {
+    display: none; /* Visível no desktop */
+    color: #fff73b;
+    font-family: 'StarJedi','Orbitron',monospace;
+    font-size: 25px;
+    flex-grow: 1; /* Permite que o título ocupe o espaço */
+    text-align: left; /* Alinha à esquerda */
+    line-height: 50px; /* Centraliza verticalmente */
+}
+
+.home {
+    color: #fff73b;
+    cursor: pointer;
+    line-height: 50px;
+    margin-right: 15px; /* Adiciona margem */
+    position: static; /* Remove posicionamento absoluto */
+}
+
+.user-area {
+    display: flex;
+    align-items: center;
+}
+
+.user-name {
+    display: flex;
+    color: #fff73b;
+    font-family: 'Orbitron', 'monospace';
+    font-weight: bold;
+    line-height: 30px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.profile {
+    cursor: pointer;
+    position: relative;
+    width: 34px;
+    height: 34px;
+    margin: auto 5px;
+    padding: 5px;
+    color: #fff73b;
+    font-size: 20px;
+    border: 2px solid #fff73b;
+    border-radius: 50%;
+    padding: 1px 5px;
+}
+
+.profile img {
+    color: #fff73b;
+    width: 18px;
+    height: 18px;
+    margin: 5px 0px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 1;
+    z-index: 1;
+}
+
+/* Estilo para o ícone de troféu no header */
+.profile .fa-trophy {
+    font-size: 18px;
+    color: #fff73b; /* Cor amarela do título */
+    transition: transform 0.2s ease-in-out;
+}
+
+.profile .fa-trophy:hover {
+    transform: scale(1.1);
+}
+
+/* Main app container */
+#app {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* Mobile View Styles (default) */
+.mobile-view {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    background-color: #0d0d26;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.desktop-view {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    background-color: #0d0d26;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.desktop-content {
+    position: absolute;
+    width: 100%;
+    bottom: 0px;
+    background-color: #0d0d26;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    overflow: hidden;
+    top: 0px;
+}
+
+/* Starfield */
+.starfield-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.starfield-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.starfield-container-desktop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.starfield-canvas-desktop {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Title Styles */
+.title-container {
+    position: absolute;
+    top: 16.5%;
+    /* 200/1212 */
+    z-index: 10;
+}
+
+.game-title {
+    font-size: 6.67vw;
+    /* 48/720 */
+    color: #fff73b;
+    font-family: 'Starjedi', 'Orbitron', monospace;
+    font-weight: 900;
+    margin-bottom: 30px;
+    /* text-shadow: 0 0 5px #fff73b, 0 0 5px #fff73b, 0 0 5px #fff73b; */
+    text-align: center;
+}
+
+.title-container-desktop {
+    position: absolute;
+    top: 16.5%;
+    /* 200/1212 */
+    z-index: 10;
+}
+
+.game-title-desktop {
+    font-size: 48px;
+    color: #fff73b;
+    font-family: 'Starjedi', 'Orbitron', monospace;
+    font-weight: 900;
+    margin-bottom: 30px;
+    /* text-shadow: 0 0 10px #fff73b, 0 0 20px #fff73b, 0 0 30px #fff73b; */
+    text-align: center;
+}
+
+/* Rocket Styles */
+.rocket-container {
+    position: absolute;
+    top: 48.7%;
+    /* 590/1212 */
+    z-index: 5;
+}
+
+.rocket-svg {
+    width: 30vh;
+    height: auto;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+}
+
+.rocket-container-desktop {
+    position: absolute;
+    top: 48.7%;
+    /* 590/1212 */
+    z-index: 5;
+}
+
+.rocket-svg-desktop {
+    width: 300px;
+    height: auto;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+}
+
+/* Button Styles */
+.button-container {
+    position: absolute;
+    bottom: 50px;
+    z-index: 10;
+}
+
+.launch-button {
+    background-color: #4a8fe7;
+    color: #fff;
+    font-size: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: 'Orbitron', monospace;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(74, 143, 231, 0.5);
+    transition: all 0.3s ease;
+}
+
+.launch-button:hover {
+    background-color: #3a7bd5;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(74, 143, 231, 0.7);
+    transform: translateY(-2px);
+}
+
+.launch-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 15px rgba(74, 143, 231, 0.4);
+}
+
+.button-container-desktop {
+    position: absolute;
+    bottom: 50px;
+    z-index: 10;
+}
+
+.launch-button-desktop {
+    background-color: #4a8fe7;
+    color: #fff;
+    font-size: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: 'Orbitron', monospace;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(74, 143, 231, 0.5);
+    transition: all 0.3s ease;
+}
+
+.launch-button-desktop:hover {
+    background-color: #3a7bd5;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(74, 143, 231, 0.7);
+    transform: translateY(-2px);
+}
+
+.launch-button-desktop:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 15px rgba(74, 143, 231, 0.4);
+}
+
+/* Animation classes */
+.fade-out {
+    animation: fadeOut 0.5s ease-in forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+.rocket-launch {
+    animation: rocketLaunch 1.5s ease-in-out forwards;
+}
+
+@keyframes rocketLaunch {
+    0% {
+        transform: translateY(0);
+    }
+
+    100% {
+        transform: translateY(-100vh);
+    }
+}
+
+.flame-flicker {
+    animation: flameFlicker 0.1s ease-in-out infinite alternate;
+}
+
+@keyframes flameFlicker {
+    0% {
+        opacity: 0.7;
+        transform: scaleY(1);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scaleY(1.2);
+    }
+}
+
+/* Responsive breakpoints */
+@media (min-width: 768px) {
+    .mobile-view {
+        display: none;
+    }
+
+    .desktop-view {
+        display: flex;
+    }
+}
+
+/* Star styles for canvas */
+.star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background-color: white;
+    border-radius: 50%;
+}
+
+/* Loading animation */
+.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+
+
+/* Contêiner do Top 3 para Desktop */
+.desktop-ranking-preview {
+    display: none; /* Escondido por padrão, ativado via media query */
+    position: absolute;
+    top: 80px; /* Ajuste conforme a altura do seu header */
+    right: 20px;
+    width: 280px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 1px solid #fff73b;
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: 'Orbitron', sans-serif;
+    color: #fff73b;
+    cursor: pointer;
+    z-index: 50;
+}
+
+.desktop-ranking-preview h3 {
+    margin: 0 0 10px 0;
+    text-align: center;
+    font-weight: 700;
+}
+
+.desktop-ranking-preview ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.desktop-ranking-preview li {
+    display: grid;
+    grid-template-columns: 30px 1fr 50px 50px;
+    gap: 10px;
+    padding: 4px 0;
+    font-size: 14px;
+}
+
+
+/* Modal do Ranking Completo */
+.full-ranking-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.full-ranking-modal.hidden {
+    display: none;
+}
+
+.ranking-content {
+    background: #0c0f1a;
+    border: 2px solid #fff73b;
+    border-radius: 12px;
+    padding: 20px 30px;
+    width: 90%;
+    max-width: 500px;
+    color: #fff73b;
+    font-family: 'Orbitron', sans-serif;
+    position: relative;
+}
+
+.ranking-content h2 {
+    font-size: 2rem;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#ranking-list, #player-rank-container {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#ranking-list li, #player-rank-container li {
+    display: grid;
+    grid-template-columns: 40px 1fr 60px 60px;
+    gap: 15px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 247, 59, 0.2);
+}
+
+.ranking-header {
+    font-weight: bold;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* Destaque para o jogador logado */
+.player-highlight {
+    color: #4ade80; /* Um verde brilhante */
+    font-weight: 700;
+}
+
+#player-rank-container {
+    margin-top: 15px;
+    border-top: 2px solid #fff73b;
+    padding-top: 10px;
+}
+
+/* Media Query para Desktop */
+@media (min-width: 768px) {
+    .desktop-ranking-preview {
+        display: block;
+    }
+}

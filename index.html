@@ -1,171 +1,107 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Scape</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/login.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 
 <body>
-
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7408688486649567"
         crossorigin="anonymous"></script>
-    <header class="main-header">
-        <h1>Space Scape</h1>
-    </header>
+    <div id="app">
+        <!-- Header will be loaded here -->
+        <div id="header-container"></div>
+        <!-- Mobile View -->
+        <div id="mobile-view" class="mobile-view">
+            <div class="starfield-container">
+                <canvas id="starfield-mobile" class="starfield-canvas"></canvas>
+            </div>
 
-    <div class="layout-container">
-        <div class="ads-container" id="ads-desktop" style="min-width:280px;width:280px;">
-            <!-- Google Ads desktop -->
-            <div id="google-ads-desktop" style="min-width:280px;width:280px;">
-                <ins class="adsbygoogle" style="display:block;min-width:280px;width:280px;" data-ad-format="autorelaxed"
-                    data-ad-client="ca-pub-7408688486649567" data-ad-slot="2255244502"></ins>
-                <script>
-                    (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
+            <div class="title-container">
+                <h1 class="game-title">Space Scape</h1>
+            </div>''
+
+            <div class="rocket-container">
+                <div id="rocket-mobile-container"></div>
+            </div>
+
+            <div class="button-container">
+                <button id="launch-btn-mobile" class="launch-button">Identify yourself</button>
             </div>
         </div>
-        <div id="game-area">
-            <canvas id="gameCanvas"></canvas>
-            <div id="message-overlay"></div>
-            <div id="win-overlay">
-                <h2>Vitória!</h2>
-                <p>Você chegou ao destino!</p>
-                <button onclick="increaseDifficultyAndReset()" id="next-level-btn">Próximo Nível</button>
-            </div>
-        </div>
-        <div class="controls-container" id="controls-desktop">
-            <div class="stats-and-controls">
-                <div class="stats">
-                    <span class="stat-label">Velocidade: <span class="stat-value" id="speedValue">0.00</span> <span
-                            class="stat-unit">u/s</span></span>
-                    <span class="stat-label">Combustível: <span class="stat-value" id="fuelValue">100</span> <span
-                            class="stat-unit">L</span></span>
+
+        <!-- Desktop View -->
+        <div id="desktop-view" class="desktop-view">
+            <div class="desktop-content">
+                <div class="starfield-container-desktop">
+                    <canvas id="starfield-desktop" class="starfield-canvas-desktop"></canvas>
                 </div>
-                <div class="control-group">
-                    <label for="planetCount">Astros:</label>
-                    <input type="number" id="planetCount" min="1" max="100" value="1"
-                        onfocusout="updatePlanetCount(this.value)">
+
+                <div class="title-container-desktop">
+                    <h1 class="game-title-desktop">Space Scape</h1>
                 </div>
-            </div>
-            <div id="key-config-container">
-                <p>Controles de Teclado:</p>
-                <div class="key-input">
-                    <label for="key-forward">Avançar</label>
-                    <input type="text" id="key-forward" value="ArrowUp" readonly>
+
+                <div class="rocket-container-desktop">
+                    <div id="rocket-desktop-container"></div>
                 </div>
-                <div class="key-input">
-                    <label for="key-backward">Retroceder</label>
-                    <input type="text" id="key-backward" value="ArrowDown" readonly>
-                </div>
-                <div class="key-input">
-                    <label for="key-left">Virar Esq.</label>
-                    <input type="text" id="key-left" value="ArrowLeft" readonly>
-                </div>
-                <div class="key-input">
-                    <label for="key-right">Virar Dir.</label>
-                    <input type="text" id="key-right" value="ArrowRight" readonly>
-                </div>
-            </div>
-        </div>
-        <div class="controls-container" id="controls-mobile">
-            <div id="mobile-arrow-pad"
-                style="display: grid; grid-template-rows: 1fr 1fr 1fr; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 100%; max-width: 320px; margin: auto auto; z-index: 100;">
-                <div></div>
-                <button class="arrow-btn" id="arrow-up" data-key="ArrowUp"
-                    style="grid-row: 1; grid-column: 2; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: #2c2c4c; color: #fff; border: 2px solid #3a3a5a; height: 60px; width: 60px;">
-                    ▲</button>
-                <div></div>
-                <button class="arrow-btn" id="arrow-left" data-key="ArrowLeft"
-                    style="grid-row: 2; grid-column: 1; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: #2c2c4c; color: #fff; border: 2px solid #3a3a5a; height: 60px; width: 60px;">
-                    ◀</button>
-                <button class="arrow-btn" id="arrow-down" data-key="ArrowDown"
-                    style="grid-row: 2; grid-column: 2; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: #2c2c4c; color: #fff; border: 2px solid #3a3a5a; height: 60px; width: 60px;">
-                    ▼</button>
-                <button class="arrow-btn" id="arrow-right" data-key="ArrowRight"
-                    style="grid-row: 2; grid-column: 3; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: #2c2c4c; color: #fff; border: 2px solid #3a3a5a; height: 60px; width: 60px;">
-                    ▶</button>
-            </div>
-            <div class="ads-container" id="ads-mobile" style="display:block;min-width:320px;width:320px;z-index: 10;">
-                <!-- Google Ads mobile -->
-                <div id="google-ads-mobile" style="min-width:320px;width:320px;">
-                    <ins class="adsbygoogle" style="display:block;min-width:320px;width:320px;" data-ad-format="autorelaxed"
-                        data-ad-client="ca-pub-7408688486649567" data-ad-slot="9291426140"></ins>
-                    <script>
-                        (adsbygoogle = window.adsbygoogle || []).push({});
-                    </script>
+
+                <div class="button-container-desktop">
+                    <button id="launch-btn-desktop" class="launch-button-desktop">Identify yourself</button>
                 </div>
             </div>
         </div>
     </div>
-    <!-- <script src="assets/js/touch-connect.js"></script> -->
-    <script>
-        function dispatchKeyboardEvent(keyName, eventType) {
-            const keyboardEvent = new KeyboardEvent(eventType, {
-                key: keyName,
-                code: keyName,
-                bubbles: true,
-                cancelable: true
-            });
-            document.body.dispatchEvent(keyboardEvent);
-        }
+    <!-- Modal will be loaded here -->
+    <div id="modal-container"></div>
+    <script type="module" src="assets/js/component-loader.js"></script>
+    <script type="module">
+        // Load common components
+        import { ComponentLoader } from './assets/js/component-loader.js';
 
-        function setupMobileArrowPad() {
-            const arrows = [
-                { id: 'arrow-up', key: 'ArrowUp', log: 'botao arrow-up' },
-                { id: 'arrow-down', key: 'ArrowDown', log: 'botao arrow-down' },
-                { id: 'arrow-left', key: 'ArrowLeft', log: 'botao arrow-left' },
-                { id: 'arrow-right', key: 'ArrowRight', log: 'botao arrow-right' }
-            ];
-            arrows.forEach(({ id, key, log }) => {
-                const el = document.getElementById(id);
-                if (!el) return;
-                el.onmousedown = el.ontouchstart = function(e) {
-                    e.preventDefault();
-                    console.log(log);
-                    dispatchKeyboardEvent(key, 'keydown');
-                };
-                el.onmouseup = el.ontouchend = el.onmouseleave = function(e) {
-                    e.preventDefault();
-                    dispatchKeyboardEvent(key, 'keyup');
-                };
-                el.onclick = function(e) { 
-                    e.preventDefault();
-                    dispatchKeyboardEvent(key, 'keydown');
-                };
-            });
-        }
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loader = new ComponentLoader();
 
-        // Inicializa controles mobile se existir
-        if (window.innerWidth <= 768 && document.getElementById('mobile-arrow-pad')) {
-            setupMobileArrowPad();
-        }
+            // Load header
+            await loader.replaceWithComponent('header', '#header-container');
+
+            // Load login modal
+            await loader.replaceWithComponent('login-modal', '#modal-container');
+
+            // Load rocket components
+            await loader.replaceWithComponent('rocket', '#rocket-mobile-container');
+            await loader.replaceWithComponent('rocket', '#rocket-desktop-container');
+        });
     </script>
-    <script src="assets/js/script.js"></script>
-    <script>
-        // Detecta se é mobile (tela <= 768px ou userAgent)
-        function isMobileDevice() {
-            return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
+    <script type="module" src="assets/js/scripts.js"></script>
+    <script type="module" src="assets/js/login.js"></script>
+    <script type="module" src="assets/js/auth-utils.js"></script>
 
-        let minR, maxR, minDist;
-        if (isMobileDevice()) {
-            minR = 10;
-            maxR = 30;
-            minDist = 50;
-            rocketSize = 6; // Tamanho do foguete menor para mobile
-            colisionThreshold = 100; // Limite de colisão menor para mobile
-        } else {
-            minR = 20;
-            maxR = 90;
-            minDist = 50;
-            rocketSize = 10; // Tamanho do foguete maior para desktop
-            colisionThreshold = 150; // Limite de colisão maior para desktop
-        }
-        init(minR, maxR, minDist, rocketSize, colisionThreshold);
-    </script>
+    <div id="desktop-ranking-preview" class="desktop-ranking-preview"></div>
+
+    <div id="full-ranking-modal" class="full-ranking-modal hidden">
+        <div class="ranking-content">
+            <div id="close-ranking-modal" class="close-button">&times;</div>
+            <h2>Melhores Jogadores</h2>
+            <ul id="ranking-list">
+            </ul>
+            <div id="player-rank-container">
+            </div>
+        </div>
+    </div>
+
+
 </body>
 
 </html>
