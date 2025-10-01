@@ -66,9 +66,11 @@ body {
 .game-container-wrapper {
     display: flex;
     flex-direction: column;
-    height: 100%; /* Ajustado para preencher a safe-area */
+    height: 100%;
+    /* Ajustado para preencher a safe-area */
     position: absolute;
-    width: 100%; /* Garante que o container ocupe a largura total */
+    width: 100%;
+    /* Garante que o container ocupe a largura total */
 }
 
 
@@ -81,8 +83,24 @@ body {
 /* Header styles for mobile - a altura da safe-area é ajustada baseada no header */
 @media (max-width: 768px) {
     .safe-area {
-        height: calc(100vh - 50px); /* Mantendo a altura do header de styles.css */
+        height: calc(100vh - 50px);
+        /* Mantendo a altura do header de styles.css */
         top: 50px;
+    }
+
+    .header {
+        justify-content: center;
+    }
+
+    .user-name {
+        display: none !important;
+    }
+
+    .header-title {
+        display: block !important;
+        text-align: center;
+        margin: auto;
+        line-height: 50px; /* Centraliza verticalmente */
     }
 
     .controls-container {
@@ -355,4 +373,8 @@ body {
 
 .hidden {
     display: none !important;
+}
+
+.header-title {
+    display: block; /* Escondido por padrão no desktop */
 }

@@ -1,5 +1,58 @@
-// Space Scape - JavaScript functionality
+// ... (início do seu scripts.js)
 import { isUserLoggedIn, getCurrentUser, checkAuthState } from './auth-utils.js';
+// Importações adicionais do Firestore
+import { db } from './firebase_config.js';
+import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+
+/**
+ * Busca todas as sessões de "game over" e exibe um ranking.
+ */
+async function fetchAndDisplayRanking() {
+    console.log("Buscando o ranking de jogadores na página inicial...");
+    try {
+        const querySnapshot = await getDocs(collection(db, "game_state"));
+        if (querySnapshot.empty) {
+            console.log("Nenhum dado de jogo encontrado.");
+            return;
+        }
+
+        let allGameOverSessions = [];
+        querySnapshot.forEach(doc => {
+            const sessions = doc.data().sessions || [];
+            // Filtra apenas as sessões que terminaram em game over
+            const gameOverSessions = sessions.filter(s => s.gameover === true);
+            allGameOverSessions.push(...gameOverSessions);
+        });
+
+        if (allGameOverSessions.length === 0) {
+            console.log("Nenhum registro de 'Game Over' encontrado para o ranking.");
+            return;
+        }
+        
+        // Ordena o ranking pelos critérios definidos
+        allGameOverSessions.sort((a, b) => {
+            if (b.level !== a.level) return b.level - a.level;       // 1. Maior level
+            if (b.fuel !== a.fuel) return b.fuel - a.fuel;           // 2. Maior fuel
+            return a.deaths - b.deaths;                              // 3. Menor deaths
+        });
+        
+        // Mapeia para um formato amigável para exibição
+        const ranking = allGameOverSessions.map(s => ({
+            username: s.username,
+            level: s.level,
+            fuel: s.fuel.toFixed(2),
+            deaths: s.deaths
+        }));
+
+        console.log("--- RANKING GERAL (Melhores Tentativas) ---");
+        console.table(ranking);
+        console.log("------------------------------------------");
+
+    } catch (error) {
+        console.error("Erro ao buscar o ranking:", error);
+    }
+}
 
 class SpaceScape {
     constructor() {
@@ -20,8 +73,11 @@ class SpaceScape {
         this.animate();
         this.checkAuthenticationStatus();
         this.setupAuthStateListener();
+        fetchAndDisplayRanking(); // Chama a função de ranking na inicialização
     }
 
+    // ... O RESTANTE DO SEU ARQUIVO scripts.js CONTINUA IGUAL ...
+    // ... (Cole todo o restante do seu código original aqui)
     setupEventListeners() {
         // Set up launch button listeners
         this.setupLaunchButtonListeners();
@@ -394,5 +450,3 @@ window.addEventListener('resize', () => {
         window.spaceScapeInstance.createStarfield();
     }
 });
-
-

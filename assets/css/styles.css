@@ -30,26 +30,37 @@ body {
     height: 50px;
     top: 0px;
     z-index: 1000;
-    justify-content: flex-end;
     display: flex;
-    flex-direction: row;
-    align-content: center;
-    flex-wrap: wrap;
+    align-items: center; /* Alinha verticalmente */
+    justify-content: space-between; /* Espaço entre título e user-name no desktop */
+    padding: 0 10px; /* Adiciona padding */
+}
+
+.header-title {
+    display: none; /* Visível no desktop */
+    color: #fff73b;
+    font-family: 'StarJedi','Orbitron',monospace;
+    font-size: 25px;
+    flex-grow: 1; /* Permite que o título ocupe o espaço */
+    text-align: left; /* Alinha à esquerda */
+    line-height: 50px; /* Centraliza verticalmente */
 }
 
 .home {
     color: #fff73b;
-    justify-self: flex-start;
     cursor: pointer;
-    line-height: 30px;
-    position: absolute;
-    left:10px;
-    margin: 10px 10px;
+    line-height: 50px;
+    margin-right: 15px; /* Adiciona margem */
+    position: static; /* Remove posicionamento absoluto */
+}
+
+.user-area {
+    display: flex;
+    align-items: center;
 }
 
 .user-name {
     display: flex;
-    justify-self: flex-end;
     color: #fff73b;
     font-family: 'Orbitron', 'monospace';
     font-weight: bold;
@@ -63,8 +74,8 @@ body {
     position: relative;
     width: 34px;
     height: 34px;
-    margin: auto 10px auto 10px;
-    padding: 5px 5px;
+    margin: auto 0;
+    padding: 5px;
     color: #fff73b;
     font-size: 20px;
     border: 2px solid #fff73b;

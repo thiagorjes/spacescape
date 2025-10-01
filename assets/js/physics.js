@@ -26,7 +26,7 @@ class Vector {
 // Constantes de física
 const G = 6.6743e-11 * 1e12;
 const ROCKET_MASS = 1;
-const ROCKET_THRUST = 500;
+const ROCKET_THRUST = 1000;
 const ROCKET_TORQUE = 0.05;
 const PLANET_DENSITY = 10;
 const ROCKET_RADIUS = 8;
@@ -46,6 +46,7 @@ class PhysicsEngine {
         this.isRunning = false;
         this.isExploding = false;
         this.lastTimestamp = 0;
+        this.explosionStartTimestamp = 0; // Adicionado para controlar a animação
         this.keyMap = {};
     }
 
@@ -142,10 +143,10 @@ class PhysicsEngine {
                 }
             }
         }
-        
+
         if (tempPlanets[startIdx]) tempPlanets[startIdx].color = '#fff73b';
         if (tempPlanets[endIdx]) tempPlanets[endIdx].color = '#e74a4a';
-        
+
         this.planets = tempPlanets;
         this.startPlanet = this.planets[startIdx];
         this.endPlanet = this.planets[endIdx];
@@ -160,9 +161,11 @@ class PhysicsEngine {
         requestAnimationFrame((ts) => this.gameLoop(ts));
     }
 
+    // physics.js
+
     update(deltaTime) {
         if (this.isExploding) return;
-        
+
         let resultantForce = new Vector(0, 0);
         this.planets.forEach(p => {
             const d = p.position.clone().subtract(this.rocket.position);
@@ -175,16 +178,34 @@ class PhysicsEngine {
 
         const thrustDirection = new Vector(Math.cos(this.rocket.angle - Math.PI / 2), Math.sin(this.rocket.angle - Math.PI / 2));
         if (this.gameState.fuel > 0) {
-            let fuelConsumed = false;
-            if (this.keyMap['up']) { resultantForce.add(thrustDirection.clone().multiply(ROCKET_THRUST)); fuelConsumed = true; }
-            if (this.keyMap['down']) { resultantForce.add(thrustDirection.clone().multiply(-ROCKET_THRUST)); fuelConsumed = true; }
-            if (this.keyMap['left']) { this.rocket.angularVelocity = Math.max(-MAX_ANGULAR_VELOCITY, -ROCKET_TORQUE); fuelConsumed = true; }
-            else if (this.keyMap['right']) { this.rocket.angularVelocity = Math.min(MAX_ANGULAR_VELOCITY, ROCKET_TORQUE); fuelConsumed = true; }
+
+            // MUDANÇA 1: Verifica se não está superaquecido para ligar o motor
+            if (!this.gameState.isOverheated) {
+                if (this.keyMap['up']) {
+                    resultantForce.add(thrustDirection.clone().multiply(ROCKET_THRUST));
+                    // MUDANÇA 2: Envia um evento específico para THRUST
+                    this.dispatchEvent('control-active', { controlType: 'thrust' });
+                }
+                if (this.keyMap['down']) {
+                    resultantForce.add(thrustDirection.clone().multiply(-ROCKET_THRUST));
+                    this.dispatchEvent('control-active', { controlType: 'thrust' });
+                }
+            }
+
+            if (this.keyMap['left']) {
+                this.rocket.angularVelocity = Math.max(-MAX_ANGULAR_VELOCITY, -ROCKET_TORQUE);
+                // MUDANÇA 3: Envia um evento específico para TURN
+                this.dispatchEvent('control-active', { controlType: 'turn' });
+            }
+            else if (this.keyMap['right']) {
+                this.rocket.angularVelocity = Math.min(MAX_ANGULAR_VELOCITY, ROCKET_TORQUE);
+                this.dispatchEvent('control-active', { controlType: 'turn' });
+            }
             else { this.rocket.angularVelocity = 0; }
-            if (fuelConsumed) this.dispatchEvent('control-active');
+
         } else {
             this.rocket.angularVelocity = 0;
-            if(!this.gameState.isFuelEmpty) this.dispatchEvent('fuel-empty');
+            if (!this.gameState.isFuelEmpty) this.dispatchEvent('fuel-empty');
         }
 
         this.rocket.acceleration = resultantForce.divide(ROCKET_MASS);
@@ -201,18 +222,19 @@ class PhysicsEngine {
             const distVec = this.rocket.position.clone().subtract(planet.position);
             const dist = distVec.magnitude;
             if (dist < ROCKET_RADIUS + planet.radius) {
-                if (planet === this.endPlanet) {
-                    this.stop();
-                    this.dispatchEvent('level-win');
-                    return;
-                }
 
                 const impactForce = this.rocket.velocity.magnitude * ROCKET_MASS;
                 if (impactForce > COLLISION_THRESHOLD) {
                     this.isExploding = true;
                     this.stop();
-                    this.dispatchEvent('explosion', { position: this.rocket.position });
+                    this.explosionStartTimestamp = performance.now(); // Inicia o tempo da explosão
                     setTimeout(() => { this.dispatchEvent('death-reset'); }, 2000);
+                    return;
+                }
+
+                if (planet === this.endPlanet) {
+                    this.stop();
+                    this.dispatchEvent('level-win');
                     return;
                 }
 
@@ -247,7 +269,34 @@ class PhysicsEngine {
             this.ctx.shadowBlur = 0;
         });
 
-        if (this.isExploding) return;
+        if (this.isExploding) {
+            const explosionDuration = 2000; // Duração da explosão em milissegundos
+            const elapsed = performance.now() - this.explosionStartTimestamp;
+            const progress = elapsed / explosionDuration;
+            const radius = ROCKET_RADIUS + progress * 50;
+            const opacity = 1 - progress;
+
+            this.ctx.globalAlpha = opacity > 0 ? opacity : 0;
+
+            this.ctx.fillStyle = '#ffcc00';
+            this.ctx.beginPath();
+            this.ctx.arc(this.rocket.position.x, this.rocket.position.y, radius, 0, 2 * Math.PI);
+            this.ctx.fill();
+
+            this.ctx.fillStyle = '#ff6600';
+            this.ctx.beginPath();
+            this.ctx.arc(this.rocket.position.x + Math.random() * 20 - 10, this.rocket.position.y + Math.random() * 20 - 10, radius * 0.8, 0, 2 * Math.PI);
+            this.ctx.fill();
+
+            this.ctx.fillStyle = '#ff0000';
+            this.ctx.beginPath();
+            this.ctx.arc(this.rocket.position.x + Math.random() * 10 - 5, this.rocket.position.y + Math.random() * 10 - 5, radius * 0.5, 0, 2 * Math.PI);
+            this.ctx.fill();
+
+            this.ctx.globalAlpha = 1.0;
+
+            return; // Sai da função para não desenhar o foguete
+        }
 
         // CORREÇÃO: Adicionada verificação para garantir que o foguete e sua posição existam
         if (!this.rocket || !this.rocket.position) {
@@ -258,7 +307,7 @@ class PhysicsEngine {
         this.ctx.translate(this.rocket.position.x, this.rocket.position.y);
         this.ctx.rotate(this.rocket.angle);
         const scale = ROCKET_RADIUS / 8;
-        if (this.gameState.fuel > 0 && (this.keyMap['up'] || this.keyMap['down'])) {
+        if (this.gameState.fuel > 0 && !this.gameState.isOverheated &&(this.keyMap['up'] || this.keyMap['down'])) {
             this.ctx.fillStyle = '#ffcc00';
             this.ctx.beginPath();
             this.ctx.moveTo(0, 9 * scale);
@@ -278,18 +327,19 @@ class PhysicsEngine {
         this.ctx.stroke();
         this.ctx.fillStyle = '#808080';
         this.ctx.beginPath();
-        this.ctx.moveTo(-6 * scale, 6 * scale); this.ctx.lineTo(-9 * scale, 6 * scale); this.ctx.lineTo(-6 * scale, 3 * scale);
+        this.ctx.moveTo(-5 * scale, 9 * scale); this.ctx.lineTo(-9 * scale, 9 * scale); this.ctx.lineTo(-5 * scale, 5 * scale);
         this.ctx.closePath(); this.ctx.fill(); this.ctx.stroke();
         this.ctx.beginPath();
-        this.ctx.moveTo(6 * scale, 6 * scale); this.ctx.lineTo(9 * scale, 6 * scale); this.ctx.lineTo(6 * scale, 3 * scale);
+        this.ctx.moveTo(5 * scale, 9 * scale); this.ctx.lineTo(9 * scale, 9 * scale); this.ctx.lineTo(5 * scale, 5 * scale);
         this.ctx.closePath(); this.ctx.fill(); this.ctx.stroke();
         this.ctx.restore();
     }
-    
+
     dispatchEvent(type, detail = {}) {
         document.dispatchEvent(new CustomEvent('gameEvent', { detail: { type, ...detail } }));
     }
 }
 
 export { PhysicsEngine };
+
 
