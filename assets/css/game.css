@@ -5,8 +5,9 @@
     box-sizing: border-box;
 }
 
+/* AJUSTE: #app agora é um container flex para suportar a barra lateral de anúncios */
 #app {
-    position: absolute;
+    display: flex;
     width: 100vw;
     height: 100vh;
 }
@@ -25,12 +26,13 @@ body {
     background: #121212;
 }
 
+/* AJUSTE: .safe-area agora é um item flex que ocupa o espaço restante verticalmente */
 .safe-area {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 50px);
-    top: 50px;
     position: relative;
+    flex: 1; /* Adicionado para ocupar o espaço restante */
+    min-height: 0; /* Correção para flexbox no firefox */
 }
 
 .background-gradient {
@@ -62,15 +64,12 @@ body {
     }
 }
 
-/* Classe renomeada para evitar conflito com a classe 'container' do Tailwind CSS */
 .game-container-wrapper {
     display: flex;
     flex-direction: column;
     height: 100%;
-    /* Ajustado para preencher a safe-area */
     position: absolute;
     width: 100%;
-    /* Garante que o container ocupe a largura total */
 }
 
 
@@ -80,12 +79,15 @@ body {
     overflow: hidden;
 }
 
-/* Header styles for mobile - a altura da safe-area é ajustada baseada no header */
-@media (max-width: 768px) {
-    .safe-area {
-        height: calc(100vh - 50px);
-        /* Mantendo a altura do header de styles.css */
-        top: 50px;
+/* NOVO: Esconde o container do anúncio mobile por padrão */
+#ads-mobile-container {
+    display: none;
+}
+
+
+@media (max-width: 767px) { /* Ajustado para 767px para corresponder ao breakpoint 'md' do Tailwind */
+    #desktop-ads-container {
+        display: none;
     }
 
     .header {
@@ -100,7 +102,7 @@ body {
         display: block !important;
         text-align: center;
         margin: auto;
-        line-height: 50px; /* Centraliza verticalmente */
+        line-height: 50px;
     }
 
     .controls-container {
@@ -369,12 +371,11 @@ body {
     z-index: 2;
 }
 
-/* Estilos do Modal de Login removidos pois são carregados de login.css */
-
 .hidden {
     display: none !important;
 }
 
 .header-title {
-    display: block; /* Escondido por padrão no desktop */
+    display: block;
 }
+
