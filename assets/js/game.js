@@ -243,6 +243,7 @@ function showWinOverlay() {
     saveGameState({
         isGameOver: false
     });
+    elements.mobileAdContainer.style.display = 'block'; // Mostra container do anúncio
     fetchAndDisplayRanking();
 }
 
@@ -268,9 +269,6 @@ function handleRestart() {
     physicsEngine.reset();
     updateDisplays();
     updateProgressBars();
-
-    
-    elements.mobileAdContainer.style.display = 'block'; // Mostra container do anúncio
     
     showStartScreen(); // Mostra a tela de início (que agora contém o anúncio)
 
@@ -288,9 +286,6 @@ function handleNextLevel() {
     physicsEngine.reset();
     updateDisplays();
     updateProgressBars();
-
-    
-    elements.mobileAdContainer.style.display = 'block'; // Mostra container do anúncio
     
     showStartScreen(); // Mostra a tela de início (que agora contém o anúncio)
 
