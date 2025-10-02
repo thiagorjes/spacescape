@@ -5,11 +5,9 @@
     box-sizing: border-box;
 }
 
-/* AJUSTE: #app agora é um container flex para suportar a barra lateral de anúncios */
+/* Main app container - inherits flex layout from styles.css */
 #app {
-    display: flex;
-    width: 100vw;
-    height: 100vh;
+    /* Inherits flex layout from styles.css */
 }
 
 /* Estilos do Header removidos para usar o styles.css, mantendo apenas personalizações */
@@ -107,6 +105,7 @@ body {
 
     .controls-container {
         padding: 5px;
+        bottom: 50px;
     }
 
     .key-button {
@@ -237,6 +236,7 @@ body {
     border-top: 4px solid #ddd;
     padding: 10px;
     flex-wrap: wrap;
+    bottom: 50px;
 }
 
 .left-controls,
@@ -378,4 +378,3 @@ body {
 .header-title {
     display: block;
 }
-

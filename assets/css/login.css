@@ -31,12 +31,183 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
-#welcome-container {
-    min-width: 300px;
-    width: fit-content;
-    padding: 30px;
-    margin: auto auto;
-    font-family: Arial, Helvetica, sans-serif;
+/* Welcome Modal Styles */
+.welcome-modal {
+    background: linear-gradient(135deg, #1a1a3e 0%, #0d0d26 100%);
+    border: 2px solid #fff73b;
+    border-radius: 20px;
+    padding: 40px;
+    min-width: 400px;
+    max-width: 500px;
+    width: 90vw;
+    font-family: 'Orbitron', monospace;
+    position: relative;
+    box-shadow:
+        0 0 50px rgba(255, 247, 59, 0.3),
+        0 0 100px rgba(255, 247, 59, 0.1),
+        inset 0 0 50px rgba(255, 247, 59, 0.05);
+    animation: modalGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes modalGlow {
+    0% {
+        box-shadow:
+            0 0 50px rgba(255, 247, 59, 0.3),
+            0 0 100px rgba(255, 247, 59, 0.1),
+            inset 0 0 50px rgba(255, 247, 59, 0.05);
+    }
+    100% {
+        box-shadow:
+            0 0 60px rgba(255, 247, 59, 0.4),
+            0 0 120px rgba(255, 247, 59, 0.15),
+            inset 0 0 60px rgba(255, 247, 59, 0.08);
+    }
+}
+
+.welcome-content {
+    color: #fff73b;
+    text-align: center;
+}
+
+.welcome-header {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.welcome-icon {
+    font-size: 4rem;
+    color: #fff73b;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 20px rgba(255, 247, 59, 0.5));
+}
+
+.welcome-title {
+    font-size: 2rem;
+    font-weight: 900;
+    margin: 0;
+    text-shadow: 0 0 20px rgba(255, 247, 59, 0.8);
+    background: linear-gradient(45deg, #fff73b, #ffd700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.welcome-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(255, 247, 59, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.user-info {
+    margin-bottom: 30px;
+}
+
+.user-display-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 15px 0;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.user-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    background: linear-gradient(45deg, #00ff88, #00cc66);
+    border-radius: 50%;
+    animation: statusPulse 2s ease-in-out infinite;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+@keyframes statusPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+}
+
+.status-text {
+    color: #00ff88;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.welcome-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.primary-btn {
+    background: linear-gradient(135deg, #4a8fe7 0%, #3a7bd5 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(74, 143, 231, 0.4);
+}
+
+.primary-btn:hover {
+    background: linear-gradient(135deg, #5a9ff7 0%, #4a8be5 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(74, 143, 231, 0.6);
+}
+
+.secondary-btn {
+    background: linear-gradient(135deg, #2d2d5f 0%, #1a1a3e 100%);
+    color: #fff73b;
+    border: 2px solid #fff73b;
+    box-shadow: 0 4px 15px rgba(255, 247, 59, 0.2);
+}
+
+.secondary-btn:hover {
+    background: linear-gradient(135deg, #3d3d6f 0%, #2a2a4e 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 247, 59, 0.3);
+}
+
+.logout-btn {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+}
+
+.logout-btn:hover {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6);
 }
 
 #modal-background {
@@ -64,11 +235,28 @@ body {
 
 #modal-close {
     position: absolute;
-    top: 10px;
-    right: 25px;
-    font-family: monospace;
-    font-size: 15px;
+    top: 15px;
+    right: 20px;
+    width: 35px;
+    height: 35px;
+    background: rgba(255, 247, 59, 0.1);
+    border: 2px solid #fff73b;
+    border-radius: 50%;
+    color: #fff73b;
+    font-size: 18px;
+    font-weight: bold;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-family: 'Orbitron', monospace;
+}
+
+#modal-close:hover {
+    background: rgba(255, 247, 59, 0.2);
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 247, 59, 0.4);
 }
 
 #loading-screen {
@@ -93,4 +281,65 @@ body {
     color: #374151;
     font-size: 14px;
     font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .welcome-modal {
+        min-width: 320px;
+        max-width: 90vw;
+        padding: 30px 20px;
+        margin: 20px;
+    }
+
+    .welcome-icon {
+        font-size: 3rem;
+    }
+
+    .welcome-title {
+        font-size: 1.5rem;
+    }
+
+    .user-display-name {
+        font-size: 1.2rem;
+    }
+
+    .action-btn {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .welcome-modal {
+        min-width: 280px;
+        padding: 25px 15px;
+    }
+
+    .welcome-icon {
+        font-size: 2.5rem;
+    }
+
+    .welcome-title {
+        font-size: 1.3rem;
+    }
+
+    .user-display-name {
+        font-size: 1.1rem;
+    }
+
+    .welcome-actions {
+        gap: 12px;
+    }
+
+    .action-btn {
+        padding: 10px 15px;
+        font-size: 0.8rem;
+    }
+
+    #modal-close {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+    }
 }

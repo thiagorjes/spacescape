@@ -22,46 +22,53 @@
         crossorigin="anonymous"></script>
     <div id="app">
         <!-- Header will be loaded here -->
-        <div id="header-container"></div>
-        <!-- Mobile View -->
-        <div id="mobile-view" class="mobile-view">
-            <div class="starfield-container">
-                <canvas id="starfield-mobile" class="starfield-canvas"></canvas>
-            </div>
+        <header id="header-container"></header>
 
-            <div class="title-container">
-                <h1 class="game-title">Space Scape</h1>
-            </div>''
-
-            <div class="rocket-container">
-                <div id="rocket-mobile-container"></div>
-            </div>
-
-            <div class="button-container">
-                <button id="launch-btn-mobile" class="launch-button">Identify yourself</button>
-            </div>
-        </div>
-
-        <!-- Desktop View -->
-        <div id="desktop-view" class="desktop-view">
-            <div class="desktop-content">
-                <div class="starfield-container-desktop">
-                    <canvas id="starfield-desktop" class="starfield-canvas-desktop"></canvas>
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Mobile View -->
+            <div id="mobile-view" class="mobile-view">
+                <div class="starfield-container">
+                    <canvas id="starfield-mobile" class="starfield-canvas"></canvas>
                 </div>
 
-                <div class="title-container-desktop">
-                    <h1 class="game-title-desktop">Space Scape</h1>
+                <div class="title-container">
+                    <h1 class="game-title">Space Scape</h1>
                 </div>
 
-                <div class="rocket-container-desktop">
-                    <div id="rocket-desktop-container"></div>
+                <div class="rocket-container">
+                    <div id="rocket-mobile-container"></div>
                 </div>
 
-                <div class="button-container-desktop">
-                    <button id="launch-btn-desktop" class="launch-button-desktop">Identify yourself</button>
+                <div class="button-container">
+                    <button id="launch-btn-mobile" class="launch-button">Identify yourself</button>
                 </div>
             </div>
-        </div>
+
+            <!-- Desktop View -->
+            <div id="desktop-view" class="desktop-view">
+                <div class="desktop-content">
+                    <div class="starfield-container-desktop">
+                        <canvas id="starfield-desktop" class="starfield-canvas-desktop"></canvas>
+                    </div>
+
+                    <div class="title-container-desktop">
+                        <h1 class="game-title-desktop">Space Scape</h1>
+                    </div>
+
+                    <div class="rocket-container-desktop">
+                        <div id="rocket-desktop-container"></div>
+                    </div>
+
+                    <div class="button-container-desktop">
+                        <button id="launch-btn-desktop" class="launch-button-desktop">Identify yourself</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer"></footer>
     </div>
     <!-- Modal will be loaded here -->
     <div id="modal-container"></div>

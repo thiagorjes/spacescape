@@ -20,9 +20,9 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 
-const FUEL_CONSUMPTION_THRUST = 0.1;
-const FUEL_CONSUMPTION_TURN = 0.02;
-const HEAT_RATE = 0.5;
+const FUEL_CONSUMPTION_THRUST = 0.01;
+const FUEL_CONSUMPTION_TURN = 0.005;
+const HEAT_RATE = 0.00001;
 
 // --- LÓGICA DO HEADER ---
 function updateHeaderUI(user) {
@@ -34,7 +34,7 @@ function updateHeaderUI(user) {
 
 function setupHeaderListeners() {
     document.addEventListener('click', (e) => {
-        if (e.target.closest('.user-name') || e.target.closest('.profile')) {
+        if (e.target.closest('.user-name') || e.target.closest('#account')) {
             const modal = document.getElementById('modal-background');
             if (modal) modal.style.display = 'flex';
         }
@@ -171,7 +171,18 @@ async function loadGameState() {
 }
 
 async function fetchAndDisplayRanking() {
-    // ... (código existente sem alterações)
+    // Se for mobile e o anúncio estiver visível, inicializa o AdSense
+    if (elements.mobileAdContainer.style.display === 'block') {
+        if (!isMobileAdInitialized) {
+            try {
+                console.log('AdSense .push() chamado para o slot mobile.');
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                isMobileAdInitialized = true; // Evita múltiplas chamadas
+            } catch (e) {
+                console.error("Erro ao chamar adsbygoogle.push():", e);
+            }
+        }
+    }
 }
 
 
@@ -202,19 +213,6 @@ function showStartScreen() {
     elements.stageTitle.textContent = `STAGE ${String(gameState.level).padStart(2, '0')}`;
     elements.startScreen.style.display = 'flex';
     gameState.gameStatus = 'ready';
-
-    // Se for mobile e o anúncio estiver visível, inicializa o AdSense
-    if (elements.mobileAdContainer.style.display === 'block') {
-        if (!isMobileAdInitialized) {
-            try {
-                console.log('AdSense .push() chamado para o slot mobile.');
-                (adsbygoogle = window.adsbygoogle || []).push({});
-                isMobileAdInitialized = true; // Evita múltiplas chamadas
-            } catch (e) {
-                console.error("Erro ao chamar adsbygoogle.push():", e);
-            }
-        }
-    }
 }
 
 function hidePopups() {
@@ -257,7 +255,6 @@ function handleStart() {
     physicsEngine.start();
 }
 
-// AJUSTADO: Agora lida com o anúncio mobile
 function handleRestart() {
     hidePopups();
     gameState = {
@@ -268,14 +265,13 @@ function handleRestart() {
     };
     physicsEngine.reset();
     updateDisplays();
-    updateProgressBars();
+    updateProgressBars(); 
     
-    showStartScreen(); // Mostra a tela de início (que agora contém o anúncio)
-
     saveGameState({
         isGameOver: false,
         isNewRun: true
     });
+    window.location = 'index.html'
 }
 
 // AJUSTADO: Agora lida com o anúncio mobile

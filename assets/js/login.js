@@ -14,6 +14,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 import {
     doc,
+    writeBatch,
     setDoc,
     getDoc,
     collection,
@@ -151,24 +152,54 @@ async function handleCreateUsername(e, user) {
         return;
     }
 
-    try {
-        const usersRef = collection(db, "users");
-        const q = query(usersRef, where("username", "==", newUsername));
-        const querySnapshot = await getDocs(q);
+    const batch = writeBatch(db);
+    const userRef = doc(db, "users", user.uid);
+    const newUsernameRef = doc(db, "usernames", newUsername);
 
-        if (!querySnapshot.empty) {
-            displayError('Este username já está em uso.');
-            return;
+    try {
+        // 1. Verificar se o username já existe (apenas para UX, a regra de segurança previne a escrita final)
+        const newUsernameSnap = await getDoc(newUsernameRef);
+        if (newUsernameSnap.exists()) {
+            // Você pode querer verificar se o username já é do usuário atual
+            if (newUsernameSnap.data().uid === user.uid) {
+                console.log("Este já é o seu username.");
+                return;
+            }
+            throw new Error(`O username '${newUsername}' já está em uso.`);
         }
 
-        const userRef = doc(db, "users", user.uid);
-        await setDoc(userRef, { username: newUsername }, { merge: true });
+        // 2. Tentar registrar o novo username na coleção /usernames
+        batch.set(newUsernameRef, { uid: user.uid });
 
-        checkUserSetup(user);
+        // 3. Atualizar o perfil do usuário com o novo username
+        batch.update(userRef, { username: newUsername });
 
+        // (Opcional) Se o usuário já tinha um username, remova o antigo da coleção /usernames
+        const userDoc = await getDoc(userRef);
+        const oldUsername = userDoc.data()?.username;
+        if (oldUsername && oldUsername !== newUsername) {
+            batch.delete(doc(db, "usernames", oldUsername));
+        }
+
+        await batch.commit();
+
+        // Forçar recarregamento dos dados do usuário
+        const updatedUserDoc = await getDoc(userRef);
+        const userData = updatedUserDoc.data();
+
+        if (userData && userData.username) {
+            const fullUserProfile = { ...user, ...userData };
+            saveAuthStateToCache(fullUserProfile);
+            showWelcomeScreen(user, userData);
+            document.dispatchEvent(new CustomEvent('authStateChange', { detail: { user: fullUserProfile } }));
+        } else {
+            displayError('Erro ao salvar username. Tente novamente.');
+        }
+
+        console.log(`Username atualizado para '${newUsername}' com sucesso!`);
     } catch (error) {
-        console.error("Erro ao criar username:", error);
-        displayError('Não foi possível salvar o username.');
+        console.error("Erro ao definir username:", error);
+        // Exibir mensagem de erro amigável ao usuário
     }
 }
 
@@ -249,7 +280,7 @@ const handleGoogleSignIn = () => {
     displayError('');
     signInWithPopup(auth, googleProvider)
         .then(result => {
-             // A verificação de username e criação do doc será feita pelo onAuthStateChanged
+            // A verificação de username e criação do doc será feita pelo onAuthStateChanged
         })
         .catch(error => {
             console.error("Erro com login Google:", error);
@@ -293,7 +324,7 @@ function initializeDOM() {
                 signOut(auth);
             });
             const closeButton = welcomeContainer.querySelector('#modal-close');
-            if(closeButton) closeButton.addEventListener('pointerup', closeModal);
+            if (closeButton) closeButton.addEventListener('pointerup', closeModal);
             return true;
         }
         return false;
@@ -340,7 +371,7 @@ async function checkUserSetup(user) {
 onAuthStateChanged(auth, user => {
     const waitForDOM = (retryCount = 0) => {
         if (loadingScreen && loginContainer && welcomeContainer) {
-             checkUserSetup(user);
+            checkUserSetup(user);
         } else if (retryCount < 50) {
             setTimeout(() => waitForDOM(retryCount + 1), 100);
         } else {

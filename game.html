@@ -17,10 +17,6 @@
         xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <!-- SCRIPT PRINCIPAL DO GOOGLE ADSENSE ADICIONADO -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7408688486649567"
-        crossorigin="anonymous"></script>
-
     <style>
         @font-face {
             font-family: 'Starjedi';
@@ -30,63 +26,68 @@
 </head>
 
 <body>
-    <!-- O #app agora é o container flex principal (veja game.css) -->
+    <!-- Main app container with proper stacking structure -->
     <div id="app">
-        <!-- Adicionado um <main> para agrupar o conteúdo do jogo e permitir que ele cresça -->
-        <main class="flex-grow h-full relative flex flex-col">
-            <!-- Header will be loaded here -->
-            <div id="header-container"></div>
+        <!-- Header will be loaded here -->
+        <header id="header-container"></header>
 
+        <!-- Main Content -->
+        <main class="content">
             <div class="safe-area">
                 <div class="background-gradient">
                     <div class="starfield" id="starfield"></div>
                     <div class="game-container-wrapper">
+                        <!-- Game Area -->
                         <div class="game-area" id="gameArea">
                             <canvas id="gameCanvas"></canvas>
-                        </div>
 
-                        <!-- Popups e Overlays do Jogo -->
-                        <div id="win-overlay" class="popup-overlay" style="display: none;">
-                            <div class="popup-content">
-                                <div id="ads-mobile-container" class="mb-4">
-                                    <div class="ads-container" id="ads-mobile"
-                                        style="min-width:300px; height: 300px; width:100%; z-index: 10;">
-                                        <div id="google-ads-mobile" style="min-width:300px; height: 300px; width:100%;">
-                                            <ins class="adsbygoogle" style="display:block;"
-                                                data-ad-client="ca-pub-7408688486649567" data-ad-slot="9291426140"
-                                                data-ad-format="autorelaxed"></ins>
+                            <!-- Game Popups and Overlays -->
+                            <div id="win-overlay" class="popup-overlay" style="display: none;">
+                                <div class="popup-content">
+                                    <div id="ads-mobile-container" class="mb-4">
+                                        <div class="ads-container" id="ads-mobile"
+                                            style="min-width:300px; height: 300px; overflow: hidden; width:100%; z-index: 10;">
+                                            <div id="google-ads-mobile" style="min-width:300px; height: 300px; width:100%;">
+                                                <script async
+                                                    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7408688486649567"
+                                                    crossorigin="anonymous"></script>
+                                                <!-- popup -->
+                                                <ins class="adsbygoogle"
+                                                    style="display:inline-block;width:300px;height:300px"
+                                                    data-ad-client="ca-pub-7408688486649567"
+                                                    data-ad-slot="7824504028">publicidade</ins>
+                                            </div>
                                         </div>
                                     </div>
+                                    <button id="next-level-btn" class="start-button">Próximo Nível</button>
                                 </div>
-                                <button id="next-level-btn" class="start-button">Próximo Nível</button>
                             </div>
-                        </div>
-                        <div id="startScreen" class="popup-overlay">
-                            <div class="popup-content">
-                                <div class="rocket-icon"><i class="fas fa-rocket"></i></div>
-                                <div class="stage-title" id="stageTitle">STAGE 01</div>
-                                <button id="startButton" class="start-button">LET'S GO</button>
+                            <div id="startScreen" class="popup-overlay">
+                                <div class="popup-content">
+                                    <div class="rocket-icon"><i class="fas fa-rocket"></i></div>
+                                    <div class="stage-title" id="stageTitle">STAGE 01</div>
+                                    <button id="startButton" class="start-button">LET'S GO</button>
+                                </div>
+                            </div>
+
+                            <div id="fuelEmptyPopup" class="popup-overlay" style="display: none;">
+                                <div class="popup-content fuel-popup">
+                                    <div class="fuel-icon"><i class="fas fa-gas-pump"></i></div>
+                                    <div class="fuel-title">GAME OVER</div>
+                                    <div class="fuel-subtitle">You reached Stage <span id="finalStage">1</span></div>
+                                    <div class="fuel-subtitle">Deaths: <span id="finalDeaths">0</span></div>
+                                    <button id="restartButton" class="restart-button">RESTART</button>
+                                </div>
+                            </div>
+
+                            <div id="overheatAlert" class="overheat-alert" style="display: none;">
+                                <div class="overheat-content">
+                                    <span>OVERHEATED!</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div id="fuelEmptyPopup" class="popup-overlay" style="display: none;">
-                            <div class="popup-content fuel-popup">
-                                <div class="fuel-icon"><i class="fas fa-gas-pump"></i></div>
-                                <div class="fuel-title">FUEL EXHAUSTED</div>
-                                <div class="fuel-subtitle">You reached Stage <span id="finalStage">1</span></div>
-                                <div class="fuel-subtitle">Deaths: <span id="finalDeaths">0</span></div>
-                                <button id="restartButton" class="restart-button">RESTART</button>
-                            </div>
-                        </div>
-
-                        <div id="overheatAlert" class="overheat-alert" style="display: none;">
-                            <div class="overheat-content">
-                                <span>OVERHEATED!</span>
-                            </div>
-                        </div>
-
-
-                        <!-- Controls Section -->
+                        <!-- Controls Container -->
                         <div class="controls-container">
                             <div class="left-controls">
                                 <div class="progress-bar vertical" id="temperatureBar">
@@ -137,6 +138,9 @@
                 </div>
             </div>
         </main>
+
+        <!-- Footer -->
+        <footer class="footer"></footer>
     </div>
 
     <!-- Modal will be loaded here -->
@@ -156,7 +160,18 @@
     <script type="module" src="assets/js/game.js"></script>
     <script type="module" src="assets/js/login.js"></script>
     <script type="module" src="assets/js/auth-utils.js"></script>
-
+    <script type="module" src="assets/js/scripts.js"></script>
+<div id="desktop-ranking-preview" class="desktop-ranking-preview"></div>
+<div id="full-ranking-modal" class="full-ranking-modal hidden">
+        <div class="ranking-content">
+            <div id="close-ranking-modal" class="close-button">&times;</div>
+            <h2>Melhores Jogadores</h2>
+            <ul id="ranking-list">
+            </ul>
+            <div id="player-rank-container">
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

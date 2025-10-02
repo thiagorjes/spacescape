@@ -11,13 +11,38 @@
         </div>
 
         <!-- Container de Boas-vindas (Logado) -->
-        <div id="welcome-container" class="login-modal bg-white rounded-xl hidden">
-            <div id="modal-close" class="close-button">x</div>
-            <h2 class="welcome-title font-bold">Welcome!</h2>
-            <p id="user-name" class="user-display-name"></p>
-            <button id="logout-button" class="logout-btn w-full px-4 py-2 text-lg font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-300">
-                Logout
-            </button>
+        <div id="welcome-container" class="welcome-modal hidden">
+            <div id="modal-close" class="close-button">×</div>
+            <div class="welcome-content">
+                <div class="welcome-header">
+                    <div class="welcome-icon">
+                        <i class="fas fa-user-astronaut"></i>
+                    </div>
+                    <h2 class="welcome-title">Welcome back!</h2>
+                    <div class="welcome-glow"></div>
+                </div>
+                <div class="user-info">
+                    <p id="user-name" class="user-display-name"></p>
+                    <div class="user-status">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Online</span>
+                    </div>
+                </div>
+                <div class="welcome-actions">
+                    <!-- <button id="continue-button" class="action-btn primary-btn">
+                        <i class="fas fa-play"></i>
+                        Continue Game
+                    </button>
+                    <button id="profile-button" class="action-btn secondary-btn">
+                        <i class="fas fa-user"></i>
+                        Profile
+                    </button> -->
+                    <button id="logout-button" class="action-btn logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
