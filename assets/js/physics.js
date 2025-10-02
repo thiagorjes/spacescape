@@ -29,10 +29,9 @@ const ROCKET_MASS = 1;
 const ROCKET_THRUST = 1000;
 const ROCKET_TORQUE = 0.05;
 const PLANET_DENSITY = 10;
-const ROCKET_RADIUS = 8;
 const MAX_ANGULAR_VELOCITY = 0.08;
-const COLLISION_THRESHOLD = 200;
 const FRICTION = 0.3;
+const MAX_PERCENTAGE = 0.3
 
 class PhysicsEngine {
     constructor(canvas, initialGameState) {
@@ -48,9 +47,20 @@ class PhysicsEngine {
         this.lastTimestamp = 0;
         this.explosionStartTimestamp = 0; // Adicionado para controlar a animação
         this.keyMap = {};
+        this.rocketRatio = 8;
+        this.collitionThreshold = 200;
+        this.minRadius=10;
+        this.maxRadius=80;
+        this.minDistance = 150;
+
     }
 
-    init() {
+    init(minR, maxR, minDist, rocketSize, collisionThreshold) {
+        this.collitionThreshold = collisionThreshold; 
+        this.minRadius = minR;
+        this.maxRadius = maxR;
+        this.minDistance = minDist; 
+        this.rocketRatio = rocketSize;
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
         this.reset();
@@ -82,7 +92,7 @@ class PhysicsEngine {
         this.generatePlanets();
 
         if (this.startPlanet) {
-            const totalRadius = this.startPlanet.radius + ROCKET_RADIUS + 5;
+            const totalRadius = this.startPlanet.radius + this.rocketRatio + 5;
             const randomAngle = Math.random() * 2 * Math.PI;
             this.rocket.position.x = this.startPlanet.position.x + Math.cos(randomAngle) * totalRadius;
             this.rocket.position.y = this.startPlanet.position.y + Math.sin(randomAngle) * totalRadius;
@@ -103,16 +113,15 @@ class PhysicsEngine {
     stop() { this.isRunning = false; }
     setInput(key, isPressed) { this.keyMap[key] = isPressed; }
 
+
     generatePlanets() {
         this.planets = [];
         const count = this.gameState.level + 1;
-        const minRadius = 20;
-        const maxRadius = Math.min(80, Math.sqrt((this.canvas.width * this.canvas.height * 0.3) / count / Math.PI));
-        const minDistance = 150;
+        this.maxRadius = Math.min(this.maxRadius, Math.sqrt((this.canvas.width * this.canvas.height * MAX_PERCENTAGE) / count / Math.PI));
 
         let tempPlanets = [];
         for (let i = 0; i < count; i++) {
-            let radius = minRadius + Math.random() * (maxRadius - minRadius);
+            let radius = this.minRadius + Math.random() * (this.maxRadius - this.minRadius);
             let mass = PLANET_DENSITY * Math.pow(radius, 2);
             let x, y, isTooClose;
             do {
@@ -120,7 +129,7 @@ class PhysicsEngine {
                 x = Math.random() * (this.canvas.width - radius * 2) + radius;
                 y = Math.random() * (this.canvas.height - radius * 2) + radius;
                 for (const p of tempPlanets) {
-                    if (Math.hypot(x - p.position.x, y - p.position.y) < radius + p.radius + minDistance) {
+                    if (Math.hypot(x - p.position.x, y - p.position.y) < radius + p.radius + this.minDistance) {
                         isTooClose = true;
                         break;
                     }
@@ -221,10 +230,10 @@ class PhysicsEngine {
         for (const planet of this.planets) {
             const distVec = this.rocket.position.clone().subtract(planet.position);
             const dist = distVec.magnitude;
-            if (dist < ROCKET_RADIUS + planet.radius) {
+            if (dist < this.rocketRatio + planet.radius) {
 
                 const impactForce = this.rocket.velocity.magnitude * ROCKET_MASS;
-                if (impactForce > COLLISION_THRESHOLD) {
+                if (impactForce > this.collitionThreshold) {
                     this.isExploding = true;
                     this.stop();
                     this.explosionStartTimestamp = performance.now(); // Inicia o tempo da explosão
@@ -242,7 +251,7 @@ class PhysicsEngine {
                 const parallelVel = this.rocket.velocity.projection(normal);
                 const orthoVel = this.rocket.velocity.clone().subtract(parallelVel);
                 this.rocket.velocity = orthoVel.subtract(parallelVel).multiply(1 - FRICTION);
-                const overlap = ROCKET_RADIUS + planet.radius - dist;
+                const overlap = this.rocketRatio + planet.radius - dist;
                 this.rocket.position.add(normal.multiply(overlap));
                 return;
             }
@@ -273,7 +282,7 @@ class PhysicsEngine {
             const explosionDuration = 2000; // Duração da explosão em milissegundos
             const elapsed = performance.now() - this.explosionStartTimestamp;
             const progress = elapsed / explosionDuration;
-            const radius = ROCKET_RADIUS + progress * 50;
+            const radius = this.rocketRatio + progress * 50;
             const opacity = 1 - progress;
 
             this.ctx.globalAlpha = opacity > 0 ? opacity : 0;
@@ -306,7 +315,7 @@ class PhysicsEngine {
         this.ctx.save();
         this.ctx.translate(this.rocket.position.x, this.rocket.position.y);
         this.ctx.rotate(this.rocket.angle);
-        const scale = ROCKET_RADIUS / 8;
+        const scale = this.rocketRatio / 8;
         if (this.gameState.fuel > 0 && !this.gameState.isOverheated &&(this.keyMap['up'] || this.keyMap['down'])) {
             this.ctx.fillStyle = '#ffcc00';
             this.ctx.beginPath();

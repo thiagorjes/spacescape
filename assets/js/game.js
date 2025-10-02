@@ -86,7 +86,7 @@ let physicsEngine;
 let isMobileAdInitialized = false; // Flag para inicializar o anúncio apenas uma vez
 
 // --- FUNÇÃO HELPER PARA VERIFICAR SE É MOBILE ---
-const isMobile = () => window.innerWidth < 768;
+const isMobile = () => window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 
 // --- FUNÇÕES DE DADOS (FIRESTORE) ---
@@ -190,7 +190,12 @@ async function fetchAndDisplayRanking() {
 
 function initGame() {
     physicsEngine = new PhysicsEngine(elements.gameCanvas, gameState);
-    physicsEngine.init();
+
+    if (isMobile) {
+        physicsEngine.init(10, 30, 150,6, 100);
+    } else {
+        physicsEngine.init(20, 90, 200, 10, 150);
+    }
     updateDisplays();
     updateProgressBars();
     setupEventListeners();
@@ -265,8 +270,8 @@ function handleRestart() {
     };
     physicsEngine.reset();
     updateDisplays();
-    updateProgressBars(); 
-    
+    updateProgressBars();
+
     saveGameState({
         isGameOver: false,
         isNewRun: true
@@ -282,7 +287,7 @@ function handleNextLevel() {
     physicsEngine.reset();
     updateDisplays();
     updateProgressBars();
-    
+
     showStartScreen(); // Mostra a tela de início (que agora contém o anúncio)
 
     saveGameState(false);

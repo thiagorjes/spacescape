@@ -251,12 +251,33 @@ body {
     justify-content: center;
     transition: all 0.3s ease;
     font-family: 'Orbitron', monospace;
+    z-index: 100001;
+    /* Melhorar área de toque em dispositivos móveis */
+    padding: 8px;
+    margin: -8px;
 }
 
 #modal-close:hover {
     background: rgba(255, 247, 59, 0.2);
     transform: scale(1.1);
     box-shadow: 0 0 15px rgba(255, 247, 59, 0.4);
+}
+
+/* Estilos específicos para dispositivos touch */
+@media (hover: none) and (pointer: coarse) {
+    #modal-close {
+        /* Aumentar ainda mais a área de toque em dispositivos móveis */
+        padding: 15px;
+        margin: -15px;
+        /* Melhorar visibilidade em dispositivos touch */
+        background: rgba(255, 247, 59, 0.15);
+        border-width: 3px;
+    }
+
+    #modal-close:active {
+        background: rgba(255, 247, 59, 0.3);
+        transform: scale(0.95);
+    }
 }
 
 #loading-screen {
@@ -338,8 +359,16 @@ body {
     }
 
     #modal-close {
-        width: 30px;
-        height: 30px;
-        font-size: 16px;
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+        top: 10px;
+        right: 10px;
+        /* Melhorar área de toque para dispositivos móveis */
+        min-width: 44px;
+        min-height: 44px;
+        /* Aumentar área clicável */
+        padding: 12px;
+        margin: -12px;
     }
 }
