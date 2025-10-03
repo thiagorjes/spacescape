@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <link rel="manifest" href="/manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Space Scape</title>
@@ -92,6 +93,19 @@
     <script type="module" src="assets/js/scripts.js"></script>
     <script type="module" src="assets/js/login.js"></script>
     <script type="module" src="assets/js/auth-utils.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha ao registrar o Service Worker:', error);
+                    });
+            });
+        }
+    </script>
 
     <div id="desktop-ranking-preview" class="desktop-ranking-preview"></div>
 
