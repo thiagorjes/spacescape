@@ -48,10 +48,10 @@ class PhysicsEngine {
         this.explosionStartTimestamp = 0; // Adicionado para controlar a animação
         this.keyMap = {};
         this.rocketRatio = 8;
-        this.collitionThreshold = 200;
+        this.collitionThreshold = 100;
         this.minRadius=10;
         this.maxRadius=80;
-        this.minDistance = 150;
+        this.minDistance = 50;
 
     }
 
@@ -80,6 +80,7 @@ class PhysicsEngine {
     reset() {
         this.isRunning = false;
         this.isExploding = false;
+        this.keyMap = {};
 
         this.rocket = {
             position: new Vector(this.canvas.width / 2, this.canvas.height / 2),
@@ -99,6 +100,8 @@ class PhysicsEngine {
             this.rocket.velocity = new Vector(0, 0);
             this.rocket.angle = randomAngle + Math.PI / 2;
         }
+        // Dispatch event when planets are generated
+        this.dispatchEvent('planets-generated');
         this.draw();
     }
 
@@ -345,10 +348,9 @@ class PhysicsEngine {
     }
 
     dispatchEvent(type, detail = {}) {
-        document.dispatchEvent(new CustomEvent('gameEvent', { detail: { type, ...detail } }));
+        let temp =new CustomEvent('gameEvent', { detail: { type, ...detail } });
+        document.dispatchEvent(temp);
     }
 }
 
 export { PhysicsEngine };
-
-

@@ -162,7 +162,7 @@ async function handleCreateUsername(e, user) {
         if (newUsernameSnap.exists()) {
             // Você pode querer verificar se o username já é do usuário atual
             if (newUsernameSnap.data().uid === user.uid) {
-                console.log("Este já é o seu username.");
+                displayError("Este já é o seu username.");
                 return;
             }
             throw new Error(`O username '${newUsername}' já está em uso.`);
@@ -198,6 +198,7 @@ async function handleCreateUsername(e, user) {
 
         console.log(`Username atualizado para '${newUsername}' com sucesso!`);
     } catch (error) {
+        displayError(error);
         console.error("Erro ao definir username:", error);
         // Exibir mensagem de erro amigável ao usuário
     }

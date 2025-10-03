@@ -22,7 +22,7 @@ import {
 
 const FUEL_CONSUMPTION_THRUST = 0.01;
 const FUEL_CONSUMPTION_TURN = 0.005;
-const HEAT_RATE = 0.00001;
+const HEAT_RATE = 0.5;
 
 // --- LÓGICA DO HEADER ---
 function updateHeaderUI(user) {
@@ -58,7 +58,8 @@ let gameState = {
     temperature: 0,
     isOverheated: false,
     isFuelEmpty: false,
-    gameStatus: 'loading'
+    gameStatus: 'loading',
+    isGeneratingPlanets: false
 };
 
 const elements = {
@@ -84,13 +85,14 @@ const elements = {
 
 let physicsEngine;
 let isMobileAdInitialized = false; // Flag para inicializar o anúncio apenas uma vez
+let loadingTimeout; // Variável para o timeout de segurança
 
 // --- FUNÇÃO HELPER PARA VERIFICAR SE É MOBILE ---
 const isMobile = () => window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 
 // --- FUNÇÕES DE DADOS (FIRESTORE) ---
-async function saveGameState(options = {}) {
+async function  saveGameState(options = {}) {
     const {
         isGameOver = false, isNewRun = false
     } = options;
@@ -148,6 +150,8 @@ async function loadGameState() {
                 gameState.deaths = activeSession.deaths || 0;
                 gameState.fuel = activeSession.fuel !== undefined ? activeSession.fuel : 100;
                 gameState.temperature = 0;
+                gameState.gameStatus = 'loading_planets';
+                gameState.isGeneratingPlanets = true;
                 initGame();
                 return;
             }
@@ -156,8 +160,7 @@ async function loadGameState() {
             level: 1,
             deaths: 0,
             fuel: 100,
-            temperature: 0,
-            gameStatus: 'ready'
+            temperature: 0
         };
         await saveGameState({
             isGameOver: false,
@@ -191,15 +194,17 @@ async function fetchAndDisplayRanking() {
 function initGame() {
     physicsEngine = new PhysicsEngine(elements.gameCanvas, gameState);
 
+    // CORREÇÃO: Mover a configuração dos listeners para ANTES da inicialização da física
+    setupEventListeners();
+    showLoadingPlanetsScreen();
+
     if (isMobile) {
-        physicsEngine.init(10, 30, 150,6, 100);
+        physicsEngine.init(10, 30, 50, 6, 100);
     } else {
         physicsEngine.init(20, 90, 200, 10, 150);
     }
     updateDisplays();
     updateProgressBars();
-    setupEventListeners();
-    showStartScreen();
 }
 
 function updateDisplays() {
@@ -215,10 +220,35 @@ function updateProgressBars() {
 }
 
 function showStartScreen() {
+    // Limpa o timeout de segurança se ele existir
+    if (loadingTimeout) clearTimeout(loadingTimeout);
+
     elements.stageTitle.textContent = `STAGE ${String(gameState.level).padStart(2, '0')}`;
     elements.startScreen.style.display = 'flex';
+    elements.startButton.style.display = 'block'; // Garante que o botão de start apareça
     gameState.gameStatus = 'ready';
+    document.getElementById("restartButton").style.display = 'block';
 }
+
+function showLoadingPlanetsScreen() {
+    elements.stageTitle.textContent = 'CARREGANDO PLANETAS...';
+    elements.startButton.style.display = 'none'; // Esconde o botão de start
+    elements.startScreen.style.display = 'flex';
+    gameState.gameStatus = 'loading_planets';
+    gameState.isGeneratingPlanets = true;
+
+    // ADIÇÃO: Timeout de segurança para evitar tela de loading infinita
+    // Se em 5 segundos o evento 'planets-generated' não for recebido,
+    // a tela de início será exibida de qualquer forma.
+    if (loadingTimeout) clearTimeout(loadingTimeout); // Limpa timeout anterior
+    loadingTimeout = setTimeout(() => {
+        console.warn("Timeout de carregamento atingido. Forçando exibição da tela de início.");
+        if (gameState.gameStatus === 'loading_planets') {
+            showStartScreen();
+        }
+    }, 5000); // 5 segundos
+}
+
 
 function hidePopups() {
     elements.startScreen.style.display = 'none';
@@ -284,12 +314,15 @@ function handleNextLevel() {
     hidePopups();
     gameState.level++;
     gameState.temperature = 0;
+    
+    // Mostra a tela de carregamento antes de resetar a física
+    showLoadingPlanetsScreen();
     physicsEngine.reset();
+
     updateDisplays();
     updateProgressBars();
-
-    showStartScreen(); // Mostra a tela de início (que agora contém o anúncio)
-
+    
+    // O evento 'planets-generated' chamará showStartScreen()
     saveGameState(false);
 }
 
@@ -368,6 +401,11 @@ function updateUIState() {
 function onGameEvent(event) {
     // ... (código existente sem alterações)
     switch (event.type) {
+        case 'planets-generated':
+            // Planets have been generated, show the stage popup
+            gameState.isGeneratingPlanets = false;
+            showStartScreen();
+            break;
         case 'level-win':
             showWinOverlay();
             break;
@@ -381,11 +419,12 @@ function onGameEvent(event) {
                 showFuelEmptyPopup();
                 return;
             }
-
+            
+            showLoadingPlanetsScreen();
             physicsEngine.reset();
             updateDisplays();
             updateProgressBars();
-            showStartScreen();
+
             saveGameState({
                 isGameOver: false
             });

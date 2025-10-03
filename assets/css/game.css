@@ -192,6 +192,7 @@ body {
     font-family: 'Orbitron', monospace;
     cursor: pointer;
     transition: all 0.1s;
+    display: none;
 }
 
 .start-button:active,
