@@ -199,7 +199,7 @@ function initGame() {
     showLoadingPlanetsScreen();
 
     if (isMobile) {
-        physicsEngine.init(10, 30, 50, 6, 100);
+        physicsEngine.init(10, 30, 20, 6, 100);
     } else {
         physicsEngine.init(20, 90, 200, 10, 150);
     }
