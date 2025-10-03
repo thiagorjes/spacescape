@@ -22,7 +22,8 @@ import {
 
 const FUEL_CONSUMPTION_THRUST = 0.01;
 const FUEL_CONSUMPTION_TURN = 0.005;
-const HEAT_RATE = 0.5;
+const HEAT_RATE = 0.4;
+const HEAT_RENEW = 4;
 
 // --- LÓGICA DO HEADER ---
 function updateHeaderUI(user) {
@@ -199,9 +200,9 @@ function initGame() {
     showLoadingPlanetsScreen();
 
     if (isMobile) {
-        physicsEngine.init(10, 30, 20, 6, 100);
+        physicsEngine.init(10, 30, 20, 10, 100);
     } else {
-        physicsEngine.init(20, 90, 200, 10, 150);
+        physicsEngine.init(30, 90, 200, 18, 150);
     }
     updateDisplays();
     updateProgressBars();
@@ -383,7 +384,7 @@ function setupEventListeners() {
 function updateUIState() {
     // ... (código existente sem alterações)
     if (gameState.gameStatus === 'playing' && !physicsEngine.keyMap['up'] && !physicsEngine.keyMap['down']) {
-        gameState.temperature = Math.max(0, gameState.temperature - 0.5);
+        gameState.temperature = Math.max(0, gameState.temperature - HEAT_RENEW);
     }
     if (gameState.temperature >= 100) {
         gameState.isOverheated = true;
