@@ -93,7 +93,7 @@ const isMobile = () => window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iP
 
 
 // --- FUNÇÕES DE DADOS (FIRESTORE) ---
-async function  saveGameState(options = {}) {
+async function saveGameState(options = {}) {
     const {
         isGameOver = false, isNewRun = false
     } = options;
@@ -174,16 +174,24 @@ async function loadGameState() {
     }
 }
 
-async function fetchAndDisplayRanking() {
+async function fetchAndDisplayRanking(stage) {
     // Se for mobile e o anúncio estiver visível, inicializa o AdSense
     if (elements.mobileAdContainer.style.display === 'block') {
         if (!isMobileAdInitialized) {
-            try {
-                console.log('AdSense .push() chamado para o slot mobile.');
-                (adsbygoogle = window.adsbygoogle || []).push({});
-                isMobileAdInitialized = true; // Evita múltiplas chamadas
-            } catch (e) {
-                console.error("Erro ao chamar adsbygoogle.push():", e);
+            if (stage % 2 == 0) {
+                document.getElementById('google-ads-mobile').style.display = "block";
+                document.getElementById('adsterra').style.display = "none";
+                try {
+                    console.log('AdSense .push() chamado para o slot mobile.');
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                    isMobileAdInitialized = true; // Evita múltiplas chamadas
+                } catch (e) {
+                    console.error("Erro ao chamar adsbygoogle.push():", e);
+                }
+            }
+            else {
+                document.getElementById('google-ads-mobile').style.display = "none";
+                document.getElementById('adsterra').style.display = "block";
             }
         }
     }
@@ -270,7 +278,7 @@ async function showFuelEmptyPopup() {
     // ... (código restante)
 }
 
-function showWinOverlay() {
+function showWinOverlay(level) {
     elements.winOverlay.style.display = 'flex';
     gameState.gameStatus = 'paused';
     physicsEngine.stop();
@@ -278,7 +286,7 @@ function showWinOverlay() {
         isGameOver: false
     });
     elements.mobileAdContainer.style.display = 'block'; // Mostra container do anúncio
-    fetchAndDisplayRanking();
+    fetchAndDisplayRanking(level);
 }
 
 function handleStart() {
@@ -315,14 +323,14 @@ function handleNextLevel() {
     hidePopups();
     gameState.level++;
     gameState.temperature = 0;
-    
+
     // Mostra a tela de carregamento antes de resetar a física
     showLoadingPlanetsScreen();
     physicsEngine.reset();
 
     updateDisplays();
     updateProgressBars();
-    
+
     // O evento 'planets-generated' chamará showStartScreen()
     saveGameState(false);
 }
@@ -408,7 +416,7 @@ function onGameEvent(event) {
             showStartScreen();
             break;
         case 'level-win':
-            showWinOverlay();
+            showWinOverlay(event.level);
             break;
         case 'death-reset':
             hidePopups();
@@ -420,7 +428,7 @@ function onGameEvent(event) {
                 showFuelEmptyPopup();
                 return;
             }
-            
+
             showLoadingPlanetsScreen();
             physicsEngine.reset();
             updateDisplays();

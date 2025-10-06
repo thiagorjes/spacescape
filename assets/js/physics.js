@@ -246,7 +246,7 @@ class PhysicsEngine {
 
                 if (planet === this.endPlanet) {
                     this.stop();
-                    this.dispatchEvent('level-win');
+                    this.dispatchEvent('level-win', {level: this.gameState.level});
                     return;
                 }
 
