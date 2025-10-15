@@ -24,6 +24,7 @@ const urlsToCache = [
   '/assets/components/rocket.html',
   '/icon-192x192.png',
   '/icon-512x512.png',
+  '/favicon.ico',
 ];
 
 // Evento de instalação: abre o cache e armazena os arquivos
