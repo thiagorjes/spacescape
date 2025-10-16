@@ -1,5 +1,9 @@
 // Importa os serviços já inicializados do arquivo de configuração
-import { auth, db, googleProvider } from "./firebase_config.js";
+import {
+    auth,
+    db,
+    googleProvider
+} from "./firebase_config.js";
 
 // Importa apenas as funções necessárias do SDK do Firebase (versão 12.3.0)
 import {
@@ -10,7 +14,8 @@ import {
     signOut,
     updateProfile,
     setPersistence,
-    browserLocalPersistence
+    browserLocalPersistence,
+    sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 import {
     doc,
@@ -38,65 +43,70 @@ const loginTemplate = `
             <input id="login-email" name="email" type="email" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="seu@email.com">
         </div>
         <div>
-            <label for="login-password" class="text-sm font-medium text-gray-700">Senha</label>
+            <label for="login-password" class="text-sm font-medium text-gray-700">Password</label>
             <input id="login-password" name="password" type="password" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="********">
         </div>
-        <button type="submit" class="w-full px-4 py-2 text-lg font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">Entrar</button>
+        <button type="submit" class="w-full px-4 py-2 text-lg font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">Enter</button>
     </form>
-   <!--- <div class="relative flex items-center justify-center my-4">
-        <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-gray-300"></div>
-        </div>
-        <div class="relative px-2 bg-white text-sm text-gray-500">ou</div>
-    </div>
-    <button id="google-signin-button" class="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-300">
-        <svg class="w-5 h-5 mr-2" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.42-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A543" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path><path fill="none" d="M0 0h48v48H0z"></path></svg>
-        Entrar com Google
-    </button> --->
-    <p id="auth-error" class="text-sm text-center text-red-500 mt-2 h-4"></p>
+   <p id="auth-error" class="text-sm text-center text-red-500 mt-2 h-4"></p>
     <p class="mt-6 text-sm text-center text-gray-600">
-        Não tem uma conta? <a href="#" id="show-register" class="font-medium text-indigo-600 hover:underline">Cadastre-se</a>
+        Don't have an account? <a href="#" id="show-register" class="font-medium text-indigo-600 hover:underline">Register</a>
     </p>
 `;
 
 const registerTemplate = `
     <div id="modal-close" class="close-button">x</div>
-    <h1 class="text-2xl font-bold text-center text-gray-800">Cadastro</h1>
+    <h1 class="text-2xl font-bold text-center text-gray-800">Register</h1>
     <form id="register-form" class="space-y-4">
         <div>
-            <label for="register-name" class="text-sm font-medium text-gray-700">Nome Completo</label>
-            <input id="register-name" name="name" type="text" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Seu Nome">
+            <label for="register-name" class="text-sm font-medium text-gray-700">Full Name</label>
+            <input id="register-name" name="name" type="text" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Your name">
         </div>
         <div>
             <label for="register-email" class="text-sm font-medium text-gray-700">Email</label>
             <input id="register-email" name="email" type="email" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="seu@email.com">
         </div>
         <div>
-            <label for="register-password" class="text-sm font-medium text-gray-700">Senha (mín. 6 caracteres)</label>
+            <label for="register-password" class="text-sm font-medium text-gray-700">Password (mín. 6 chars)</label>
             <input id="register-password" name="password" type="password" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="********">
         </div>
-        <button type="submit" class="w-full px-4 py-2 text-lg font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">Criar Conta</button>
+        <button type="submit" class="w-full px-4 py-2 text-lg font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">Create account</button>
     </form>
     <p id="auth-error" class="text-sm text-center text-red-500 mt-2 h-4"></p>
     <p class="mt-6 text-sm text-center text-gray-600">
-        Já tem uma conta? <a href="#" id="show-login" class="font-medium text-indigo-600 hover:underline">Faça o login</a>
+        Already have an account? <a href="#" id="show-login" class="font-medium text-indigo-600 hover:underline">Log in</a>
     </p>
 `;
 
 const createUsernameTemplate = `
     <div id="modal-close" class="close-button">x</div>
     <h1 class="text-2xl font-bold text-center text-gray-800">Crie seu Username</h1>
-    <p class="text-sm text-center text-gray-600 mb-4">Este nome será exibido para outros jogadores.</p>
+    <p class="text-sm text-center text-gray-600 mb-4">This name will be displayed to other players.</p>
     <form id="username-form" class="space-y-4">
         <div>
             <label for="username-input" class="text-sm font-medium text-gray-700">Username</label>
             <input id="username-input" name="username" type="text" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="SeuUsername123" minlength="3" maxlength="15" pattern="[a-zA-Z0-9_]+">
-            <p class="text-xs text-gray-500 mt-1">3-15 caracteres, apenas letras, números e _.</p>
+            <p class="text-xs text-gray-500 mt-1">3-15 characters, only letters, numbers and _.</p>
         </div>
         <button type="submit" class="w-full px-4 py-2 text-lg font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">Salvar e Continuar</button>
     </form>
     <p id="auth-error" class="text-sm text-center text-red-500 mt-2 h-4"></p>
 `;
+
+// NOVO: Template para a tela de verificação de e-mail
+const verifyEmailTemplate = `
+    <div id="modal-close" class="close-button">x</div>
+    <h1 class="text-2xl font-bold text-center text-gray-800">Verifique seu E-mail</h1>
+    <p class="text-sm text-center text-gray-600 my-4">
+        Um link de verificação foi enviado para o seu e-mail. Por favor, verifique sua caixa de entrada (e a pasta de spam) para continuar.
+    </p>
+    <button id="resend-verification-button" class="w-full px-4 py-2 text-lg font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors duration-300">Reenviar E-mail</button>
+    <p id="auth-error" class="text-sm text-center text-red-500 mt-2 h-4"></p>
+    <p class="mt-6 text-sm text-center text-gray-600">
+        <a href="#" id="logout-from-verify" class="font-medium text-indigo-600 hover:underline">Logout</a>
+    </p>
+`;
+
 
 const closeModal = () => {
     const modalBackground = document.getElementById('modal-background');
@@ -112,7 +122,7 @@ function showLoginScreen() {
     loginContainer.classList.remove('hidden');
 
     document.getElementById('login-form').addEventListener('submit', handleLogin);
-    document.getElementById('google-signin-button').addEventListener('click', handleGoogleSignIn);
+    // document.getElementById('google-signin-button').addEventListener('click', handleGoogleSignIn); // Removido
     document.getElementById('show-register').addEventListener('click', (e) => {
         e.preventDefault();
         showRegisterScreen();
@@ -140,6 +150,29 @@ function showCreateUsernameScreen(user) {
     document.getElementById("modal-close").addEventListener('pointerup', closeModal);
 }
 
+// NOVA FUNÇÃO: Exibe a tela de verificação
+function showVerifyEmailScreen(user) {
+    loginContainer.innerHTML = verifyEmailTemplate;
+    welcomeContainer.classList.add('hidden');
+    loadingScreen.classList.add('hidden');
+    loginContainer.classList.remove('hidden');
+
+    document.getElementById('resend-verification-button').addEventListener('click', async () => {
+        try {
+            await sendEmailVerification(user);
+            displayError('E-mail de verificação reenviado!');
+        } catch (error) {
+            displayError('Erro ao reenviar e-mail. Tente mais tarde.');
+        }
+    });
+
+    document.getElementById('logout-from-verify').addEventListener('click', () => {
+        signOut(auth);
+    });
+
+    document.getElementById('modal-close').addEventListener('pointerup', closeModal);
+}
+
 
 async function handleCreateUsername(e, user) {
     e.preventDefault();
@@ -157,24 +190,18 @@ async function handleCreateUsername(e, user) {
     const newUsernameRef = doc(db, "usernames", newUsername);
 
     try {
-        // 1. Verificar se o username já existe (apenas para UX, a regra de segurança previne a escrita final)
         const newUsernameSnap = await getDoc(newUsernameRef);
         if (newUsernameSnap.exists()) {
-            // Você pode querer verificar se o username já é do usuário atual
-            if (newUsernameSnap.data().uid === user.uid) {
-                displayError("Este já é o seu username.");
-                return;
-            }
-            throw new Error(`O username '${newUsername}' já está em uso.`);
+            throw new Error(`Username '${newUsername}' is already in use.`);
         }
 
-        // 2. Tentar registrar o novo username na coleção /usernames
-        batch.set(newUsernameRef, { uid: user.uid });
+        batch.set(newUsernameRef, {
+            uid: user.uid
+        });
+        batch.update(userRef, {
+            username: newUsername
+        });
 
-        // 3. Atualizar o perfil do usuário com o novo username
-        batch.update(userRef, { username: newUsername });
-
-        // (Opcional) Se o usuário já tinha um username, remova o antigo da coleção /usernames
         const userDoc = await getDoc(userRef);
         const oldUsername = userDoc.data()?.username;
         if (oldUsername && oldUsername !== newUsername) {
@@ -183,24 +210,26 @@ async function handleCreateUsername(e, user) {
 
         await batch.commit();
 
-        // Forçar recarregamento dos dados do usuário
         const updatedUserDoc = await getDoc(userRef);
         const userData = updatedUserDoc.data();
 
         if (userData && userData.username) {
-            const fullUserProfile = { ...user, ...userData };
+            const fullUserProfile = { ...user,
+                ...userData
+            };
             saveAuthStateToCache(fullUserProfile);
             showWelcomeScreen(user, userData);
-            document.dispatchEvent(new CustomEvent('authStateChange', { detail: { user: fullUserProfile } }));
+            document.dispatchEvent(new CustomEvent('authStateChange', {
+                detail: {
+                    user: fullUserProfile
+                }
+            }));
         } else {
             displayError('Erro ao salvar username. Tente novamente.');
         }
-
-        console.log(`Username atualizado para '${newUsername}' com sucesso!`);
     } catch (error) {
-        displayError(error);
+        displayError(error.message);
         console.error("Erro ao definir username:", error);
-        // Exibir mensagem de erro amigável ao usuário
     }
 }
 
@@ -222,7 +251,10 @@ async function createUserDocument(user, additionalData) {
     const userRef = doc(db, "users", user.uid);
     const userDoc = await getDoc(userRef);
     if (!userDoc.exists()) {
-        const { displayName, email } = user;
+        const {
+            displayName,
+            email
+        } = user;
         try {
             await setDoc(userRef, {
                 name: displayName,
@@ -241,15 +273,17 @@ const handleLogin = (e) => {
     const email = e.target.email.value;
     const password = e.target.password.value;
     displayError('');
-    signInWithEmailAndPassword(auth, email, password).catch(error => {
-        let message = "Ocorreu um erro.";
-        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-            message = 'Email ou senha inválidos.';
-        }
-        displayError(message);
-    });
+    signInWithEmailAndPassword(auth, email, password)
+        .catch(error => {
+            let message = "Ocorreu um erro.";
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                message = 'Email/Password invalid.';
+            }
+            displayError(message);
+        });
 };
 
+// ATUALIZADO: handleRegister agora envia o e-mail de verificação
 const handleRegister = async (e) => {
     e.preventDefault();
     const name = e.target.name.value;
@@ -258,20 +292,31 @@ const handleRegister = async (e) => {
     displayError('');
 
     if (password.length < 6) {
-        displayError("A senha deve ter no mínimo 6 caracteres.");
+        displayError("password must be at least 6 characters long.");
         return;
     }
 
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await updateProfile(userCredential.user, { displayName: name });
-        await createUserDocument(userCredential.user, { score: 0 });
+        await updateProfile(userCredential.user, {
+            displayName: name
+        });
+        await createUserDocument(userCredential.user, {
+            score: 0
+        });
+
+        // Envia o e-mail de verificação
+        await sendEmailVerification(userCredential.user);
+
+        // Mostra a tela de verificação
+        showVerifyEmailScreen(userCredential.user);
+
     } catch (error) {
-        let message = "Ocorreu um erro.";
+        let message = "An error occurred.";
         if (error.code === 'auth/email-already-in-use') {
-            message = 'Este email já está em uso.';
+            message = 'This email is already in use.';
         } else if (error.code === 'auth/weak-password') {
-            message = 'A senha é muito fraca.';
+            message = 'Password weak.';
         }
         displayError(message);
     }
@@ -280,12 +325,9 @@ const handleRegister = async (e) => {
 const handleGoogleSignIn = () => {
     displayError('');
     signInWithPopup(auth, googleProvider)
-        .then(result => {
-            // A verificação de username e criação do doc será feita pelo onAuthStateChanged
-        })
         .catch(error => {
             console.error("Erro com login Google:", error);
-            displayError("Não foi possível logar com o Google.");
+            displayError("Unable to log in with Google.");
         });
 };
 
@@ -299,7 +341,7 @@ function saveAuthStateToCache(userProfile) {
             uid: userProfile.uid,
             displayName: userProfile.displayName,
             email: userProfile.email,
-            username: userProfile.username, // Adiciona username ao cache
+            username: userProfile.username,
             lastLogin: new Date().toISOString()
         }));
     } else {
@@ -343,10 +385,24 @@ function initializeDOM() {
     }
 }
 
+// ATUALIZADO: checkUserSetup agora verifica o status do e-mail
 async function checkUserSetup(user) {
     if (!user) {
         showLoginScreen();
-        document.dispatchEvent(new CustomEvent('authStateChange', { detail: { user: null } }));
+        document.dispatchEvent(new CustomEvent('authStateChange', {
+            detail: {
+                user: null
+            }
+        }));
+        return;
+    }
+
+    // Recarrega o estado do usuário para obter o status de verificação mais recente
+    await user.reload();
+    
+    // Se o e-mail não foi verificado, mostra a tela de verificação
+    if (!user.emailVerified) {
+        showVerifyEmailScreen(user);
         return;
     }
 
@@ -355,11 +411,17 @@ async function checkUserSetup(user) {
 
     if (userDoc.exists() && userDoc.data().username) {
         const userData = userDoc.data();
-        const fullUserProfile = { ...user, ...userData };
+        const fullUserProfile = { ...user,
+            ...userData
+        };
 
         saveAuthStateToCache(fullUserProfile);
         showWelcomeScreen(user, userData);
-        document.dispatchEvent(new CustomEvent('authStateChange', { detail: { user: fullUserProfile } }));
+        document.dispatchEvent(new CustomEvent('authStateChange', {
+            detail: {
+                user: fullUserProfile
+            }
+        }));
     } else {
         if (!userDoc.exists()) {
             await createUserDocument(user);

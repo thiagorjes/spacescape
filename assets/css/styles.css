@@ -666,14 +666,14 @@ header#header-container {
     }
 
     #close-ranking-modal {
-        width: 44px;
-        height: 44px;
+        width: 35px;
+        height: 35px;
         font-size: 20px;
-        top: 10px;
-        right: 10px;
+        top: 15px;
+        right: 15px;
         /* Melhorar área de toque para dispositivos móveis */
-        min-width: 44px;
-        min-height: 44px;
+        min-width: 35px;
+        min-height: 35px;
         /* Aumentar área clicável */
         padding: 12px;
         margin: -12px;

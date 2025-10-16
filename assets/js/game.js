@@ -177,25 +177,7 @@ async function loadGameState() {
 async function fetchAndDisplayRanking(stage) {
     // Se for mobile e o anúncio estiver visível, inicializa o AdSense
     if (elements.mobileAdContainer.style.display === 'block') {
-        if (stage % 2 == 0) {
-            document.getElementById('google-ads-mobile').style.display = "block";
-            document.getElementById('adsterra').style.display = "none";
-        }
-        else {
-            document.getElementById('google-ads-mobile').style.display = "none";
-            document.getElementById('adsterra').style.display = "block";
-        }
-        if (!isMobileAdInitialized) {
-
-
-            try {
-                console.log('AdSense .push() chamado para o slot mobile.');
-                (adsbygoogle = window.adsbygoogle || []).push({});
-                isMobileAdInitialized = true; // Evita múltiplas chamadas
-            } catch (e) {
-                console.error("Erro ao chamar adsbygoogle.push():", e);
-            }
-        }
+        document.getElementById('adsterra').style.display = "block";
     }
 }
 
@@ -242,7 +224,7 @@ function showStartScreen() {
 }
 
 function showLoadingPlanetsScreen() {
-    elements.stageTitle.textContent = 'CARREGANDO PLANETAS...';
+    elements.stageTitle.textContent = 'LOADING PLANETS...';
     elements.startButton.style.display = 'none'; // Esconde o botão de start
     elements.startScreen.style.display = 'flex';
     gameState.gameStatus = 'loading_planets';

@@ -193,6 +193,7 @@ body {
     cursor: pointer;
     transition: all 0.1s;
     display: none;
+    justify-self: center;
 }
 
 .start-button:active,

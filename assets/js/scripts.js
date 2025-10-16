@@ -58,7 +58,7 @@ function renderRanking(rankingData) {
     playerRankContainer.innerHTML = '';
 
     if (rankingData.length === 0) {
-        previewContainer.innerHTML = '<h3>Ranking</h3><p>Nenhum dado disponível.</p>';
+        previewContainer.innerHTML = '<h3>Ranking</h3><p>No data available</p>';
         return;
     }
 
@@ -75,7 +75,7 @@ function renderRanking(rankingData) {
 
     const top3 = rankingData.slice(0, 3);
     let previewHTML = '<h3>TOP 3</h3><ol>';
-    previewHTML += `<li class="ranking-header"><span>#</span><span>Nome</span><span>Fase</span><span>Mortes</span></li>`;
+    previewHTML += `<li class="ranking-header"><span>#</span><span>Name</span><span>Stage</span><span>Deaths</span></li>`;
     top3.forEach((session, index) => {
         const isPlayer = currentUser && session.userId === currentUser.uid;
         previewHTML += `<li class="${isPlayer ? 'player-highlight' : ''}">
@@ -89,7 +89,7 @@ function renderRanking(rankingData) {
     previewContainer.innerHTML = previewHTML;
 
     const top10 = rankingData.slice(0, 10);
-    let fullListHTML = `<li class="ranking-header"><span>#</span><span>Nome</span><span>Fase</span><span>Mortes</span></li>`;
+    let fullListHTML = `<li class="ranking-header"><span>#</span><span>Name</span><span>Stage</span><span>Deaths</span></li>`;
     top10.forEach((session, index) => {
         const isPlayer = currentUser && session.userId === currentUser.uid;
         fullListHTML += `<li class="${isPlayer ? 'player-highlight' : ''}">
