@@ -91,6 +91,8 @@ let gameState = {
     deaths: 0,
     fuel: 100,
     temperature: 0,
+    shields: 3,
+    shieldPercentage: 100,
     isOverheated: false,
     isFuelEmpty: false,
     gameStatus: 'loading',
@@ -184,7 +186,9 @@ async function loadGameState() {
             level: 1,
             deaths: 0,
             fuel: 100,
-            temperature: 0
+            temperature: 0,
+            shields: 3,
+            shieldPercentage: 100
         };
         initGame();
         return;
@@ -200,6 +204,8 @@ async function loadGameState() {
                 gameState.level = activeSession.level || 1;
                 gameState.deaths = activeSession.deaths || 0;
                 gameState.fuel = activeSession.fuel !== undefined ? activeSession.fuel : 100;
+                gameState.shields = activeSession.shields !== undefined ? activeSession.shields : 3;
+                gameState.shieldPercentage = activeSession.shieldPercentage !== undefined ? activeSession.shieldPercentage : 100;
                 gameState.temperature = 0;
                 gameState.gameStatus = 'loading_planets';
                 gameState.isGeneratingPlanets = true;
@@ -211,7 +217,9 @@ async function loadGameState() {
             level: 1,
             deaths: 0,
             fuel: 100,
-            temperature: 0
+            temperature: 0,
+            shields: 3,
+            shieldPercentage: 100
         };
         await saveGameState({
             isGameOver: false,
@@ -346,7 +354,9 @@ function handleRestart() {
         level: 1,
         deaths: 0,
         fuel: 100,
-        temperature: 0
+        temperature: 0,
+        shields: 3,
+        shieldPercentage: 100
     };
     physicsEngine.reset();
     updateDisplays();

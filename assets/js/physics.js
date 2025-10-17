@@ -56,14 +56,14 @@ class PhysicsEngine {
     }
 
     init(minR, maxR, minDist, rocketSize, collisionThreshold) {
-        this.collitionThreshold = collisionThreshold; 
+        this.collitionThreshold = collisionThreshold;
         this.minRadius = minR;
         this.maxRadius = maxR;
-        this.minDistance = minDist; 
+        this.minDistance = minDist;
         this.rocketRatio = rocketSize;
+        this.reset(); // CORREÇÃO: Movido para antes de resizeCanvas
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
-        this.reset();
     }
 
     resizeCanvas() {
@@ -233,33 +233,60 @@ class PhysicsEngine {
         for (const planet of this.planets) {
             const distVec = this.rocket.position.clone().subtract(planet.position);
             const dist = distVec.magnitude;
-            if (dist < this.rocketRatio + planet.radius) {
 
+            if (dist < this.rocketRatio + planet.radius) { // Collision detected
                 const impactForce = this.rocket.velocity.magnitude * ROCKET_MASS;
-                if (impactForce > this.collitionThreshold) {
-                    this.isExploding = true;
-                    this.stop();
-                    this.explosionStartTimestamp = performance.now(); // Inicia o tempo da explosão
-                    setTimeout(() => { this.dispatchEvent('death-reset'); }, 2000);
-                    return;
+
+                if (this.gameState.shields > 0) { // Shield is active
+                    // Deplete shield
+                    const shieldDamage = impactForce / 10; // Proportional damage, needs tuning
+                    this.gameState.shieldPercentage -= shieldDamage;
+
+                    // Handle shield depletion
+                    if (this.gameState.shieldPercentage <= 0) {
+                        this.gameState.shields--;
+                        if (this.gameState.shields > 0) {
+                            this.gameState.shieldPercentage = 100;
+                        } else {
+                            this.gameState.shieldPercentage = 0;
+                        }
+                    }
+
+                    // Elastic collision
+                    const normal = distVec.normalize;
+                    const parallelVel = this.rocket.velocity.projection(normal);
+                    const orthoVel = this.rocket.velocity.clone().subtract(parallelVel);
+                    // For 100% elastic, just reverse the parallel component
+                    this.rocket.velocity = orthoVel.subtract(parallelVel);
+                    const overlap = this.rocketRatio + planet.radius - dist;
+                    this.rocket.position.add(normal.multiply(overlap));
+
+                } else { // No shields left
+                    if (impactForce > this.collitionThreshold) {
+                        this.isExploding = true;
+                        this.stop();
+                        this.explosionStartTimestamp = performance.now();
+                        setTimeout(() => { this.dispatchEvent('death-reset'); }, 2000);
+                    } else { // Bounce if impact is not strong enough to destroy
+                         const normal = distVec.normalize;
+                        const parallelVel = this.rocket.velocity.projection(normal);
+                        const orthoVel = this.rocket.velocity.clone().subtract(parallelVel);
+                        this.rocket.velocity = orthoVel.subtract(parallelVel).multiply(1 - FRICTION);
+                        const overlap = this.rocketRatio + planet.radius - dist;
+                        this.rocket.position.add(normal.multiply(overlap));
+                    }
                 }
 
-                if (planet === this.endPlanet) {
+                // Check for win condition after handling collision
+                 if (planet === this.endPlanet) {
                     this.stop();
                     this.dispatchEvent('level-win', {level: this.gameState.level});
-                    return;
                 }
-
-                const normal = distVec.normalize;
-                const parallelVel = this.rocket.velocity.projection(normal);
-                const orthoVel = this.rocket.velocity.clone().subtract(parallelVel);
-                this.rocket.velocity = orthoVel.subtract(parallelVel).multiply(1 - FRICTION);
-                const overlap = this.rocketRatio + planet.radius - dist;
-                this.rocket.position.add(normal.multiply(overlap));
-                return;
+                return; // Exit after handling one collision
             }
         }
     }
+
 
     checkBoundaries() {
         if (this.rocket.position.x < 0) this.rocket.position.x = this.canvas.width;
@@ -280,6 +307,42 @@ class PhysicsEngine {
             this.ctx.closePath();
             this.ctx.shadowBlur = 0;
         });
+
+        // Draw Shield UI if active
+        if (this.gameState.shields > 0) {
+            this.ctx.save();
+            this.ctx.translate(this.rocket.position.x, this.rocket.position.y);
+
+            // 1. Shield outline
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, this.rocketRatio + 10, 0, 2 * Math.PI);
+            this.ctx.strokeStyle = 'rgba(173, 255, 47, 0.8)'; // Green-apple color
+            this.ctx.lineWidth = 2;
+            this.ctx.stroke();
+
+            // 2. Shield count indicators (left side)
+            this.ctx.fillStyle = 'rgba(173, 255, 47, 1)'; // Solid green-apple
+            for (let i = 0; i < this.gameState.shields; i++) {
+                 this.ctx.beginPath();
+                 this.ctx.arc(-25, 10 - (i * 10), 3, 0, 2 * Math.PI);
+                 this.ctx.fill();
+            }
+
+            // 3. Shield percentage bar (right side)
+            const barWidth = 5;
+            const barHeight = 40;
+            const barX = 25;
+            const barY = -barHeight / 2;
+            // Background
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            this.ctx.fillRect(barX, barY, barWidth, barHeight);
+            // Foreground
+            const fillHeight = (this.gameState.shieldPercentage / 100) * barHeight;
+            this.ctx.fillStyle = 'rgba(173, 255, 47, 1)';
+            this.ctx.fillRect(barX, barY + (barHeight - fillHeight), barWidth, fillHeight);
+
+            this.ctx.restore();
+        }
 
         if (this.isExploding) {
             const explosionDuration = 2000; // Duração da explosão em milissegundos
