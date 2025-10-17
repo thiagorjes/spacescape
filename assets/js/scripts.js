@@ -14,28 +14,28 @@ async function fetchRankingData() {
         const querySnapshot = await getDocs(collection(db, "game_state"));
         if (querySnapshot.empty) return [];
 
-        let allGameOverSessions = [];
+        let allPlayersBestSessions = [];
         querySnapshot.forEach(doc => {
             const sessions = doc.data().sessions || [];
-            const userGameOverSessions = sessions.filter(s => s.gameover === true);
+            // const userGameOverSessions = sessions.filter(s => s.gameover === true);
             
-            if (userGameOverSessions.length > 0) {
-                const bestSession = userGameOverSessions.sort((a, b) => {
+            if (sessions.length > 0) {
+                const bestSession = sessions.sort((a, b) => {
                      if (b.level !== a.level) return b.level - a.level;
                      return a.deaths - b.deaths;
                 })[0];
-                allGameOverSessions.push(bestSession);
+                allPlayersBestSessions.push(bestSession);
             }
         });
 
-        if (allGameOverSessions.length === 0) return [];
+        if (allPlayersBestSessions.length === 0) return [];
         
-        allGameOverSessions.sort((a, b) => {
+        allPlayersBestSessions.sort((a, b) => {
             if (b.level !== a.level) return b.level - a.level;
             return a.deaths - b.deaths;
         });
         
-        return allGameOverSessions;
+        return allPlayersBestSessions;
     } catch (error) {
         console.error("Erro ao buscar o ranking:", error);
         return [];
