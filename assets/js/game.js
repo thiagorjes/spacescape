@@ -62,6 +62,11 @@ function setupLanguageSwitcher() {
                 // Update active button
                 langButtons.forEach(btn => btn.classList.remove('active'));
                 e.target.classList.add('active');
+
+                // CORREÇÃO: Força a atualização de todos os textos da UI do jogo
+                i18n.applyCurrentLanguage();
+                // Atualiza textos que são montados dinamicamente
+                showStartScreen();
             }
         });
     });
@@ -98,13 +103,12 @@ const elements = {
     deathDisplay: document.getElementById('deathDisplay'),
     gameCanvas: document.getElementById('gameCanvas'),
     gameArea: document.getElementById('gameArea'),
-    // NOVO: Referência ao contêiner do anúncio mobile
     mobileAdContainer: document.getElementById('ads-mobile-container')
 };
 
 let physicsEngine;
-let isMobileAdInitialized = false; // Flag para inicializar o anúncio apenas uma vez
-let loadingTimeout; // Variável para o timeout de segurança
+let isMobileAdInitialized = false;
+let loadingTimeout;
 
 // --- FUNÇÃO HELPER PARA VERIFICAR SE É MOBILE ---
 const isMobile = () => window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -193,7 +197,6 @@ async function loadGameState() {
 }
 
 async function fetchAndDisplayRanking(stage) {
-    // Se for mobile e o anúncio estiver visível, inicializa o AdSense
     if (elements.mobileAdContainer.style.display === 'block') {
         document.getElementById('adsterra').style.display = "block";
     }
@@ -205,7 +208,6 @@ async function fetchAndDisplayRanking(stage) {
 function initGame() {
     physicsEngine = new PhysicsEngine(elements.gameCanvas, gameState);
 
-    // CORREÇÃO: Mover a configuração dos listeners para ANTES da inicialização da física
     setupEventListeners();
     showLoadingPlanetsScreen();
 
@@ -216,6 +218,9 @@ function initGame() {
     }
     updateDisplays();
     updateProgressBars();
+
+    // CORREÇÃO: Aplica a tradução inicial a todos os elementos da UI
+    i18n.applyCurrentLanguage();
 }
 
 function updateDisplays() {
@@ -231,33 +236,32 @@ function updateProgressBars() {
 }
 
 function showStartScreen() {
-    // Limpa o timeout de segurança se ele existir
     if (loadingTimeout) clearTimeout(loadingTimeout);
 
-    elements.stageTitle.textContent = i18n.translate('game.stage', { stage: String(gameState.level).padStart(2, '0') });
+    // Proposta
+    const stageTextTemplate = i18n.t('game.stage'); // Busca o texto modelo, ex: "Fase {{stage}}"
+    elements.stageTitle.textContent = stageTextTemplate.replace('{{stage}}', String(gameState.level).padStart(2, '0'));
     elements.startScreen.style.display = 'flex';
-    elements.startButton.style.display = 'block'; // Garante que o botão de start apareça
+    elements.startButton.style.display = 'block';
     gameState.gameStatus = 'ready';
     document.getElementById("restartButton").style.display = 'block';
 }
 
 function showLoadingPlanetsScreen() {
+    // CORREÇÃO: Garante que o texto de carregamento seja traduzido
     elements.stageTitle.textContent = i18n.t('game.loading_planets');
-    elements.startButton.style.display = 'none'; // Esconde o botão de start
+    elements.startButton.style.display = 'none';
     elements.startScreen.style.display = 'flex';
     gameState.gameStatus = 'loading_planets';
     gameState.isGeneratingPlanets = true;
 
-    // ADIÇÃO: Timeout de segurança para evitar tela de loading infinita
-    // Se em 5 segundos o evento 'planets-generated' não for recebido,
-    // a tela de início será exibida de qualquer forma.
-    if (loadingTimeout) clearTimeout(loadingTimeout); // Limpa timeout anterior
+    if (loadingTimeout) clearTimeout(loadingTimeout);
     loadingTimeout = setTimeout(() => {
         console.warn("Timeout de carregamento atingido. Forçando exibição da tela de início.");
         if (gameState.gameStatus === 'loading_planets') {
             showStartScreen();
         }
-    }, 5000); // 5 segundos
+    }, 5000);
 }
 
 
@@ -277,7 +281,6 @@ async function showFuelEmptyPopup() {
     await saveGameState({
         isGameOver: true
     });
-    // ... (código restante)
 }
 
 function showWinOverlay(level) {
@@ -287,13 +290,12 @@ function showWinOverlay(level) {
     saveGameState({
         isGameOver: false
     });
-    elements.mobileAdContainer.style.display = 'block'; // Mostra container do anúncio
+    elements.mobileAdContainer.style.display = 'block';
     fetchAndDisplayRanking(level);
 }
 
 function handleStart() {
     hidePopups();
-    // Oculta o container do anúncio ao iniciar o jogo
     if (elements.mobileAdContainer) {
         elements.mobileAdContainer.style.display = 'none';
     }
@@ -320,20 +322,17 @@ function handleRestart() {
     window.location = 'index.html'
 }
 
-// AJUSTADO: Agora lida com o anúncio mobile
 function handleNextLevel() {
     hidePopups();
     gameState.level++;
     gameState.temperature = 0;
 
-    // Mostra a tela de carregamento antes de resetar a física
     showLoadingPlanetsScreen();
     physicsEngine.reset();
 
     updateDisplays();
     updateProgressBars();
 
-    // O evento 'planets-generated' chamará showStartScreen()
     saveGameState(false);
 }
 
@@ -346,7 +345,6 @@ function setupEventListeners() {
     elements.startButton.addEventListener('click', handleStart);
     elements.restartButton.addEventListener('click', handleRestart);
     elements.nextLevelButton.addEventListener('click', handleNextLevel);
-    // ... (código de controles existente sem alterações)
     const controls = {
         left: 'left',
         right: 'right',
@@ -392,7 +390,6 @@ function setupEventListeners() {
 }
 
 function updateUIState() {
-    // ... (código existente sem alterações)
     if (gameState.gameStatus === 'playing' && !physicsEngine.keyMap['up'] && !physicsEngine.keyMap['down']) {
         gameState.temperature = Math.max(0, gameState.temperature - HEAT_RENEW);
     }
@@ -410,10 +407,8 @@ function updateUIState() {
 }
 
 function onGameEvent(event) {
-    // ... (código existente sem alterações)
     switch (event.type) {
         case 'planets-generated':
-            // Planets have been generated, show the stage popup
             gameState.isGeneratingPlanets = false;
             showStartScreen();
             break;
@@ -465,14 +460,16 @@ function onGameEvent(event) {
 
 // --- PONTO DE ENTRADA ---
 document.addEventListener('DOMContentLoaded', () => {
-    setupHeaderListeners();
-    checkAuthState(user => {
-        if (!user) {
-            window.location.href = 'index.html';
-        } else {
-            currentUser = user;
-            updateHeaderUI(user);
-            loadGameState();
-        }
+    i18n.ready.then(() => { // Espera o i18n carregar antes de tudo
+        setupHeaderListeners();
+        checkAuthState(user => {
+            if (!user) {
+                window.location.href = 'index.html';
+            } else {
+                currentUser = user;
+                updateHeaderUI(user);
+                loadGameState();
+            }
+        });
     });
 });
