@@ -25,6 +25,9 @@ const FUEL_CONSUMPTION_THRUST = 0.01;
 const FUEL_CONSUMPTION_TURN = 0.005;
 const HEAT_RATE = 0.4;
 const HEAT_RENEW = 4;
+const SHIELD_RECHARGE_LEVEL_INTERVAL = 5;
+const SHIELD_RECHARGE_DURATION = 5;
+
 
 // --- LÓGICA DO HEADER ---
 function updateHeaderUI(user) {
@@ -96,7 +99,9 @@ let gameState = {
     isOverheated: false,
     isFuelEmpty: false,
     gameStatus: 'loading',
-    isGeneratingPlanets: false
+    isGeneratingPlanets: false,
+    rechargeInProgress: false,
+    rechargeCountdown: SHIELD_RECHARGE_DURATION
 };
 
 const elements = {
@@ -116,7 +121,8 @@ const elements = {
     deathDisplay: document.getElementById('deathDisplay'),
     gameCanvas: document.getElementById('gameCanvas'),
     gameArea: document.getElementById('gameArea'),
-    mobileAdContainer: document.getElementById('ads-mobile-container')
+    mobileAdContainer: document.getElementById('ads-mobile-container'),
+    rechargeCountdown: document.getElementById('rechargeCountdown')
 };
 
 let physicsEngine;
@@ -188,7 +194,9 @@ async function loadGameState() {
             fuel: 100,
             temperature: 0,
             shields: 3,
-            shieldPercentage: 100
+            shieldPercentage: 100,
+            rechargeInProgress: false,
+            rechargeCountdown: SHIELD_RECHARGE_DURATION
         };
         initGame();
         return;
@@ -219,7 +227,9 @@ async function loadGameState() {
             fuel: 100,
             temperature: 0,
             shields: 3,
-            shieldPercentage: 100
+            shieldPercentage: 100,
+            rechargeInProgress: false,
+            rechargeCountdown: SHIELD_RECHARGE_DURATION
         };
         await saveGameState({
             isGameOver: false,
@@ -242,7 +252,10 @@ async function fetchAndDisplayRanking(stage) {
 // --- LÓGICA DO JOGO ---
 
 function initGame() {
-    physicsEngine = new PhysicsEngine(elements.gameCanvas, gameState);
+    physicsEngine = new PhysicsEngine(elements.gameCanvas, gameState, {
+        SHIELD_RECHARGE_LEVEL_INTERVAL,
+        SHIELD_RECHARGE_DURATION
+    });
 
     setupEventListeners();
     showLoadingPlanetsScreen();
@@ -356,7 +369,9 @@ function handleRestart() {
         fuel: 100,
         temperature: 0,
         shields: 3,
-        shieldPercentage: 100
+        shieldPercentage: 100,
+        rechargeInProgress: false,
+        rechargeCountdown: SHIELD_RECHARGE_DURATION
     };
     physicsEngine.reset();
     updateDisplays();
@@ -516,6 +531,23 @@ function onGameEvent(event) {
                     type: 'fuel-empty'
                 });
             }
+            break;
+        case 'recharge-started':
+            gameState.rechargeInProgress = true;
+            elements.rechargeCountdown.style.display = 'block';
+            break;
+        case 'recharge-progress':
+            gameState.rechargeCountdown = event.countdown;
+            elements.rechargeCountdown.textContent = Math.ceil(event.countdown);
+            break;
+        case 'recharge-complete':
+            gameState.shields = 3;
+            gameState.shieldPercentage = 100;
+            // Fall through to cancelled
+        case 'recharge-cancelled':
+            gameState.rechargeInProgress = false;
+            gameState.rechargeCountdown = SHIELD_RECHARGE_DURATION;
+            elements.rechargeCountdown.style.display = 'none';
             break;
     }
 }

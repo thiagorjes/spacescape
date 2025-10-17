@@ -6,11 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpaceScape Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Links de CSS padronizados -->
-    <link rel="stylesheet" href="assets/css/styles.css"> <!-- Estilos compartilhados (header) -->
-    <link rel="stylesheet" href="assets/css/login.css"> <!-- Estilos do modal de login -->
-    <link rel="stylesheet" href="assets/css/game.css"> <!-- Estilos específicos do jogo -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="assets/css/styles.css"> <link rel="stylesheet" href="assets/css/login.css"> <link rel="stylesheet" href="assets/css/game.css"> <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -26,22 +22,19 @@
 </head>
 
 <body>
-    <!-- Main app container with proper stacking structure -->
     <div id="app">
-        <!-- Header will be loaded here -->
         <header id="header-container"></header>
 
-        <!-- Main Content -->
         <main class="content">
             <div class="safe-area">
                 <div class="background-gradient">
                     <div class="starfield" id="starfield"></div>
                     <div class="game-container-wrapper">
-                        <!-- Game Area -->
                         <div class="game-area" id="gameArea">
                             <canvas id="gameCanvas"></canvas>
+                            <div id="rechargeCountdown" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 48px; display: none;">5</div>
 
-                            <!-- Game Popups and Overlays -->
+
                             <div id="win-overlay" class="popup-overlay" style="display: none;">
                                 <div class="popup-content">
                                     <div id="ads-mobile-container" class="mb-4">
@@ -60,17 +53,7 @@
                                                 <script type="text/javascript"
                                                     src="//www.highperformanceformat.com/e34d003d97f47c1239d4c474839ae338/invoke.js"></script>
                                             </div>
-                                            <!-- <div id="google-ads-mobile"
-                                                style="min-width:300px; height: 300px; width:100%; display: none;">
-                                                <script async
-                                                    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7408688486649567"
-                                                    crossorigin="anonymous"></script>
-                                                <ins class="adsbygoogle"
-                                                    style="display:inline-block;width:300px;height:300px"
-                                                    data-ad-client="ca-pub-7408688486649567"
-                                                    data-ad-slot="7824504028"></ins>
-                                            </div> -->
-                                        </div>
+                                            </div>
                                     </div>
                                     <button id="next-level-btn" class="start-button" style="display: block;" data-i18n="game.next_level">Next Level</button>
                                 </div>
@@ -101,7 +84,6 @@
                             </div>
                         </div>
 
-                        <!-- Controls Container -->
                         <div class="controls-container">
                             <div class="left-controls">
                                 <div class="progress-bar vertical" id="temperatureBar">
@@ -153,11 +135,9 @@
             </div>
         </main>
 
-        <!-- Footer -->
         <footer class="footer"></footer>
     </div>
 
-    <!-- Modal will be loaded here -->
     <div id="modal-container"></div>
     <div id="ranking-container"></div>
 

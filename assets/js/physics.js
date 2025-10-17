@@ -34,14 +34,17 @@ const FRICTION = 0.3;
 const MAX_PERCENTAGE = 0.3
 
 class PhysicsEngine {
-    constructor(canvas, initialGameState) {
+    constructor(canvas, initialGameState, config) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.gameState = initialGameState;
+        this.config = config;
         this.planets = [];
         this.rocket = {};
         this.startPlanet = null;
         this.endPlanet = null;
+        this.rechargePlanet = null;
+        this.rechargeTimer = null;
         this.isRunning = false;
         this.isExploding = false;
         this.lastTimestamp = 0;
@@ -119,6 +122,7 @@ class PhysicsEngine {
 
     generatePlanets() {
         this.planets = [];
+        this.rechargePlanet = null;
         const count = this.gameState.level + 1;
         this.maxRadius = Math.min(this.maxRadius, Math.sqrt((this.canvas.width * this.canvas.height * MAX_PERCENTAGE) / count / Math.PI));
 
@@ -139,6 +143,26 @@ class PhysicsEngine {
                 }
             } while (isTooClose);
             tempPlanets.push({ position: new Vector(x, y), radius, mass, color: '#4a8fe7' });
+        }
+        
+        // Shield Recharge Planet Logic
+        if (this.gameState.level % this.config.SHIELD_RECHARGE_LEVEL_INTERVAL === 0) {
+            let radius = this.minRadius + Math.random() * (this.maxRadius - this.minRadius);
+            let mass = PLANET_DENSITY * Math.pow(radius, 2);
+            let x, y, isTooClose;
+             do {
+                isTooClose = false;
+                x = Math.random() * (this.canvas.width - radius * 2) + radius;
+                y = Math.random() * (this.canvas.height - radius * 2) + radius;
+                for (const p of tempPlanets) {
+                    if (Math.hypot(x - p.position.x, y - p.position.y) < radius + p.radius + this.minDistance) {
+                        isTooClose = true;
+                        break;
+                    }
+                }
+            } while (isTooClose);
+            this.rechargePlanet = { position: new Vector(x, y), radius, mass, color: '#228B22', isRecharge: true };
+            tempPlanets.push(this.rechargePlanet);
         }
 
         let maxDist = 0;
@@ -230,11 +254,29 @@ class PhysicsEngine {
     }
 
     checkCollisions() {
+        let onRechargePlanet = false;
         for (const planet of this.planets) {
             const distVec = this.rocket.position.clone().subtract(planet.position);
             const dist = distVec.magnitude;
 
             if (dist < this.rocketRatio + planet.radius) { // Collision detected
+                if (planet.isRecharge) {
+                    onRechargePlanet = true;
+                    // Landed condition for recharge
+                    if (this.rocket.velocity.magnitude < 5) {
+                        if (!this.gameState.rechargeInProgress) {
+                            this.dispatchEvent('recharge-started');
+                            this.rechargeTimer = setInterval(() => {
+                                this.gameState.rechargeCountdown--;
+                                this.dispatchEvent('recharge-progress', { countdown: this.gameState.rechargeCountdown });
+                                if (this.gameState.rechargeCountdown <= 0) {
+                                    this.dispatchEvent('recharge-complete');
+                                    clearInterval(this.rechargeTimer);
+                                }
+                            }, 1000);
+                        }
+                    }
+                }
                 const impactForce = this.rocket.velocity.magnitude * ROCKET_MASS;
 
                 if (this.gameState.shields > 0) { // Shield is active
@@ -285,6 +327,10 @@ class PhysicsEngine {
                 return; // Exit after handling one collision
             }
         }
+         if (!onRechargePlanet && this.gameState.rechargeInProgress) {
+            clearInterval(this.rechargeTimer);
+            this.dispatchEvent('recharge-cancelled');
+        }
     }
 
 
@@ -320,11 +366,11 @@ class PhysicsEngine {
             this.ctx.lineWidth = 2;
             this.ctx.stroke();
 
-            // 2. Shield count indicators (left side)
+            // 2. Shield count indicators (left side, vertical)
             this.ctx.fillStyle = 'rgba(173, 255, 47, 1)'; // Solid green-apple
             for (let i = 0; i < this.gameState.shields; i++) {
                  this.ctx.beginPath();
-                 this.ctx.arc(-25, 10 - (i * 10), 3, 0, 2 * Math.PI);
+                 this.ctx.arc(-25, -10 + (i * 10), 3, 0, 2 * Math.PI);
                  this.ctx.fill();
             }
 
