@@ -29,27 +29,36 @@ body {
     height: 50px;
     z-index: 1000;
     display: flex;
-    align-items: center; /* Alinha verticalmente */
-    justify-content: space-between; /* Espaço entre título e user-name no desktop */
-    padding: 0 10px; /* Adiciona padding */
+    align-items: center;
+    /* Alinha verticalmente */
+    justify-content: space-between;
+    /* Espaço entre título e user-name no desktop */
+    padding: 0 10px;
+    /* Adiciona padding */
 }
 
 .header-title {
-    display: none; /* Visível no desktop */
+    display: none;
+    /* Visível no desktop */
     color: #fff73b;
-    font-family: 'StarJedi','Orbitron',monospace;
+    font-family: 'StarJedi', 'Orbitron', monospace;
     font-size: 25px;
-    flex-grow: 1; /* Permite que o título ocupe o espaço */
-    text-align: left; /* Alinha à esquerda */
-    line-height: 50px; /* Centraliza verticalmente */
+    flex-grow: 1;
+    /* Permite que o título ocupe o espaço */
+    text-align: left;
+    /* Alinha à esquerda */
+    line-height: 50px;
+    /* Centraliza verticalmente */
 }
 
 .home {
     color: #fff73b;
     cursor: pointer;
     line-height: 50px;
-    margin-right: 15px; /* Adiciona margem */
-    position: static; /* Remove posicionamento absoluto */
+    margin-right: 15px;
+    /* Adiciona margem */
+    position: static;
+    /* Remove posicionamento absoluto */
 }
 
 .user-area {
@@ -96,7 +105,8 @@ body {
 /* Estilo para o ícone de troféu no header */
 .profile .fa-trophy {
     font-size: 18px;
-    color: #fff73b; /* Cor amarela do título */
+    color: #fff73b;
+    /* Cor amarela do título */
     transition: transform 0.2s ease-in-out;
 }
 
@@ -380,7 +390,7 @@ header#header-container {
 /* Responsive breakpoints */
 @media (min-width: 768px) {
     .mobile-view {
-        display: none ;
+        display: none;
     }
 
     .desktop-view {
@@ -389,14 +399,16 @@ header#header-container {
 
     /* Desktop specific content sizing */
     .content {
-        min-height: calc(100vh - 100px); /* Account for header height */
+        min-height: calc(100vh - 100px);
+        /* Account for header height */
     }
 }
 
 /* Mobile specific styles */
 @media (max-width: 767px) {
     .content {
-        min-height: calc(100vh - 100px); /* Account for header height */
+        min-height: calc(100vh - 100px);
+        /* Account for header height */
     }
 }
 
@@ -462,9 +474,11 @@ header#header-container {
 
 /* Contêiner do Top 3 para Desktop */
 .desktop-ranking-preview {
-    display: none; /* Escondido por padrão, ativado via media query */
+    display: none;
+    /* Escondido por padrão, ativado via media query */
     position: absolute;
-    top: 80px; /* Ajuste conforme a altura do seu header */
+    top: 80px;
+    /* Ajuste conforme a altura do seu header */
     right: 20px;
     width: 280px;
     background-color: rgba(0, 0, 0, 0.6);
@@ -499,12 +513,12 @@ header#header-container {
 }
 
 /* Estilos específicos para as colunas do ranking desktop */
-.desktop-ranking-preview li > *:nth-child(1) {
+.desktop-ranking-preview li>*:nth-child(1) {
     text-align: center;
     font-weight: bold;
 }
 
-.desktop-ranking-preview li > *:nth-child(2) {
+.desktop-ranking-preview li>*:nth-child(2) {
     text-align: left;
     overflow: hidden;
     white-space: nowrap;
@@ -512,8 +526,8 @@ header#header-container {
     max-width: 100px;
 }
 
-.desktop-ranking-preview li > *:nth-child(3),
-.desktop-ranking-preview li > *:nth-child(4) {
+.desktop-ranking-preview li>*:nth-child(3),
+.desktop-ranking-preview li>*:nth-child(4) {
     text-align: right;
     font-weight: bold;
 }
@@ -566,53 +580,6 @@ header#header-container {
     position: relative;
 }
 
-/* Botão de fechar do modal de ranking */
-#close-ranking-modal {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    width: 35px;
-    height: 35px;
-    background: rgba(255, 247, 59, 0.1);
-    border: 2px solid #fff73b;
-    border-radius: 50%;
-    color: #fff73b;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    font-family: 'Orbitron', monospace;
-    z-index: 1001;
-    /* Melhorar área de toque em dispositivos móveis */
-    padding: 8px;
-    margin: -8px;
-}
-
-#close-ranking-modal:hover {
-    background: rgba(255, 247, 59, 0.2);
-    transform: scale(1.1);
-    box-shadow: 0 0 15px rgba(255, 247, 59, 0.4);
-}
-
-/* Estilos específicos para dispositivos touch no modal de ranking */
-@media (hover: none) and (pointer: coarse) {
-    #close-ranking-modal {
-        /* Aumentar ainda mais a área de toque em dispositivos móveis */
-        padding: 15px;
-        margin: -15px;
-        /* Melhorar visibilidade em dispositivos touch */
-        background: rgba(255, 247, 59, 0.15);
-        border-width: 3px;
-    }
-
-    #close-ranking-modal:active {
-        background: rgba(255, 247, 59, 0.3);
-        transform: scale(0.95);
-    }
-}
 
 .ranking-content h2 {
     font-size: 2rem;
@@ -621,13 +588,15 @@ header#header-container {
     margin-bottom: 20px;
 }
 
-#ranking-list, #player-rank-container {
+#ranking-list,
+#player-rank-container {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-#ranking-list li, #player-rank-container li {
+#ranking-list li,
+#player-rank-container li {
     display: grid;
     grid-template-columns: 40px 200px 60px 60px;
     gap: 15px;
@@ -637,14 +606,14 @@ header#header-container {
 }
 
 /* Estilos específicos para as colunas do ranking completo */
-#ranking-list li > *:nth-child(1),
-#player-rank-container li > *:nth-child(1) {
+#ranking-list li>*:nth-child(1),
+#player-rank-container li>*:nth-child(1) {
     text-align: center;
     font-weight: bold;
 }
 
-#ranking-list li > *:nth-child(2),
-#player-rank-container li > *:nth-child(2) {
+#ranking-list li>*:nth-child(2),
+#player-rank-container li>*:nth-child(2) {
     text-align: left;
     overflow: hidden;
     white-space: nowrap;
@@ -652,10 +621,10 @@ header#header-container {
     max-width: 200px;
 }
 
-#ranking-list li > *:nth-child(3),
-#ranking-list li > *:nth-child(4),
-#player-rank-container li > *:nth-child(3),
-#player-rank-container li > *:nth-child(4) {
+#ranking-list li>*:nth-child(3),
+#ranking-list li>*:nth-child(4),
+#player-rank-container li>*:nth-child(3),
+#player-rank-container li>*:nth-child(4) {
     text-align: right;
     font-weight: bold;
 }
@@ -668,7 +637,8 @@ header#header-container {
 
 /* Destaque para o jogador logado */
 .player-highlight {
-    color: #4ade80; /* Um verde brilhante */
+    color: #4ade80;
+    /* Um verde brilhante */
     font-weight: 700;
 }
 
@@ -681,7 +651,8 @@ header#header-container {
 /* Media Query para Desktop */
 @media (min-width: 768px) {
     .desktop-ranking-preview {
-        display: none; /* Mantido oculto mesmo no desktop */
+        display: none;
+        /* Mantido oculto mesmo no desktop */
     }
 }
 
@@ -692,12 +663,13 @@ header#header-container {
         margin: 20px;
     }
 
-    #close-ranking-modal {
-        width: 40px;
-        height: 40px;
-        font-size: 16px;
-        top: 12px;
-        right: 15px;
+    .close-button {
+        width: 5px !important;
+        height: 5px !important;
+        padding: 5px !important;
+        font-size: 14px !important;
+        min-width: 5px !important;
+        min-height: 5px !important;
     }
 }
 
@@ -719,41 +691,44 @@ header#header-container {
         font-size: 0.9rem;
     }
 
-    #close-ranking-modal {
-        width: 35px;
-        height: 35px;
-        font-size: 20px;
-        top: 15px;
-        right: 15px;
-        /* Melhorar área de toque para dispositivos móveis */
-        min-width: 35px;
-        min-height: 35px;
-        /* Aumentar área clicável */
-        padding: 12px;
-        margin: -12px;
+    .close-button {
+        width: 5px !important;
+        height: 5px !important;
+        padding: 5px !important;
+        font-size: 14px !important;
+        min-width: 5px !important;
+        min-height: 5px !important;
     }
 }
 
 
 /* Garante que o container do modal seja a referência para o posicionamento do botão */
-.modal-content, .ranking-content {
+.modal-content,
+.ranking-content {
     position: relative;
 }
 
 /* Estilo padronizado para o botão de fechar */
 .close-button {
     position: absolute;
-    top: 15px; /* Ajuste a distância do topo se necessário */
-    right: 15px; /* Ajuste a distância da direita se necessário */
-    width: 30px;  /* Largura do quadrado */
-    height: 30px; /* Altura do quadrado */
-    border: 2px solid red; /* Borda vermelha */
-    background-color: transparent; /* Fundo transparente */
-    color: red; /* Cor do 'x' */
+    top: 15px;
+    /* Ajuste a distância do topo se necessário */
+    right: 15px;
+    /* Ajuste a distância da direita se necessário */
+    width: 30px;
+    /* Largura do quadrado */
+    height: 30px;
+    /* Altura do quadrado */
+    border: 2px solid red;
+    /* Borda vermelha */
+    background-color: transparent;
+    /* Fundo transparente */
+    color: red;
+    /* Cor do 'x' */
     font-size: 20px;
     font-weight: bold;
     cursor: pointer;
-    
+
     /* Centraliza o 'x' dentro do quadrado */
     display: flex;
     justify-content: center;
