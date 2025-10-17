@@ -9,6 +9,8 @@
   "home.identify_yourself": "Identifique-se",
   "home.start_game": "Iniciar Jogo",
   "home.launching": "Lançando...",
+  "home.casual": "Casual",
+  "home.ranked": "Ranquiado",
 
   "login.title": "Login",
   "login.email": "Email",

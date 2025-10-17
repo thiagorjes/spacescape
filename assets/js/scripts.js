@@ -107,6 +107,8 @@ class SpaceScape {
         this.progress = 0;
         this.loggedIn = false;
         this.currentUser = null;
+        this.isGuestMode = false;
+        this.pendingGameMode = null; // Track if user was trying to play ranked mode
 
         this.init();
     }
@@ -194,11 +196,21 @@ class SpaceScape {
     }
 
     setupLaunchButtonListeners() {
+        // Mobile buttons
+        const casualBtnMobile = document.getElementById('casual-btn-mobile');
+        const rankedBtnMobile = document.getElementById('ranked-btn-mobile');
 
-        const launchBtnMobile = document.getElementById('launch-btn-mobile');
-        const launchBtnDesktop = document.getElementById('launch-btn-desktop');
-        if (launchBtnMobile) launchBtnMobile.addEventListener('click', () => this.handleLaunch('mobile'));
-        if (launchBtnDesktop) launchBtnDesktop.addEventListener('click', () => this.handleLaunch('desktop'));
+        // Desktop buttons
+        const casualBtnDesktop = document.getElementById('casual-btn-desktop');
+        const rankedBtnDesktop = document.getElementById('ranked-btn-desktop');
+
+        // Mobile event listeners
+        if (casualBtnMobile) casualBtnMobile.addEventListener('click', () => this.handleGameMode('casual', 'mobile'));
+        if (rankedBtnMobile) rankedBtnMobile.addEventListener('click', () => this.handleGameMode('ranked', 'mobile'));
+
+        // Desktop event listeners
+        if (casualBtnDesktop) casualBtnDesktop.addEventListener('click', () => this.handleGameMode('casual', 'desktop'));
+        if (rankedBtnDesktop) rankedBtnDesktop.addEventListener('click', () => this.handleGameMode('ranked', 'desktop'));
     }
 
     setupLanguageSwitcher() {
@@ -321,9 +333,9 @@ class SpaceScape {
         const title = document.querySelector('.game-title');
         const rocket = document.querySelector('.rocket-container .rocket-svg');
         const flame = rocket ? rocket.querySelector('#flame') : null;
-        const button = document.getElementById('launch-btn-mobile');
+        const buttonContainer = document.querySelector('.dual-button-container');
         if (title) title.style.opacity = Math.max(0, 1 - (progress * 2));
-        if (button) button.style.opacity = Math.max(0, 1 - (progress * 2));
+        if (buttonContainer) buttonContainer.style.opacity = Math.max(0, 1 - (progress * 2));
         if (rocket) {
             const rocketDelay = 0.3;
             const adjustedRocketProgress = Math.max(0, (progress - rocketDelay) / (1 - rocketDelay));
@@ -339,9 +351,9 @@ class SpaceScape {
         const title = document.querySelector('.game-title-desktop');
         const rocket = document.querySelector('.rocket-container-desktop .rocket-svg');
         const flame = rocket ? rocket.querySelector('#flame') : null;
-        const button = document.getElementById('launch-btn-desktop');
+        const buttonContainer = document.querySelector('.dual-button-container-desktop');
         if (title) title.style.opacity = Math.max(0, 1 - (progress * 2));
-        if (button) button.style.opacity = Math.max(0, 1 - (progress * 2));
+        if (buttonContainer) buttonContainer.style.opacity = Math.max(0, 1 - (progress * 2));
         if (rocket) {
             const rocketDelay = 0.3;
             const adjustedRocketProgress = Math.max(0, (progress - rocketDelay) / (1 - rocketDelay));
@@ -353,19 +365,83 @@ class SpaceScape {
         }
     }
 
+    handleGameMode(gameMode, viewType) {
+        if (this.animationInProgress) return;
+
+        this.isMobile = viewType === 'mobile';
+
+        if (gameMode === 'casual') {
+            // Casual mode - start immediately as guest
+            this.startGameAsGuest();
+        } else if (gameMode === 'ranked') {
+            // Ranked mode - require login first
+            if (this.loggedIn) {
+                // User is already logged in, start the game
+                this.startGameAsRanked();
+            } else {
+                // User needs to login first, store the pending game mode
+                this.pendingGameMode = 'ranked';
+                this.showLoginModal();
+            }
+        }
+    }
+
+    startGameAsGuest() {
+        this.isGuestMode = true;
+        this.isMobile = this.isMobile;
+        this.animationInProgress = true;
+        this.progress = 0;
+
+        const button = this.isMobile ? document.getElementById('casual-btn-mobile') : document.getElementById('casual-btn-desktop');
+        if (button) {
+            button.classList.add('loading');
+            button.textContent = i18n.t('home.launching');
+        }
+
+        console.log('Starting game in guest mode - no progress will be saved');
+    }
+
+    startGameAsRanked() {
+        this.isGuestMode = false;
+        this.isMobile = this.isMobile;
+        this.animationInProgress = true;
+        this.progress = 0;
+
+        const button = this.isMobile ? document.getElementById('ranked-btn-mobile') : document.getElementById('ranked-btn-desktop');
+        if (button) {
+            button.classList.add('loading');
+            button.textContent = i18n.t('home.launching');
+        }
+
+        console.log('Starting game in ranked mode - progress will be saved');
+    }
+
+    showLoginModal() {
+        const modalBackground = document.getElementById('modal-background');
+        if (modalBackground) {
+            modalBackground.style.display = 'flex';
+        } else {
+            console.error('Login modal not found');
+        }
+    }
+
     handleLaunch(viewType) {
         if (this.animationInProgress) return;
+
+        // Allow game launch for both logged in users and guests
+        this.isMobile = viewType === 'mobile';
+        this.animationInProgress = true;
+        this.progress = 0;
+
+        const button = this.isMobile ? document.getElementById('launch-btn-mobile') : document.getElementById('launch-btn-desktop');
+        if (button) {
+            button.classList.add('loading');
+            button.textContent = i18n.t('home.launching');
+        }
+
+        // Set guest mode if user is not logged in
         if (!this.loggedIn) {
-            this.openProfileModal();
-        } else {
-            this.isMobile = viewType === 'mobile';
-            this.animationInProgress = true;
-            this.progress = 0;
-            const button = this.isMobile ? document.getElementById('launch-btn-mobile') : document.getElementById('launch-btn-desktop');
-            if (button) {
-                button.classList.add('loading');
-                button.textContent = i18n.t('home.launching');
-            }
+            this.setGuestMode();
         }
     }
 
@@ -412,6 +488,12 @@ class SpaceScape {
             this.checkAuthenticationStatus();
             const rankingData = await fetchRankingData();
             renderRanking(rankingData);
+
+            // If user just logged in and was trying to play ranked mode, start the game
+            if (this.loggedIn && this.pendingGameMode === 'ranked') {
+                this.pendingGameMode = null; // Reset pending mode
+                this.startGameAsRanked();
+            }
         });
     }
 
@@ -444,8 +526,18 @@ class SpaceScape {
         }
     }
 
+    setGuestMode() {
+        this.isGuestMode = true;
+        console.log('Guest mode activated - no progress will be saved');
+    }
+
     onAnimationComplete() {
-        window.location.href = 'game.html';
+        // Pass guest mode information to the game page
+        const gameUrl = new URL('game.html', window.location.origin);
+        if (this.isGuestMode) {
+            gameUrl.searchParams.set('guest', 'true');
+        }
+        window.location.href = gameUrl.toString();
     }
 }
 

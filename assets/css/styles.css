@@ -284,6 +284,63 @@ header#header-container {
     z-index: 10;
 }
 
+.dual-button-container {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-mode-button {
+    background-color: #4a8fe7;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: 'Orbitron', monospace;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(74, 143, 231, 0.5);
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.game-mode-button:hover {
+    background-color: #3a7bd5;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(74, 143, 231, 0.7);
+    transform: translateY(-2px);
+}
+
+.game-mode-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 15px rgba(74, 143, 231, 0.4);
+}
+
+.casual-button {
+    background-color: #28a745;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(40, 167, 69, 0.5);
+}
+
+.casual-button:hover {
+    background-color: #218838;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(40, 167, 69, 0.7);
+    transform: translateY(-2px);
+}
+
+.ranked-button {
+    background-color: #ffc107;
+    color: #212529;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 193, 7, 0.5);
+}
+
+.ranked-button:hover {
+    background-color: #e0a800;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 193, 7, 0.7);
+    transform: translateY(-2px);
+}
+
 .launch-button {
     background-color: #4a8fe7;
     color: #fff;
@@ -314,6 +371,40 @@ header#header-container {
     position: absolute;
     bottom: 100px;
     z-index: 10;
+}
+
+.dual-button-container-desktop {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-mode-button-desktop {
+    background-color: #4a8fe7;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-family: 'Orbitron', monospace;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(74, 143, 231, 0.5);
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.game-mode-button-desktop:hover {
+    background-color: #3a7bd5;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(74, 143, 231, 0.7);
+    transform: translateY(-2px);
+}
+
+.game-mode-button-desktop:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 15px rgba(74, 143, 231, 0.4);
 }
 
 .launch-button-desktop {

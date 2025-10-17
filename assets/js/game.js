@@ -37,11 +37,22 @@ function updateHeaderUI(user) {
 function setupHeaderListeners() {
     document.addEventListener('click', (e) => {
         if (e.target.closest('.user-name') || e.target.closest('#account')) {
+            // Check if in guest mode - redirect to login page instead of showing modal
+            if (!currentUser) {
+                window.location.href = 'index.html';
+                return;
+            }
+
             const modal = document.getElementById('modal-background');
             if (modal) modal.style.display = 'flex';
         }
         if (e.target.closest('.home')) {
-            window.location.href = 'index.html';
+            // Return to main page (with guest mode if applicable)
+            const returnUrl = new URL('index.html', window.location.origin);
+            if (!currentUser) {
+                returnUrl.searchParams.set('guest', 'true');
+            }
+            window.location.href = returnUrl.toString();
         }
     });
 
@@ -119,7 +130,12 @@ async function saveGameState(options = {}) {
     const {
         isGameOver = false, isNewRun = false
     } = options;
-    if (!currentUser) return;
+
+    // Skip saving in guest mode
+    if (!currentUser) {
+        console.log('Guest mode: Progress not saved');
+        return;
+    }
 
     const gameStateRef = doc(db, "game_state", currentUser.uid);
 
@@ -161,7 +177,19 @@ async function saveGameState(options = {}) {
 }
 
 async function loadGameState() {
-    if (!currentUser) return;
+    // Skip loading in guest mode - start fresh
+    if (!currentUser) {
+        console.log('Guest mode: Starting with default game state');
+        gameState = {
+            level: 1,
+            deaths: 0,
+            fuel: 100,
+            temperature: 0
+        };
+        initGame();
+        return;
+    }
+
     const gameStateRef = doc(db, "game_state", currentUser.uid);
     try {
         const docSnap = await getDoc(gameStateRef);
@@ -278,18 +306,27 @@ async function showFuelEmptyPopup() {
     gameState.isFuelEmpty = true;
     gameState.gameStatus = 'paused';
     physicsEngine.stop();
-    await saveGameState({
-        isGameOver: true
-    });
+
+    // Only save game state if not in guest mode
+    if (currentUser) {
+        await saveGameState({
+            isGameOver: true
+        });
+    }
 }
 
 function showWinOverlay(level) {
     elements.winOverlay.style.display = 'flex';
     gameState.gameStatus = 'paused';
     physicsEngine.stop();
-    saveGameState({
-        isGameOver: false
-    });
+
+    // Only save game state if not in guest mode
+    if (currentUser) {
+        saveGameState({
+            isGameOver: false
+        });
+    }
+
     elements.mobileAdContainer.style.display = 'block';
     fetchAndDisplayRanking(level);
 }
@@ -315,11 +352,20 @@ function handleRestart() {
     updateDisplays();
     updateProgressBars();
 
-    saveGameState({
-        isGameOver: false,
-        isNewRun: true
-    });
-    window.location = 'index.html'
+    // Only save game state if not in guest mode
+    if (currentUser) {
+        saveGameState({
+            isGameOver: false,
+            isNewRun: true
+        });
+    }
+
+    // Return to main page (with guest mode if applicable)
+    const returnUrl = new URL('index.html', window.location.origin);
+    if (!currentUser) {
+        returnUrl.searchParams.set('guest', 'true');
+    }
+    window.location.href = returnUrl.toString();
 }
 
 function handleNextLevel() {
@@ -333,7 +379,10 @@ function handleNextLevel() {
     updateDisplays();
     updateProgressBars();
 
-    saveGameState(false);
+    // Only save game state if not in guest mode
+    if (currentUser) {
+        saveGameState(false);
+    }
 }
 
 function handleControl(direction, isPressed) {
@@ -431,9 +480,12 @@ function onGameEvent(event) {
             updateDisplays();
             updateProgressBars();
 
-            saveGameState({
-                isGameOver: false
-            });
+            // Only save game state if not in guest mode
+            if (currentUser) {
+                saveGameState({
+                    isGameOver: false
+                });
+            }
             break;
         case 'fuel-empty':
             showFuelEmptyPopup();
@@ -462,14 +514,27 @@ function onGameEvent(event) {
 document.addEventListener('DOMContentLoaded', () => {
     i18n.ready.then(() => { // Espera o i18n carregar antes de tudo
         setupHeaderListeners();
-        checkAuthState(user => {
-            if (!user) {
-                window.location.href = 'index.html';
-            } else {
-                currentUser = user;
-                updateHeaderUI(user);
-                loadGameState();
-            }
-        });
+
+        // Check if we're in guest mode
+        const urlParams = new URLSearchParams(window.location.search);
+        const isGuestMode = urlParams.get('guest') === 'true';
+
+        if (isGuestMode) {
+            // Run in guest mode - no authentication required
+            currentUser = null;
+            updateHeaderUI(null);
+            initGame();
+        } else {
+            // Normal authenticated mode
+            checkAuthState(user => {
+                if (!user) {
+                    window.location.href = 'index.html';
+                } else {
+                    currentUser = user;
+                    updateHeaderUI(user);
+                    loadGameState();
+                }
+            });
+        }
     });
 });
