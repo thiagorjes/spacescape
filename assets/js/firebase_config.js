@@ -7,15 +7,15 @@ import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase
 // =================================================================================
 // Suas configurações do Firebase. Este é o único lugar para editá-las.
 // =================================================================================
-const firebaseConfig = {
+  const firebaseConfig = {
     apiKey: "AIzaSyBTkb531VznWPdP4-H6koUsaaqfclk4IhE",
     authDomain: "ultimateforce-6dad4.firebaseapp.com",
     projectId: "ultimateforce-6dad4",
     storageBucket: "ultimateforce-6dad4.firebasestorage.app",
     messagingSenderId: "350709553465",
-    appId: "1:350709553465:web:627e79ddbfabf8c7df30e8",
-    measurementId: "G-QVR6FNGS1W"
-};
+    appId: "1:350709553465:web:bc4683f3fcc7997ddf30e8",
+    measurementId: "G-B0PVXBD2Y1"
+  };
 
 // Inicializa o Firebase
 const app = initializeApp(firebaseConfig);
