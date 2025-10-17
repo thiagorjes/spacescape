@@ -543,6 +543,7 @@ function onGameEvent(event) {
         case 'recharge-complete':
             gameState.shields = 3;
             gameState.shieldPercentage = 100;
+            gameState.fuel = 100;
             // Fall through to cancelled
         case 'recharge-cancelled':
             gameState.rechargeInProgress = false;

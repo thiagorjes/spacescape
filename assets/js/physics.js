@@ -52,8 +52,8 @@ class PhysicsEngine {
         this.keyMap = {};
         this.rocketRatio = 8;
         this.collitionThreshold = 100;
-        this.minRadius=10;
-        this.maxRadius=80;
+        this.minRadius = 10;
+        this.maxRadius = 80;
         this.minDistance = 50;
 
     }
@@ -144,13 +144,13 @@ class PhysicsEngine {
             } while (isTooClose);
             tempPlanets.push({ position: new Vector(x, y), radius, mass, color: '#4a8fe7' });
         }
-        
+
         // Shield Recharge Planet Logic
         if (this.gameState.level % this.config.SHIELD_RECHARGE_LEVEL_INTERVAL === 0) {
             let radius = this.minRadius + Math.random() * (this.maxRadius - this.minRadius);
             let mass = PLANET_DENSITY * Math.pow(radius, 2);
             let x, y, isTooClose;
-             do {
+            do {
                 isTooClose = false;
                 x = Math.random() * (this.canvas.width - radius * 2) + radius;
                 y = Math.random() * (this.canvas.height - radius * 2) + radius;
@@ -260,10 +260,57 @@ class PhysicsEngine {
             const dist = distVec.magnitude;
 
             if (dist < this.rocketRatio + planet.radius) { // Collision detected
-                if (planet.isRecharge) {
-                    onRechargePlanet = true;
-                    // Landed condition for recharge
-                    if (this.rocket.velocity.magnitude < 5) {
+
+                const impactForce = this.rocket.velocity.magnitude * ROCKET_MASS;
+                if (impactForce > this.collitionThreshold) {
+                    if (this.gameState.shields > 0) { // Shield is active
+                        // Deplete shield
+                        const shieldDamage = impactForce / 10; // Proportional damage, needs tuning
+                        this.gameState.shieldPercentage -= shieldDamage;
+
+                        // Handle shield depletion
+                        if (this.gameState.shieldPercentage <= 0) {
+                            this.gameState.shields--;
+                            if (this.gameState.shields > 0) {
+                                this.gameState.shieldPercentage = 100;
+                            } else {
+                                this.gameState.shieldPercentage = 0;
+                            }
+                        }
+
+                        // Elastic collision
+                        const normal = distVec.normalize;
+                        const parallelVel = this.rocket.velocity.projection(normal);
+                        const orthoVel = this.rocket.velocity.clone().subtract(parallelVel);
+                        // For 100% elastic, just reverse the parallel component
+                        this.rocket.velocity = orthoVel.subtract(parallelVel).multiply(1 - FRICTION);
+                        const overlap = this.rocketRatio + planet.radius - dist;
+                        this.rocket.position.add(normal.multiply(overlap));
+
+                    } else {
+                        this.isExploding = true;
+                        this.stop();
+                        this.explosionStartTimestamp = performance.now();
+                        setTimeout(() => { this.dispatchEvent('death-reset'); }, 2000);
+                    }
+                }
+                else {
+                    const normal = distVec.normalize;
+                    const parallelVel = this.rocket.velocity.projection(normal);
+                    const orthoVel = this.rocket.velocity.clone().subtract(parallelVel);
+                    this.rocket.velocity = orthoVel.subtract(parallelVel).multiply(1 - FRICTION);
+                    const overlap = this.rocketRatio + planet.radius - dist;
+                    this.rocket.position.add(normal.multiply(overlap));
+
+                    // Check for win condition after handling collision
+                    if (planet === this.endPlanet) {
+                        this.stop();
+                        this.dispatchEvent('level-win', { level: this.gameState.level });
+                    }
+
+                    if (planet.isRecharge) {
+                        onRechargePlanet = true;
+                        // Landed condition for recharge
                         if (!this.gameState.rechargeInProgress) {
                             this.dispatchEvent('recharge-started');
                             this.rechargeTimer = setInterval(() => {
@@ -277,57 +324,11 @@ class PhysicsEngine {
                         }
                     }
                 }
-                const impactForce = this.rocket.velocity.magnitude * ROCKET_MASS;
 
-                if (this.gameState.shields > 0) { // Shield is active
-                    // Deplete shield
-                    const shieldDamage = impactForce / 10; // Proportional damage, needs tuning
-                    this.gameState.shieldPercentage -= shieldDamage;
-
-                    // Handle shield depletion
-                    if (this.gameState.shieldPercentage <= 0) {
-                        this.gameState.shields--;
-                        if (this.gameState.shields > 0) {
-                            this.gameState.shieldPercentage = 100;
-                        } else {
-                            this.gameState.shieldPercentage = 0;
-                        }
-                    }
-
-                    // Elastic collision
-                    const normal = distVec.normalize;
-                    const parallelVel = this.rocket.velocity.projection(normal);
-                    const orthoVel = this.rocket.velocity.clone().subtract(parallelVel);
-                    // For 100% elastic, just reverse the parallel component
-                    this.rocket.velocity = orthoVel.subtract(parallelVel);
-                    const overlap = this.rocketRatio + planet.radius - dist;
-                    this.rocket.position.add(normal.multiply(overlap));
-
-                } else { // No shields left
-                    if (impactForce > this.collitionThreshold) {
-                        this.isExploding = true;
-                        this.stop();
-                        this.explosionStartTimestamp = performance.now();
-                        setTimeout(() => { this.dispatchEvent('death-reset'); }, 2000);
-                    } else { // Bounce if impact is not strong enough to destroy
-                         const normal = distVec.normalize;
-                        const parallelVel = this.rocket.velocity.projection(normal);
-                        const orthoVel = this.rocket.velocity.clone().subtract(parallelVel);
-                        this.rocket.velocity = orthoVel.subtract(parallelVel).multiply(1 - FRICTION);
-                        const overlap = this.rocketRatio + planet.radius - dist;
-                        this.rocket.position.add(normal.multiply(overlap));
-                    }
-                }
-
-                // Check for win condition after handling collision
-                 if (planet === this.endPlanet) {
-                    this.stop();
-                    this.dispatchEvent('level-win', {level: this.gameState.level});
-                }
                 return; // Exit after handling one collision
             }
         }
-         if (!onRechargePlanet && this.gameState.rechargeInProgress) {
+        if (!onRechargePlanet && this.gameState.rechargeInProgress) {
             clearInterval(this.rechargeTimer);
             this.dispatchEvent('recharge-cancelled');
         }
@@ -369,9 +370,9 @@ class PhysicsEngine {
             // 2. Shield count indicators (left side, vertical)
             this.ctx.fillStyle = 'rgba(173, 255, 47, 1)'; // Solid green-apple
             for (let i = 0; i < this.gameState.shields; i++) {
-                 this.ctx.beginPath();
-                 this.ctx.arc(-25, -10 + (i * 10), 3, 0, 2 * Math.PI);
-                 this.ctx.fill();
+                this.ctx.beginPath();
+                this.ctx.arc(-25, -10 + (i * 10), 3, 0, 2 * Math.PI);
+                this.ctx.fill();
             }
 
             // 3. Shield percentage bar (right side)
@@ -428,7 +429,7 @@ class PhysicsEngine {
         this.ctx.translate(this.rocket.position.x, this.rocket.position.y);
         this.ctx.rotate(this.rocket.angle);
         const scale = this.rocketRatio / 8;
-        if (this.gameState.fuel > 0 && !this.gameState.isOverheated &&(this.keyMap['up'] || this.keyMap['down'])) {
+        if (this.gameState.fuel > 0 && !this.gameState.isOverheated && (this.keyMap['up'] || this.keyMap['down'])) {
             this.ctx.fillStyle = '#ffcc00';
             this.ctx.beginPath();
             this.ctx.moveTo(0, 9 * scale);
@@ -457,7 +458,7 @@ class PhysicsEngine {
     }
 
     dispatchEvent(type, detail = {}) {
-        let temp =new CustomEvent('gameEvent', { detail: { type, ...detail } });
+        let temp = new CustomEvent('gameEvent', { detail: { type, ...detail } });
         document.dispatchEvent(temp);
     }
 }
