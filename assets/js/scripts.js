@@ -468,12 +468,36 @@ class SpaceScape {
             userNameElement.textContent = displayName;
         }
         this.updateButtonText(i18n.t('home.start_game'));
+        this.updateGameModeButtons();
     }
 
     updateUIForLoggedOutUser() {
         const userNameElement = document.querySelector('.user-name');
         if (userNameElement) userNameElement.textContent = i18n.t('header.login');
         this.updateButtonText(i18n.t('home.identify_yourself'));
+        this.updateGameModeButtons();
+    }
+
+    updateGameModeButtons() {
+        // Get all game mode buttons
+        const casualBtnMobile = document.getElementById('casual-btn-mobile');
+        const rankedBtnMobile = document.getElementById('ranked-btn-mobile');
+        const casualBtnDesktop = document.getElementById('casual-btn-desktop');
+        const rankedBtnDesktop = document.getElementById('ranked-btn-desktop');
+
+        if (this.loggedIn) {
+            // User is logged in - show only ranked buttons, hide casual buttons
+            if (casualBtnMobile) casualBtnMobile.style.display = 'none';
+            if (casualBtnDesktop) casualBtnDesktop.style.display = 'none';
+            if (rankedBtnMobile) rankedBtnMobile.style.display = 'block';
+            if (rankedBtnDesktop) rankedBtnDesktop.style.display = 'block';
+        } else {
+            // User is not logged in - show only casual buttons, hide ranked buttons
+            if (casualBtnMobile) casualBtnMobile.style.display = 'block';
+            if (casualBtnDesktop) casualBtnDesktop.style.display = 'block';
+            if (rankedBtnMobile) rankedBtnMobile.style.display = 'none';
+            if (rankedBtnDesktop) rankedBtnDesktop.style.display = 'none';
+        }
     }
 
     updateButtonText(text) {

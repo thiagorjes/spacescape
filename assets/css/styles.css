@@ -315,29 +315,29 @@ header#header-container {
 
 .game-mode-button:active {
     transform: translateY(0);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 15px rgba(74, 143, 231, 0.4);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 15px rgba(74, 143, 231, 0.7);
 }
 
 .casual-button {
-    background-color: #28a745;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(40, 167, 69, 0.5);
+    background-color: #3a7bd5;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(74, 143, 231, 0.7);
 }
 
 .casual-button:hover {
-    background-color: #218838;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(40, 167, 69, 0.7);
+    background-color: #3a7bd5;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(74, 143, 231, 0.7);
     transform: translateY(-2px);
 }
 
 .ranked-button {
-    background-color: #ffc107;
+    background-color: #e23c0a;
     color: #212529;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 193, 7, 0.5);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 36, 7, 0.5);
 }
 
 .ranked-button:hover {
-    background-color: #e0a800;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 193, 7, 0.7);
+    background-color: #e23c0a;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 36, 7, 0.5);
     transform: translateY(-2px);
 }
 
