@@ -3,6 +3,7 @@
 import { getCurrentUser, checkAuthState } from './auth-utils.js';
 import { db } from './firebase_config.js';
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { i18n } from './i18n.js';
 
 
 /**
@@ -18,23 +19,23 @@ async function fetchRankingData() {
         querySnapshot.forEach(doc => {
             const sessions = doc.data().sessions || [];
             // const userGameOverSessions = sessions.filter(s => s.gameover === true);
-            
+
             if (sessions.length > 0) {
                 const bestSession = sessions.sort((a, b) => {
-                     if (b.level !== a.level) return b.level - a.level;
-                     return a.deaths - b.deaths;
+                    if (b.level !== a.level) return b.level - a.level;
+                    return a.deaths - b.deaths;
                 })[0];
                 allPlayersBestSessions.push(bestSession);
             }
         });
 
         if (allPlayersBestSessions.length === 0) return [];
-        
+
         allPlayersBestSessions.sort((a, b) => {
             if (b.level !== a.level) return b.level - a.level;
             return a.deaths - b.deaths;
         });
-        
+
         return allPlayersBestSessions;
     } catch (error) {
         console.error("Erro ao buscar o ranking:", error);
@@ -43,72 +44,55 @@ async function fetchRankingData() {
 }
 
 /**
- * Renderiza o HTML para os painéis de ranking.
+ * Renderiza os dados do ranking nos containers HTML existentes.
  * @param {Array} rankingData - A lista de dados do ranking.
  */
 function renderRanking(rankingData) {
     const currentUser = getCurrentUser();
-    
-    const previewContainer = document.getElementById('desktop-ranking-preview');
-    const fullListContainer = document.getElementById('ranking-list');
-    const playerRankContainer = document.getElementById('player-rank-container');
 
-    previewContainer.innerHTML = '';
-    fullListContainer.innerHTML = '';
-    playerRankContainer.innerHTML = '';
+    const loadingScreen = document.getElementById('ranking-loading-screen');
+    const rankingContainer = document.getElementById('ranking-container');
+    const rankingList = document.getElementById('ranking-list');
+
+    // Esconde a tela de loading e mostra o conteúdo do ranking
+    if (loadingScreen) loadingScreen.classList.add('hidden');
+    if (rankingContainer) rankingContainer.classList.remove('hidden');
+
+    // Limpa o conteúdo existente
+    if (rankingList) {
+        // Remove itens existentes (exceto header)
+        const existingItems = rankingList.querySelectorAll('li:not(.ranking-header)');
+        existingItems.forEach(item => item.remove());
+    }
 
     if (rankingData.length === 0) {
-        previewContainer.innerHTML = '<h3>Ranking</h3><p>No data available</p>';
+        if (rankingList) {
+            const noDataItem = document.createElement('li');
+            noDataItem.innerHTML = `<p>${i18n.t('ranking.no_data')}</p>`;
+            noDataItem.style.textAlign = 'center';
+            noDataItem.style.padding = '20px';
+            rankingList.appendChild(noDataItem);
+        }
         return;
     }
 
-    let playerRank = -1;
-    let playerBestSession = null;
+    // Preenche a lista com top 10
+    if (rankingList) {
+        const top10 = rankingData.slice(0, 10);
 
-    if (currentUser) {
-        const playerIndex = rankingData.findIndex(s => s.userId === currentUser.uid);
-        if (playerIndex !== -1) {
-            playerRank = playerIndex + 1;
-            playerBestSession = rankingData[playerIndex];
-        }
-    }
-
-    const top3 = rankingData.slice(0, 3);
-    let previewHTML = '<h3>TOP 3</h3><ol>';
-    previewHTML += `<li class="ranking-header"><span>#</span><span>Name</span><span>Stage</span><span>Deaths</span></li>`;
-    top3.forEach((session, index) => {
-        const isPlayer = currentUser && session.userId === currentUser.uid;
-        previewHTML += `<li class="${isPlayer ? 'player-highlight' : ''}">
-            <span>${index + 1}</span>
-            <span>${session.username}</span>
-            <span>${session.level}</span>
-            <span>${session.deaths}</span>
-        </li>`;
-    });
-    previewHTML += '</ol>';
-    previewContainer.innerHTML = previewHTML;
-
-    const top10 = rankingData.slice(0, 10);
-    let fullListHTML = `<li class="ranking-header"><span>#</span><span>Name</span><span>Stage</span><span>Deaths</span></li>`;
-    top10.forEach((session, index) => {
-        const isPlayer = currentUser && session.userId === currentUser.uid;
-        fullListHTML += `<li class="${isPlayer ? 'player-highlight' : ''}">
-            <span>${index + 1}</span>
-            <span>${session.username}</span>
-            <span>${session.level}</span>
-            <span>${session.deaths}</span>
-        </li>`;
-    });
-    fullListContainer.innerHTML = fullListHTML;
-
-    if (playerRank > 10 && playerBestSession) {
-        let playerRankHTML = `<li class="player-highlight">
-            <span>${playerRank}</span>
-            <span>${playerBestSession.username}</span>
-            <span>${playerBestSession.level}</span>
-            <span>${playerBestSession.deaths}</span>
-        </li>`;
-        playerRankContainer.innerHTML = playerRankHTML;
+        // Adiciona novos itens
+        top10.forEach((session, index) => {
+            const isPlayer = currentUser && session.userId === currentUser.uid;
+            const listItem = document.createElement('li');
+            listItem.className = isPlayer ? 'player-highlight' : '';
+            listItem.innerHTML = `
+                <span>${index + 1}</span>
+                <span>${session.username}</span>
+                <span>${session.level}</span>
+                <span>${session.deaths}</span>
+            `;
+            rankingList.appendChild(listItem);
+        });
     }
 }
 
@@ -136,6 +120,9 @@ class SpaceScape {
 
         const rankingData = await fetchRankingData();
         renderRanking(rankingData);
+
+        // Setup language switcher after components are loaded
+        this.setupComponentsLoadedListener();
     }
 
     setupEventListeners() {
@@ -154,37 +141,87 @@ class SpaceScape {
      * componentes carregados dinamicamente.
      */
     setupRankingModalListeners() {
-        const modal = document.getElementById('full-ranking-modal');
-        
         // Adiciona um único ouvinte ao 'document' que está sempre presente.
         document.addEventListener('click', (e) => {
-            // Verifica se o clique foi no ícone de ranking (ou em um elemento dentro dele)
+            // Verifica se o clique foi no ícone de ranking
             if (e.target.closest('#ranking-toggle')) {
-                modal.classList.remove('hidden');
-            }
-            
-            // Verifica se o clique foi no preview do ranking no desktop
-            if (e.target.closest('#desktop-ranking-preview')) {
-                modal.classList.remove('hidden');
+                this.showRankingModal();
             }
 
-            // Verifica se o clique foi no botão de fechar o modal
-            if (e.target.closest('#close-ranking-modal')) {
-                modal.classList.add('hidden');
+            // Verifica se o clique foi em QUALQUER botão de fechar do modal
+            if (e.target.closest('.close-button')) {
+                // Encontra o modal pai mais próximo (seja de ranking ou de login)
+                const modal = e.target.closest('.ranking-overlay, .modal-overlay');
+                // Se encontrar o modal, o esconde
+                if (modal) {
+                    modal.style.display = 'none';
+                }
             }
 
-            // A lógica anterior de abrir o modal de perfil também pode ser centralizada aqui
+            // Lógica para abrir o modal de perfil
             if (e.target.closest('.user-name') || e.target.closest('#account')) {
                 this.openProfileModal();
             }
         });
     }
 
+    /**
+     * Mostra o modal de ranking
+     */
+    showRankingModal() {
+        const modal = document.getElementById('ranking-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            // Remove hidden class if it exists
+            modal.classList.remove('hidden');
+        } else {
+            console.error('Ranking modal not found');
+        }
+    }
+
+    /**
+     * Esconde o modal de ranking
+     */
+    hideRankingModal() {
+        const modal = document.getElementById('ranking-modal');
+        if (modal) {
+            modal.style.display = 'none';
+            // Add hidden class for consistency
+            modal.classList.add('hidden');
+        } else {
+            console.error('Ranking modal not found');
+        }
+    }
+
     setupLaunchButtonListeners() {
+
         const launchBtnMobile = document.getElementById('launch-btn-mobile');
         const launchBtnDesktop = document.getElementById('launch-btn-desktop');
         if (launchBtnMobile) launchBtnMobile.addEventListener('click', () => this.handleLaunch('mobile'));
         if (launchBtnDesktop) launchBtnDesktop.addEventListener('click', () => this.handleLaunch('desktop'));
+    }
+
+    setupLanguageSwitcher() {
+        console.log("carregou script de mudar language");
+        const langButtons = document.querySelectorAll('.lang-btn');
+        console.log(langButtons);
+        langButtons.forEach(button => {
+            console.log("cada botao");
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log("trocou idioma por ");
+                const targetLang = e.target.getAttribute('data-lang');
+                console.log(targetLang);
+                if (targetLang && i18n.setLanguage(targetLang)) {
+                    // Update active button
+                    langButtons.forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+
+                    // After language change, verify user login status and update name display
+                    this.checkAuthenticationStatus();
+                }
+            });
+        });
     }
 
     createStarfield() {
@@ -327,7 +364,7 @@ class SpaceScape {
             const button = this.isMobile ? document.getElementById('launch-btn-mobile') : document.getElementById('launch-btn-desktop');
             if (button) {
                 button.classList.add('loading');
-                button.textContent = 'Launching...';
+                button.textContent = i18n.t('home.launching');
             }
         }
     }
@@ -349,14 +386,18 @@ class SpaceScape {
 
     updateUIForLoggedInUser(user) {
         const userNameElement = document.querySelector('.user-name');
-        if (userNameElement) userNameElement.textContent = user.username || user.displayName || user.email;
-        this.updateButtonText('Start Game');
+        if (userNameElement) {
+            // Use the username if available, otherwise display name, otherwise email
+            const displayName = user.username || user.displayName || user.email;
+            userNameElement.textContent = displayName;
+        }
+        this.updateButtonText(i18n.t('home.start_game'));
     }
 
     updateUIForLoggedOutUser() {
         const userNameElement = document.querySelector('.user-name');
-        if (userNameElement) userNameElement.textContent = 'Login';
-        this.updateButtonText('Identify yourself');
+        if (userNameElement) userNameElement.textContent = i18n.t('header.login');
+        this.updateButtonText(i18n.t('home.identify_yourself'));
     }
 
     updateButtonText(text) {
@@ -374,13 +415,46 @@ class SpaceScape {
         });
     }
 
+    setupComponentsLoadedListener() {
+        // Check if components are already loaded
+        if (document.querySelector('.lang-btn')) {
+            this.setupLanguageSwitcher();
+            this.updateActiveLanguageButton();
+            return;
+        }
+
+        // Wait for components to be loaded
+        document.addEventListener('componentsLoaded', () => {
+            this.setupLanguageSwitcher();
+            this.updateActiveLanguageButton();
+        });
+    }
+
+    updateActiveLanguageButton() {
+        const currentLang = i18n.getCurrentLanguage();
+        const langButtons = document.querySelectorAll('.lang-btn');
+
+        // Remove active class from all buttons
+        langButtons.forEach(btn => btn.classList.remove('active'));
+
+        // Add active class to the button that matches current language
+        const activeButton = document.querySelector(`[data-lang="${currentLang}"]`);
+        if (activeButton) {
+            activeButton.classList.add('active');
+        }
+    }
+
     onAnimationComplete() {
         window.location.href = 'game.html';
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Agora é seguro inicializar a aplicação principal
     window.spaceScapeInstance = new SpaceScape();
+
+    // Espera o gerenciador i18n estar totalmente inicializado (traduções carregadas)
+    
 });
 
 window.addEventListener('resize', () => {

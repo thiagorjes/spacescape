@@ -32,7 +32,7 @@
                 </div>
 
                 <div class="title-container">
-                    <h1 class="game-title">Space Scape</h1>
+                    <h1 class="game-title" data-i18n="home.title">Space Scape</h1>
                 </div>
 
                 <div class="rocket-container">
@@ -52,7 +52,7 @@
                     </div>
 
                     <div class="title-container-desktop">
-                        <h1 class="game-title-desktop">Space Scape</h1>
+                    <h1 class="game-title-desktop" data-i18n="home.title">Space Scape</h1>
                     </div>
 
                     <div class="rocket-container-desktop">
@@ -71,14 +71,17 @@
     </div>
     <!-- Modal will be loaded here -->
     <div id="modal-container"></div>
+    <div id="ranking-container"></div>
+
     <script type="module" src="assets/js/component-loader.js"></script>
     <script type="module">
+        
         // Load common components
         import { ComponentLoader } from './assets/js/component-loader.js';
 
         document.addEventListener('DOMContentLoaded', async () => {
             const loader = new ComponentLoader();
-
+            
             // Load header
             await loader.replaceWithComponent('header', '#header-container');
 
@@ -88,6 +91,11 @@
             // Load rocket components
             await loader.replaceWithComponent('rocket', '#rocket-mobile-container');
             await loader.replaceWithComponent('rocket', '#rocket-desktop-container');
+
+            // Load ranking component
+            await loader.replaceWithComponent('ranking', '#ranking-container');
+            
+            document.dispatchEvent(new Event('componentsLoaded'));
         });
     </script>
     <script type="module" src="assets/js/scripts.js"></script>
@@ -106,21 +114,6 @@
             });
         }
     </script>
-
-    <div id="desktop-ranking-preview" class="desktop-ranking-preview"></div>
-
-    <div id="full-ranking-modal" class="full-ranking-modal hidden">
-        <div class="ranking-content">
-            <div id="close-ranking-modal" class="close-button">&times;</div>
-            <h2>Best Players</h2>
-            <ul id="ranking-list">
-            </ul>
-            <div id="player-rank-container">
-            </div>
-        </div>
-    </div>
-
-
 </body>
 
 </html>

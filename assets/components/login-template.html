@@ -1,0 +1,17 @@
+<div id="modal-close" class="close-button">×</div>
+<h1 class="text-2xl font-bold text-center text-gray-800" data-i18n="login.title">Login</h1>
+<form id="login-form" class="space-y-4">
+    <div>
+        <label for="login-email" class="text-sm font-medium text-gray-700" data-i18n="login.email">Email</label>
+        <input id="login-email" name="email" type="email" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" data-i18n-placeholder="login.email_placeholder" placeholder="your@email.com">
+    </div>
+    <div>
+        <label for="login-password" class="text-sm font-medium text-gray-700" data-i18n="login.password">Password</label>
+        <input id="login-password" name="password" type="password" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" data-i18n-placeholder="login.password_placeholder" placeholder="********">
+    </div>
+    <button type="submit" class="w-full px-4 py-2 text-lg font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300" data-i18n="login.enter">Enter</button>
+</form>
+<p id="auth-error" class="text-sm text-center text-red-500 mt-2 h-4"></p>
+<p class="mt-6 text-sm text-center text-gray-600">
+    <span data-i18n="login.register_link">Don't have an account?</span> <a href="#" id="show-register" class="font-medium text-indigo-600 hover:underline" data-i18n="login.register">Register</a>
+</p>

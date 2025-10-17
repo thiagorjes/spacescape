@@ -18,6 +18,7 @@ import {
     query,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { i18n } from './i18n.js';
 
 
 const FUEL_CONSUMPTION_THRUST = 0.01;
@@ -46,6 +47,23 @@ function setupHeaderListeners() {
 
     document.addEventListener('authStateChange', (e) => {
         updateHeaderUI(e.detail.user);
+    });
+
+    // Setup language switcher for game page
+    setupLanguageSwitcher();
+}
+
+function setupLanguageSwitcher() {
+    const langButtons = document.querySelectorAll('.lang-btn');
+    langButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            const targetLang = e.target.getAttribute('data-lang');
+            if (targetLang && i18n.setLanguage(targetLang)) {
+                // Update active button
+                langButtons.forEach(btn => btn.classList.remove('active'));
+                e.target.classList.add('active');
+            }
+        });
     });
 }
 // --- FIM DA LÓGICA DO HEADER ---
@@ -216,7 +234,7 @@ function showStartScreen() {
     // Limpa o timeout de segurança se ele existir
     if (loadingTimeout) clearTimeout(loadingTimeout);
 
-    elements.stageTitle.textContent = `STAGE ${String(gameState.level).padStart(2, '0')}`;
+    elements.stageTitle.textContent = i18n.translate('game.stage', { stage: String(gameState.level).padStart(2, '0') });
     elements.startScreen.style.display = 'flex';
     elements.startButton.style.display = 'block'; // Garante que o botão de start apareça
     gameState.gameStatus = 'ready';
@@ -224,7 +242,7 @@ function showStartScreen() {
 }
 
 function showLoadingPlanetsScreen() {
-    elements.stageTitle.textContent = 'LOADING PLANETS...';
+    elements.stageTitle.textContent = i18n.t('game.loading_planets');
     elements.startButton.style.display = 'none'; // Esconde o botão de start
     elements.startScreen.style.display = 'flex';
     gameState.gameStatus = 'loading_planets';

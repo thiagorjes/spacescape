@@ -72,31 +72,31 @@
                                             </div> -->
                                         </div>
                                     </div>
-                                    <button id="next-level-btn" class="start-button" style="display: block;">Next Level</button>
+                                    <button id="next-level-btn" class="start-button" style="display: block;" data-i18n="game.next_level">Next Level</button>
                                 </div>
                             </div>
                             <div id="startScreen" class="popup-overlay">
                                 <div class="popup-content">
                                     <div class="rocket-icon"><i class="fas fa-rocket"></i></div>
-                                    <div class="stage-title" id="stageTitle">LOADING PLANETS...</div>
-                                    <button id="startButton" class="start-button">LET'S GO</button>
+                                    <div class="stage-title" id="stageTitle" data-i18n="game.loading_planets">LOADING PLANETS...</div>
+                                    <button id="startButton" class="start-button" data-i18n="game.lets_go">LET'S GO</button>
                                 </div>
                             </div>
 
                             <div id="fuelEmptyPopup" class="popup-overlay" style="display: none;">
                                 <div class="popup-content fuel-popup">
                                     <div class="fuel-icon"><i class="fas fa-gas-pump"></i></div>
-                                    <div class="fuel-title">GAME OVER</div>
-                                    <div class="fuel-subtitle">You reached Stage <span id="finalStage">1</span></div>
-                                    <div class="fuel-subtitle">Deaths: <span id="finalDeaths">0</span></div>
+                                    <div class="fuel-title" data-i18n="game.game_over">GAME OVER</div>
+                                    <div class="fuel-subtitle" data-i18n="game.reached_stage">You reached Stage <span id="finalStage">1</span></div>
+                                    <div class="fuel-subtitle" data-i18n="game.deaths">Deaths: <span id="finalDeaths">0</span></div>
                                     <button id="restartButton" class="restart-button"
-                                        style="display: block;">RESTART</button>
+                                        style="display: block;" data-i18n="game.restart">RESTART</button>
                                 </div>
                             </div>
 
                             <div id="overheatAlert" class="overheat-alert" style="display: none;">
                                 <div class="overheat-content">
-                                    <span>OVERHEATED!</span>
+                                    <span data-i18n="game.overheated">OVERHEATED!</span>
                                 </div>
                             </div>
                         </div>
@@ -111,7 +111,7 @@
                             </div>
                             <div class="control-col">
                                 <div class="display" id="stageDisplay">
-                                    <div class="display-label">STAGES</div>
+                                    <div class="display-label" data-i18n="game.stages">STAGES</div>
                                     <div class="display-segments">
                                         <div class="segment">0</div>
                                         <div class="segment">1</div>
@@ -131,7 +131,7 @@
                             </div>
                             <div class="control-col">
                                 <div class="display" id="deathDisplay">
-                                    <div class="display-label">DEATHS</div>
+                                    <div class="display-label" data-i18n="game.deaths_label">DEATHS</div>
                                     <div class="display-segments">
                                         <div class="segment">0</div>
                                         <div class="segment">0</div>
@@ -159,8 +159,7 @@
 
     <!-- Modal will be loaded here -->
     <div id="modal-container"></div>
-
-    <!-- O SCRIPT DE CONTROLE DE ANÚNCIOS FOI REMOVIDO DAQUI E INTEGRADO AO game.js -->
+    <div id="ranking-container"></div>
 
     <script type="module" src="assets/js/component-loader.js"></script>
     <script type="module">
@@ -169,23 +168,15 @@
             const loader = new ComponentLoader();
             await loader.replaceWithComponent('header', '#header-container');
             await loader.replaceWithComponent('login-modal', '#modal-container');
+
+            // Load ranking component
+            await loader.replaceWithComponent('ranking', '#ranking-container');
         });
     </script>
     <script type="module" src="assets/js/game.js"></script>
     <script type="module" src="assets/js/login.js"></script>
     <script type="module" src="assets/js/auth-utils.js"></script>
     <script type="module" src="assets/js/scripts.js"></script>
-    <div id="desktop-ranking-preview" class="desktop-ranking-preview"></div>
-    <div id="full-ranking-modal" class="full-ranking-modal hidden">
-        <div class="ranking-content">
-            <div id="close-ranking-modal" class="close-button">&times;</div>
-            <h2>Best Players</h2>
-            <ul id="ranking-list">
-            </ul>
-            <div id="player-rank-container">
-            </div>
-        </div>
-    </div>
 </body>
 
 </html>

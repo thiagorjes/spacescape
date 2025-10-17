@@ -28,84 +28,43 @@ import {
     getDocs
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
+// Import internationalization manager
+import { i18n } from "./i18n.js";
+
 // O restante do código de lógica da UI permanece o mesmo...
 
 // Elementos da UI - serão inicializados quando o DOM estiver pronto
 let loadingScreen, loginContainer, welcomeContainer, userNameDisplay, logoutButton;
 
-// --- TEMPLATES HTML ---
-const loginTemplate = `
-    <div id="modal-close" class="close-button">x</div>
-    <h1 class="text-2xl font-bold text-center text-gray-800">Login</h1>
-    <form id="login-form" class="space-y-4">
-        <div>
-            <label for="login-email" class="text-sm font-medium text-gray-700">Email</label>
-            <input id="login-email" name="email" type="email" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="seu@email.com">
-        </div>
-        <div>
-            <label for="login-password" class="text-sm font-medium text-gray-700">Password</label>
-            <input id="login-password" name="password" type="password" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="********">
-        </div>
-        <button type="submit" class="w-full px-4 py-2 text-lg font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">Enter</button>
-    </form>
-   <p id="auth-error" class="text-sm text-center text-red-500 mt-2 h-4"></p>
-    <p class="mt-6 text-sm text-center text-gray-600">
-        Don't have an account? <a href="#" id="show-register" class="font-medium text-indigo-600 hover:underline">Register</a>
-    </p>
-`;
+// --- TEMPLATE LOADING FUNCTIONS ---
+async function loadTemplate(templatePath) {
+    try {
+        const response = await fetch(templatePath);
+        if (!response.ok) {
+            throw new Error(`Failed to load template: ${templatePath}`);
+        }
+        return await response.text();
+    } catch (error) {
+        console.error(`Error loading template ${templatePath}:`, error);
+        return '';
+    }
+}
 
-const registerTemplate = `
-    <div id="modal-close" class="close-button">x</div>
-    <h1 class="text-2xl font-bold text-center text-gray-800">Register</h1>
-    <form id="register-form" class="space-y-4">
-        <div>
-            <label for="register-name" class="text-sm font-medium text-gray-700">Full Name</label>
-            <input id="register-name" name="name" type="text" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Your name">
-        </div>
-        <div>
-            <label for="register-email" class="text-sm font-medium text-gray-700">Email</label>
-            <input id="register-email" name="email" type="email" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="seu@email.com">
-        </div>
-        <div>
-            <label for="register-password" class="text-sm font-medium text-gray-700">Password (mín. 6 chars)</label>
-            <input id="register-password" name="password" type="password" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="********">
-        </div>
-        <button type="submit" class="w-full px-4 py-2 text-lg font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-300">Create account</button>
-    </form>
-    <p id="auth-error" class="text-sm text-center text-red-500 mt-2 h-4"></p>
-    <p class="mt-6 text-sm text-center text-gray-600">
-        Already have an account? <a href="#" id="show-login" class="font-medium text-indigo-600 hover:underline">Log in</a>
-    </p>
-`;
+// Load all templates
+let loginTemplate, registerTemplate, createUsernameTemplate, verifyEmailTemplate;
 
-const createUsernameTemplate = `
-    <div id="modal-close" class="close-button">x</div>
-    <h1 class="text-2xl font-bold text-center text-gray-800">Crie seu Username</h1>
-    <p class="text-sm text-center text-gray-600 mb-4">This name will be displayed to other players.</p>
-    <form id="username-form" class="space-y-4">
-        <div>
-            <label for="username-input" class="text-sm font-medium text-gray-700">Username</label>
-            <input id="username-input" name="username" type="text" required class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="SeuUsername123" minlength="3" maxlength="15" pattern="[a-zA-Z0-9_]+">
-            <p class="text-xs text-gray-500 mt-1">3-15 characters, only letters, numbers and _.</p>
-        </div>
-        <button type="submit" class="w-full px-4 py-2 text-lg font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">Salvar e Continuar</button>
-    </form>
-    <p id="auth-error" class="text-sm text-center text-red-500 mt-2 h-4"></p>
-`;
-
-// NOVO: Template para a tela de verificação de e-mail
-const verifyEmailTemplate = `
-    <div id="modal-close" class="close-button">x</div>
-    <h1 class="text-2xl font-bold text-center text-gray-800">Verifique seu E-mail</h1>
-    <p class="text-sm text-center text-gray-600 my-4">
-        Um link de verificação foi enviado para o seu e-mail. Por favor, verifique sua caixa de entrada (e a pasta de spam) para continuar.
-    </p>
-    <button id="resend-verification-button" class="w-full px-4 py-2 text-lg font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors duration-300">Reenviar E-mail</button>
-    <p id="auth-error" class="text-sm text-center text-red-500 mt-2 h-4"></p>
-    <p class="mt-6 text-sm text-center text-gray-600">
-        <a href="#" id="logout-from-verify" class="font-medium text-indigo-600 hover:underline">Logout</a>
-    </p>
-`;
+async function loadAllTemplates() {
+    try {
+        [loginTemplate, registerTemplate, createUsernameTemplate, verifyEmailTemplate] = await Promise.all([
+            loadTemplate('./assets/components/login-template.html'),
+            loadTemplate('./assets/components/register-template.html'),
+            loadTemplate('./assets/components/create-username-template.html'),
+            loadTemplate('./assets/components/verify-email-template.html')
+        ]);
+    } catch (error) {
+        console.error('Error loading templates:', error);
+    }
+}
 
 
 const closeModal = () => {
@@ -121,8 +80,10 @@ function showLoginScreen() {
     loadingScreen.classList.add('hidden');
     loginContainer.classList.remove('hidden');
 
+    // CORREÇÃO: Usa o novo método para aplicar as traduções
+    i18n.applyCurrentLanguage();
+
     document.getElementById('login-form').addEventListener('submit', handleLogin);
-    // document.getElementById('google-signin-button').addEventListener('click', handleGoogleSignIn); // Removido
     document.getElementById('show-register').addEventListener('click', (e) => {
         e.preventDefault();
         showRegisterScreen();
@@ -132,6 +93,10 @@ function showLoginScreen() {
 
 function showRegisterScreen() {
     loginContainer.innerHTML = registerTemplate;
+
+    // CORREÇÃO: Usa o novo método para aplicar as traduções
+    i18n.applyCurrentLanguage();
+
     document.getElementById('register-form').addEventListener('submit', handleRegister);
     document.getElementById('show-login').addEventListener('click', (e) => {
         e.preventDefault();
@@ -146,6 +111,9 @@ function showCreateUsernameScreen(user) {
     loadingScreen.classList.add('hidden');
     loginContainer.classList.remove('hidden');
 
+    // CORREÇÃO: Usa o novo método para aplicar as traduções
+    i18n.applyCurrentLanguage();
+
     document.getElementById('username-form').addEventListener('submit', (e) => handleCreateUsername(e, user));
     document.getElementById("modal-close").addEventListener('pointerup', closeModal);
 }
@@ -157,12 +125,15 @@ function showVerifyEmailScreen(user) {
     loadingScreen.classList.add('hidden');
     loginContainer.classList.remove('hidden');
 
+    // CORREÇÃO: Usa o novo método para aplicar as traduções
+    i18n.applyCurrentLanguage();
+
     document.getElementById('resend-verification-button').addEventListener('click', async () => {
         try {
             await sendEmailVerification(user);
-            displayError('E-mail de verificação reenviado!');
+            displayError(i18n.t('email_verification.success.resent'));
         } catch (error) {
-            displayError('Erro ao reenviar e-mail. Tente mais tarde.');
+            displayError(i18n.t('email_verification.error.resend'));
         }
     });
 
@@ -181,7 +152,7 @@ async function handleCreateUsername(e, user) {
     displayError('');
 
     if (!newUsername || newUsername.length < 3 || newUsername.length > 15 || !/^[a-zA-Z0-9_]+$/.test(newUsername)) {
-        displayError('Username inválido. Verifique as regras.');
+        displayError(i18n.t('username.error.invalid'));
         return;
     }
 
@@ -225,7 +196,7 @@ async function handleCreateUsername(e, user) {
                 }
             }));
         } else {
-            displayError('Erro ao salvar username. Tente novamente.');
+            displayError(i18n.t('username.error.generic'));
         }
     } catch (error) {
         displayError(error.message);
@@ -275,9 +246,9 @@ const handleLogin = (e) => {
     displayError('');
     signInWithEmailAndPassword(auth, email, password)
         .catch(error => {
-            let message = "Ocorreu um erro.";
+            let message = i18n.t('login.error.generic');
             if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                message = 'Email/Password invalid.';
+                message = i18n.t('login.error.invalid_credentials');
             }
             displayError(message);
         });
@@ -292,7 +263,7 @@ const handleRegister = async (e) => {
     displayError('');
 
     if (password.length < 6) {
-        displayError("password must be at least 6 characters long.");
+        displayError(i18n.t('register.error.weak_password'));
         return;
     }
 
@@ -312,11 +283,11 @@ const handleRegister = async (e) => {
         showVerifyEmailScreen(userCredential.user);
 
     } catch (error) {
-        let message = "An error occurred.";
+        let message = i18n.t('register.error.generic');
         if (error.code === 'auth/email-already-in-use') {
-            message = 'This email is already in use.';
+            message = i18n.t('register.error.email_in_use');
         } else if (error.code === 'auth/weak-password') {
-            message = 'Password weak.';
+            message = i18n.t('register.error.weak_password');
         }
         displayError(message);
     }
@@ -353,7 +324,10 @@ function clearAuthCache() {
     localStorage.removeItem('spacescape_user');
 }
 
-function initializeDOM() {
+async function initializeDOM() {
+    // Load templates first
+    await loadAllTemplates();
+
     const findElements = () => {
         loadingScreen = document.getElementById('loading-screen');
         loginContainer = document.getElementById('login-container');

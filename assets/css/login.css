@@ -35,7 +35,7 @@ body {
 .welcome-modal {
     background: linear-gradient(135deg, #1a1a3e 0%, #0d0d26 100%);
     border: 2px solid #fff73b;
-    border-radius: 20px;
+    border-radius: 10px;
     padding: 40px;
     min-width: 400px;
     max-width: 500px;
@@ -243,9 +243,9 @@ body {
     min-width: 35px;
     min-height: 35px;
     background: rgba(255, 247, 59, 0.1);
-    border: 2px solid #fff73b;
-    border-radius: 50%;
-    color: #fff73b;
+    border: 2px solid #ff0000;
+    border-radius: 15%;
+    color: #ff0000;
     font-size: 18px;
     font-weight: bold;
     cursor: pointer;

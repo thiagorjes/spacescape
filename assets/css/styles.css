@@ -421,6 +421,43 @@ header#header-container {
     pointer-events: none;
 }
 
+/* Language Switcher Styles */
+.language-switcher {
+    display: flex;
+    gap: 5px;
+    margin-left: 10px;
+}
+
+.lang-btn {
+    background: rgba(255, 247, 59, 0.1);
+    border: 2px solid #fff73b;
+    border-radius: 6px;
+    color: #fff73b;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: all 0.3s ease;
+    font-family: 'Orbitron', monospace;
+    min-width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lang-btn:hover {
+    background: rgba(255, 247, 59, 0.2);
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(255, 247, 59, 0.3);
+}
+
+.lang-btn.active {
+    background: rgba(255, 247, 59, 0.3);
+    border-color: #fff73b;
+    box-shadow: 0 0 15px rgba(255, 247, 59, 0.4);
+}
+
 
 
 /* Contêiner do Top 3 para Desktop */
@@ -483,6 +520,23 @@ header#header-container {
 
 
 /* Modal do Ranking Completo */
+.ranking-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.ranking-overlay.hidden {
+    display: none;
+}
+
 .full-ranking-modal {
     position: fixed;
     top: 0;
@@ -678,4 +732,37 @@ header#header-container {
         padding: 12px;
         margin: -12px;
     }
+}
+
+
+/* Garante que o container do modal seja a referência para o posicionamento do botão */
+.modal-content, .ranking-content {
+    position: relative;
+}
+
+/* Estilo padronizado para o botão de fechar */
+.close-button {
+    position: absolute;
+    top: 15px; /* Ajuste a distância do topo se necessário */
+    right: 15px; /* Ajuste a distância da direita se necessário */
+    width: 30px;  /* Largura do quadrado */
+    height: 30px; /* Altura do quadrado */
+    border: 2px solid red; /* Borda vermelha */
+    background-color: transparent; /* Fundo transparente */
+    color: red; /* Cor do 'x' */
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    
+    /* Centraliza o 'x' dentro do quadrado */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
+    padding: 0;
+}
+
+.close-button:hover {
+    /* Efeito opcional ao passar o mouse */
+    background-color: rgba(255, 0, 0, 0.1);
 }
