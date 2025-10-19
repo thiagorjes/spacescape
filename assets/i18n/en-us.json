@@ -62,6 +62,7 @@
   "ranking.no_data": "No data available",
   "ranking.header.position": "#",
   "ranking.header.name": "Name",
+  "ranking.header.platform": "View",
   "ranking.header.stage": "Stage",
   "ranking.header.deaths": "Deaths",
 

@@ -62,6 +62,7 @@
   "ranking.no_data": "Nenhum dado disponível",
   "ranking.header.position": "#",
   "ranking.header.name": "Nome",
+  "ranking.header.platform": "Tela",
   "ranking.header.stage": "Fase",
   "ranking.header.deaths": "Mortes",
 

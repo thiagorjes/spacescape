@@ -17,15 +17,30 @@ async function fetchRankingData() {
 
         let allPlayersBestSessions = [];
         querySnapshot.forEach(doc => {
-            const sessions = doc.data().sessions || [];
-            // const userGameOverSessions = sessions.filter(s => s.gameover === true);
+            const data = doc.data();
+            
+            // Process PC sessions
+            const pcSessions = data.sessions_pc || [];
+            if (data.sessions) { // Migration for old data
+                data.sessions.forEach(s => {
+                    if (s.level > 17) pcSessions.push({ ...s, platform: 'pc' });
+                });
+            }
+            if (pcSessions.length > 0) {
+                const bestPcSession = pcSessions.sort((a, b) => b.level - a.level || a.deaths - b.deaths)[0];
+                allPlayersBestSessions.push(bestPcSession);
+            }
 
-            if (sessions.length > 0) {
-                const bestSession = sessions.sort((a, b) => {
-                    if (b.level !== a.level) return b.level - a.level;
-                    return a.deaths - b.deaths;
-                })[0];
-                allPlayersBestSessions.push(bestSession);
+            // Process Mobile sessions
+            const mobileSessions = data.sessions_mobile || [];
+            if (data.sessions) { // Migration for old data
+                data.sessions.forEach(s => {
+                    if (s.level <= 17) mobileSessions.push({ ...s, platform: 'mobile' });
+                });
+            }
+            if (mobileSessions.length > 0) {
+                const bestMobileSession = mobileSessions.sort((a, b) => b.level - a.level || a.deaths - b.deaths)[0];
+                allPlayersBestSessions.push(bestMobileSession);
             }
         });
 
@@ -33,6 +48,8 @@ async function fetchRankingData() {
 
         allPlayersBestSessions.sort((a, b) => {
             if (b.level !== a.level) return b.level - a.level;
+            if (a.platform === 'mobile' && b.platform !== 'mobile') return -1;
+            if (b.platform === 'mobile' && a.platform !== 'mobile') return 1;
             return a.deaths - b.deaths;
         });
 
@@ -42,6 +59,7 @@ async function fetchRankingData() {
         return [];
     }
 }
+
 
 /**
  * Renderiza os dados do ranking nos containers HTML existentes.
@@ -84,10 +102,12 @@ function renderRanking(rankingData) {
         top10.forEach((session, index) => {
             const isPlayer = currentUser && session.userId === currentUser.uid;
             const listItem = document.createElement('li');
+            const platformIcon = session.platform === 'mobile' ? '📱' : '💻';
             listItem.className = isPlayer ? 'player-highlight' : '';
             listItem.innerHTML = `
                 <span>${index + 1}</span>
                 <span>${session.username}</span>
+                <span>${platformIcon}</span>
                 <span>${session.level}</span>
                 <span>${session.deaths}</span>
             `;

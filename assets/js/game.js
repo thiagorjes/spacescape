@@ -16,12 +16,13 @@ import {
     getDocs,
     orderBy,
     query,
-    serverTimestamp
+    serverTimestamp,
+    writeBatch
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 import { i18n } from './i18n.js';
 
 
-const FUEL_CONSUMPTION_THRUST = 0.01;
+const FUEL_CONSUMPTION_THRUST = 0.1;
 const FUEL_CONSUMPTION_TURN = 0.005;
 const HEAT_RATE = 0.4;
 const HEAT_RENEW = 4;
@@ -110,8 +111,8 @@ const elements = {
     winOverlay: document.getElementById('win-overlay'),
     overheatAlert: document.getElementById('overheatAlert'),
     stageTitle: document.getElementById('stageTitle'),
-    finalStage: document.getElementById('finalStage'),
-    finalDeaths: document.getElementById('finalDeaths'),
+    finalStageText: document.getElementById('finalStageText'),
+    finalDeathsText: document.getElementById('finalDeathsText'),
     startButton: document.getElementById('startButton'),
     restartButton: document.getElementById('restartButton'),
     nextLevelButton: document.getElementById('next-level-btn'),
@@ -146,10 +147,14 @@ async function saveGameState(options = {}) {
     }
 
     const gameStateRef = doc(db, "game_state", currentUser.uid);
+    const platform = isMobile() ? 'mobile' : 'pc';
+    const sessionKey = `sessions_${platform}`;
+
 
     try {
         const docSnap = await getDoc(gameStateRef);
-        let sessions = docSnap.exists() ? docSnap.data().sessions || [] : [];
+        let data = docSnap.exists() ? docSnap.data() : {};
+        let sessions = data[sessionKey] || [];
 
         if (isNewRun) {
             sessions.forEach(session => {
@@ -166,7 +171,9 @@ async function saveGameState(options = {}) {
             gameover: isGameOver,
             timestamp: new Date(),
             userId: currentUser.uid,
-            username: currentUser.username || currentUser.displayName || "Anônimo"
+            username: currentUser.username || currentUser.displayName || "Anônimo",
+            platform: platform
+
         };
 
         if (isNewRun || activeSessionIndex === -1) {
@@ -175,9 +182,12 @@ async function saveGameState(options = {}) {
             sessions[activeSessionIndex] = sessionData;
         }
 
-        await setDoc(gameStateRef, {
-            sessions
+        await setDoc(gameStateRef, { ...data,
+            [sessionKey]: sessions
+        }, {
+            merge: true
         });
+
 
     } catch (error) {
         console.error("Erro ao salvar o progresso: ", error);
@@ -201,46 +211,77 @@ async function loadGameState() {
         initGame();
         return;
     }
-
+    const platform = isMobile() ? 'mobile' : 'pc';
+    const sessionKey = `sessions_${platform}`;
     const gameStateRef = doc(db, "game_state", currentUser.uid);
+
     try {
         const docSnap = await getDoc(gameStateRef);
-        if (docSnap.exists() && docSnap.data().sessions) {
-            const sessions = docSnap.data().sessions;
-            const activeSession = sessions.find(s => s.gameover === false);
-            if (activeSession) {
-                gameState.level = activeSession.level || 1;
-                gameState.deaths = activeSession.deaths || 0;
-                gameState.fuel = activeSession.fuel !== undefined ? activeSession.fuel : 100;
-                gameState.shields = activeSession.shields !== undefined ? activeSession.shields : 3;
-                gameState.shieldPercentage = activeSession.shieldPercentage !== undefined ? activeSession.shieldPercentage : 100;
-                gameState.temperature = 0;
-                gameState.gameStatus = 'loading_planets';
-                gameState.isGeneratingPlanets = true;
-                initGame();
-                return;
-            }
+        let data = docSnap.exists() ? docSnap.data() : {};
+
+        // Migration logic for old data structure
+        if (data.sessions && (!data.sessions_pc || !data.sessions_mobile)) {
+            const batch = writeBatch(db);
+            const migratedData = {
+                sessions_pc: [],
+                sessions_mobile: []
+            };
+            data.sessions.forEach(session => {
+                if (session.level > 17) {
+                    migratedData.sessions_pc.push({ ...session,
+                        platform: 'pc'
+                    });
+                } else {
+                    migratedData.sessions_mobile.push({ ...session,
+                        platform: 'mobile'
+                    });
+                }
+            });
+            batch.update(gameStateRef, { ...migratedData,
+                sessions: []
+            });
+            await batch.commit();
+            data = { ...data,
+                ...migratedData
+            };
         }
-        gameState = {
-            level: 1,
-            deaths: 0,
-            fuel: 100,
-            temperature: 0,
-            shields: 3,
-            shieldPercentage: 100,
-            rechargeInProgress: false,
-            rechargeCountdown: SHIELD_RECHARGE_DURATION
-        };
-        await saveGameState({
-            isGameOver: false,
-            isNewRun: true
-        });
+
+
+        const sessions = data[sessionKey] || [];
+        const activeSession = sessions.find(s => s.gameover === false);
+
+        if (activeSession) {
+            gameState.level = activeSession.level || 1;
+            gameState.deaths = activeSession.deaths || 0;
+            gameState.fuel = activeSession.fuel !== undefined ? activeSession.fuel : 100;
+            gameState.shields = activeSession.shields !== undefined ? activeSession.shields : 3;
+            gameState.shieldPercentage = activeSession.shieldPercentage !== undefined ? activeSession.shieldPercentage : 100;
+            gameState.temperature = 0;
+            gameState.gameStatus = 'loading_planets';
+            gameState.isGeneratingPlanets = true;
+        } else {
+            gameState = {
+                level: 1,
+                deaths: 0,
+                fuel: 100,
+                temperature: 0,
+                shields: 3,
+                shieldPercentage: 100,
+                rechargeInProgress: false,
+                rechargeCountdown: SHIELD_RECHARGE_DURATION
+            };
+            await saveGameState({
+                isGameOver: false,
+                isNewRun: true
+            });
+        }
         initGame();
     } catch (error) {
         console.error("Erro ao carregar o progresso: ", error);
         initGame();
     }
 }
+
 
 async function fetchAndDisplayRanking(stage) {
     if (elements.mobileAdContainer.style.display === 'block') {
@@ -321,8 +362,12 @@ function hidePopups() {
 }
 
 async function showFuelEmptyPopup() {
-    elements.finalStage.textContent = gameState.level;
-    elements.finalDeaths.textContent = gameState.deaths;
+    const stageTextTemplate = i18n.t('game.reached_stage');
+    const deathsTextTemplate = i18n.t('game.deaths');
+
+    elements.finalStageText.textContent = stageTextTemplate.replace('{{stage}}', gameState.level);
+    elements.finalDeathsText.textContent = deathsTextTemplate.replace('{{deaths}}', gameState.deaths);
+
     elements.fuelEmptyPopup.style.display = 'flex';
     gameState.isFuelEmpty = true;
     gameState.gameStatus = 'paused';
