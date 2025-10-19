@@ -578,3 +578,22 @@ window.addEventListener('resize', () => {
         window.spaceScapeInstance.createStarfield();
     }
 });
+
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(reg => {
+    console.log('Service Worker registrado:', reg);
+
+    reg.onupdatefound = () => {
+      const newWorker = reg.installing;
+      newWorker.onstatechange = () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          console.log('Nova versão detectada. Atualizando...');
+          window.location.reload();
+        }
+      };
+    };
+  }).catch(err => {
+    console.error('Erro ao registrar Service Worker:', err);
+  });
+}

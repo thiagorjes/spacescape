@@ -1,4 +1,4 @@
-const CACHE_NAME = 'versao-1';
+const CACHE_NAME = 'versao-2'; // mude este número a cada nova atualização
 const urlsToCache = [
   '/',
   '/assets/css/styles.css',
@@ -27,28 +27,59 @@ const urlsToCache = [
   '/favicon.ico',
 ];
 
-// Evento de instalação: abre o cache e armazena os arquivos
+// Instalação: adiciona arquivos ao cache
 self.addEventListener('install', event => {
+  console.log('[ServiceWorker] Instalando nova versão...');
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Cache aberto');
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then(cache => {
+      console.log('[ServiceWorker] Cache aberto');
+      return cache.addAll(urlsToCache);
+    })
   );
+  // força o service worker a ativar imediatamente após instalar
+  self.skipWaiting();
 });
 
-// Evento de fetch: intercepta as requisições e serve do cache se disponível
+// Ativação: remove caches antigos
+self.addEventListener('activate', event => {
+  console.log('[ServiceWorker] Ativando nova versão...');
+  event.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            console.log('[ServiceWorker] Removendo cache antigo:', key);
+            return caches.delete(key);
+          }
+        })
+      );
+    })
+  );
+  // força controle imediato das páginas abertas
+  self.clients.claim();
+});
+
+// Fetch: serve do cache ou busca na rede
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Retorna a resposta do cache se encontrada
-        if (response) {
-          return response;
+    caches.match(event.request).then(response => {
+      // Se encontrar no cache, retorna
+      if (response) return response;
+
+      // Senão, busca na rede e atualiza o cache
+      return fetch(event.request).then(networkResponse => {
+        if (!networkResponse || networkResponse.status !== 200) {
+          return networkResponse;
         }
-        // Caso contrário, busca na rede
-        return fetch(event.request);
-      })
+
+        // Atualiza o cache em segundo plano
+        const responseClone = networkResponse.clone();
+        caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, responseClone);
+        });
+
+        return networkResponse;
+      });
+    })
   );
 });
