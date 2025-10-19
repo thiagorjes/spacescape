@@ -31,7 +31,7 @@ const ROCKET_TORQUE = 0.05;
 const PLANET_DENSITY = 10;
 const MAX_ANGULAR_VELOCITY = 0.08;
 const FRICTION = 0.3;
-const MAX_PERCENTAGE = 0.3
+const MAX_PERCENTAGE = 0.6
 
 class PhysicsEngine {
     constructor(canvas, initialGameState, config) {
@@ -64,19 +64,22 @@ class PhysicsEngine {
         this.maxRadius = maxR;
         this.minDistance = minDist;
         this.rocketRatio = rocketSize;
-        this.reset(); // CORREÇÃO: Movido para antes de resizeCanvas
         this.resizeCanvas();
+        this.reset();
         window.addEventListener('resize', () => this.resizeCanvas());
     }
 
     resizeCanvas() {
         const gameArea = this.canvas.parentElement;
         if (gameArea) {
-            this.canvas.width = gameArea.clientWidth;
-            this.canvas.height = gameArea.clientHeight;
-        }
-        if (!this.isRunning) {
-            this.draw();
+            const width = gameArea.clientWidth || window.innerWidth;
+            const height = gameArea.clientHeight || window.innerHeight;
+            this.canvas.width = width;
+            this.canvas.height = height;
+        } else {
+            // fallback de segurança
+            this.canvas.width = window.innerWidth;
+            this.canvas.height = window.innerHeight;
         }
     }
 
@@ -124,7 +127,7 @@ class PhysicsEngine {
         this.planets = [];
         this.rechargePlanet = null;
         const count = this.gameState.level + 1;
-        this.maxRadius = Math.min(this.maxRadius, Math.sqrt((this.canvas.width * this.canvas.height * MAX_PERCENTAGE) / count / Math.PI));
+        this.maxRadius = Math.min(this.maxRadius, Math.sqrt((this.canvas.width * this.canvas.height * MAX_PERCENTAGE) / count / Math.PI)) / 2;
 
         let tempPlanets = [];
         for (let i = 0; i < count; i++) {

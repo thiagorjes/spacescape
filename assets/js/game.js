@@ -263,7 +263,7 @@ function initGame() {
     if (isMobile) {
         physicsEngine.init(10, 30, 20, 10, 100);
     } else {
-        physicsEngine.init(30, 90, 200, 18, 150);
+        physicsEngine.init(30, 90, 20, 18, 150);
     }
     updateDisplays();
     updateProgressBars();
