@@ -127,7 +127,7 @@ class PhysicsEngine {
         this.planets = [];
         this.rechargePlanet = null;
         const count = this.gameState.level + 1;
-        this.maxRadius = Math.min(this.maxRadius, Math.sqrt((this.canvas.width * this.canvas.height * MAX_PERCENTAGE) / count / Math.PI)) / 2;
+        this.maxRadius = Math.min(this.maxRadius, Math.sqrt((this.canvas.width * this.canvas.height * MAX_PERCENTAGE) / count / Math.PI));
 
         let tempPlanets = [];
         for (let i = 0; i < count; i++) {
