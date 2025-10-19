@@ -1,4 +1,4 @@
-const CACHE_NAME = 'versao-2'; // mude este número a cada nova atualização
+const CACHE_NAME = 'versao-3'; // mude este número a cada nova atualização
 const urlsToCache = [
   '/',
   '/assets/css/styles.css',
