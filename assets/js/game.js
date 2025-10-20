@@ -330,6 +330,11 @@ function showStartScreen() {
     // Proposta
     const stageTextTemplate = i18n.t('game.stage'); // Busca o texto modelo, ex: "Fase {{stage}}"
     elements.stageTitle.textContent = stageTextTemplate.replace('{{stage}}', String(gameState.level).padStart(2, '0'));
+    
+    // CORREÇÃO ADICIONADA:
+    // Remove o atributo de tradução para evitar que seja sobrescrito.
+    elements.stageTitle.removeAttribute('data-i18n');
+    
     elements.startScreen.style.display = 'flex';
     elements.startButton.style.display = 'block';
     gameState.gameStatus = 'ready';
@@ -610,7 +615,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Run in guest mode - no authentication required
             currentUser = null;
             updateHeaderUI(null);
-            initGame();
+            loadGameState();
         } else {
             // Normal authenticated mode
             checkAuthState(user => {

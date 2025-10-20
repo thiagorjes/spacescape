@@ -588,9 +588,7 @@ class SpaceScape {
 document.addEventListener('DOMContentLoaded', async () => {
     // Agora é seguro inicializar a aplicação principal
     window.spaceScapeInstance = new SpaceScape();
-
-    // Espera o gerenciador i18n estar totalmente inicializado (traduções carregadas)
-    
+   
 });
 
 window.addEventListener('resize', () => {
