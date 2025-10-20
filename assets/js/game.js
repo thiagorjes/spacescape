@@ -195,6 +195,8 @@ async function saveGameState(options = {}) {
 }
 
 async function loadGameState() {
+    // CORREÇÃO: Aplica a tradução inicial a todos os elementos da UI
+    i18n.applyCurrentLanguage();
     // Skip loading in guest mode - start fresh
     if (!currentUser) {
         console.log('Guest mode: Starting with default game state');
@@ -308,9 +310,6 @@ function initGame() {
     }
     updateDisplays();
     updateProgressBars();
-
-    // CORREÇÃO: Aplica a tradução inicial a todos os elementos da UI
-    i18n.applyCurrentLanguage();
 }
 
 function updateDisplays() {
