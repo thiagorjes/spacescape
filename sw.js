@@ -1,4 +1,4 @@
-const CACHE_NAME = 'versao-4.2'; // mude este número a cada nova atualização
+const CACHE_NAME = 'versao-5.0'; // mude este número a cada nova atualização
 const urlsToCache = [
   '/',
   '/assets/css/styles.css',
