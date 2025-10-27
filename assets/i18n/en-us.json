@@ -76,5 +76,16 @@
   "game.next_level": "Next Level",
   "game.stages": "STAGES",
   "game.deaths_label": "DEATHS",
-  "game.overheated": "OVERHEATED!"
+  "game.overheated": "OVERHEATED!",
+  "tutorial.step1.title": "Welcome, Pilot!",
+  "tutorial.step1.text": "Your mission is to take off from the YELLOW planet and land on the RED planet.",
+  "tutorial.step2.title": "Controls",
+  "tutorial.step2.text": "Use UP and DOWN arrows for thrust (forward/backward) and LEFT and RIGHT to rotate.",
+  "tutorial.step3.title": "Be Careful!",
+  "tutorial.step3.text": "Shields protect you from strong collisions. If your shields run out, a hard crash will be fatal!",
+  "tutorial.step4.title": "Good Luck!",
+  "tutorial.step4.text": "Now, land safely on the red planet. Press 'LET'S GO' to begin.",
+  "tutorial.next": "Next",
+  "tutorial.close": "Close"
+
 }

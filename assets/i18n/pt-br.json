@@ -76,5 +76,15 @@
   "game.next_level": "Próxima Fase",
   "game.stages": "FASES",
   "game.deaths_label": "MORTES",
-  "game.overheated": "SUPERAQUECIDO!"
+  "game.overheated": "SUPERAQUECIDO!",
+  "tutorial.step1.title": "Bem-vindo, Piloto!",
+  "tutorial.step1.text": "Sua missão é decolar do planeta AMARELO e pousar no planeta VERMELHO.",
+  "tutorial.step2.title": "Controles",
+  "tutorial.step2.text": "Use as setas CIMA e BAIXO para propulsão (frente/trás) e ESQUERDA e DIREITA para girar.",
+  "tutorial.step3.title": "Tenha Cuidado!",
+  "tutorial.step3.text": "Os escudos protegem você de colisões fortes. Se seus escudos acabarem, uma batida forte será fatal!",
+  "tutorial.step4.title": "Boa Sorte!",
+  "tutorial.step4.text": "Agora, pouse em segurança no planeta vermelho. Pressione 'VAMOS LÁ' para começar.",
+  "tutorial.next": "Próximo",
+  "tutorial.close": "Fechar"
 }

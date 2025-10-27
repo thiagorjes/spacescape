@@ -106,6 +106,7 @@ let gameState = {
 };
 
 const elements = {
+    username: document.getElementById('username'),
     startScreen: document.getElementById('startScreen'),
     fuelEmptyPopup: document.getElementById('fuelEmptyPopup'),
     winOverlay: document.getElementById('win-overlay'),
@@ -123,12 +124,18 @@ const elements = {
     gameCanvas: document.getElementById('gameCanvas'),
     gameArea: document.getElementById('gameArea'),
     mobileAdContainer: document.getElementById('ads-mobile-container'),
-    rechargeCountdown: document.getElementById('rechargeCountdown')
+    rechargeCountdown: document.getElementById('rechargeCountdown'),
+    tutorialOverlay: document.getElementById('tutorialOverlay'),
+    tutorialStep: document.getElementById('tutorialStep'),
+    tutorialTitle: document.getElementById('tutorialTitle'),
+    tutorialText: document.getElementById('tutorialText'),
+    tutorialNextBtn: document.getElementById('tutorialNextBtn'),
 };
 
 let physicsEngine;
 let isMobileAdInitialized = false;
 let loadingTimeout;
+let currentTutorialStep = 1;
 
 // --- FUNÇÃO HELPER PARA VERIFICAR SE É MOBILE ---
 const isMobile = () => window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -286,9 +293,9 @@ async function loadGameState() {
 
 
 async function fetchAndDisplayRanking(stage) {
-    if (elements.mobileAdContainer.style.display === 'block') {
-        document.getElementById('adsterra').style.display = "block";
-    }
+    // if (elements.mobileAdContainer.style.display === 'block') {
+    //     document.getElementById('adsterra').style.display = "block";
+    // }
 }
 
 
@@ -326,6 +333,13 @@ function updateProgressBars() {
 
 function showStartScreen() {
     if (loadingTimeout) clearTimeout(loadingTimeout);
+    elements.username = document.getElementById('username');
+    elements.username.removeAttribute('data-i18n');
+    if (gameState.level === 1) {
+        
+        showTutorial(1); // Mostra o tutorial
+        return; // Pula a tela de início normal
+    }
 
     // Proposta
     const stageTextTemplate = i18n.t('game.stage'); // Busca o texto modelo, ex: "Fase {{stage}}"
@@ -334,7 +348,6 @@ function showStartScreen() {
     // CORREÇÃO ADICIONADA:
     // Remove o atributo de tradução para evitar que seja sobrescrito.
     elements.stageTitle.removeAttribute('data-i18n');
-    
     elements.startScreen.style.display = 'flex';
     elements.startButton.style.display = 'block';
     gameState.gameStatus = 'ready';
@@ -357,6 +370,75 @@ function showLoadingPlanetsScreen() {
         }
     }, 5000);
 }
+
+
+// ... (depois de showLoadingPlanetsScreen(), perto da linha 335)
+
+function showTutorial(step) {
+    // Garante que o motor de física tenha desenhado os planetas
+    if (!physicsEngine || !physicsEngine.startPlanet || !physicsEngine.endPlanet) {
+        // Espera um pouco e tenta novamente se os planetas não estiverem prontos
+        setTimeout(() => showTutorial(step), 100);
+        return;
+    }
+
+    currentTutorialStep = step;
+    elements.tutorialOverlay.style.display = 'flex';
+    elements.tutorialStep.setAttribute('data-step', step);
+
+    let titleKey, textKey, btnKey;
+
+    switch (step) {
+        case 1:
+            titleKey = 'tutorial.step1.title';
+            textKey = 'tutorial.step1.text';
+            btnKey = 'tutorial.next';
+            
+            break;
+
+        case 2:
+            titleKey = 'tutorial.step2.title';
+            textKey = 'tutorial.step2.text';
+            btnKey = 'tutorial.next';
+            break;
+
+        case 3:
+            titleKey = 'tutorial.step3.title';
+            textKey = 'tutorial.step3.text';
+            btnKey = 'tutorial.next';
+            // Sem destaque, apenas texto
+            break;
+
+        case 4:
+            titleKey = 'tutorial.step4.title';
+            textKey = 'tutorial.step4.text';
+            btnKey = 'game.lets_go'; // Muda o texto do botão para "VAMOS LÁ"
+            break;
+    }
+
+    // Aplica as traduções
+    elements.tutorialTitle.setAttribute('data-i18n', titleKey);
+    elements.tutorialText.setAttribute('data-i18n', textKey);
+    elements.tutorialNextBtn.setAttribute('data-i18n', btnKey);
+    i18n.applyCurrentLanguage(); // Re-aplica todas as traduções da UI
+}
+
+function nextTutorialStep() {
+    if (currentTutorialStep < 4) {
+        showTutorial(currentTutorialStep + 1);
+    } else {
+        // Última etapa, o botão significa "VAMOS LÁ"
+        closeTutorialAndStart();
+    }
+}
+
+function closeTutorialAndStart() {
+    elements.tutorialOverlay.style.display = 'none';
+    
+    // Agora, chama a lógica *real* de início de jogo
+    handleStart();
+}
+
 
 
 function hidePopups() {
@@ -468,6 +550,7 @@ function setupEventListeners() {
     elements.startButton.addEventListener('click', handleStart);
     elements.restartButton.addEventListener('click', handleRestart);
     elements.nextLevelButton.addEventListener('click', handleNextLevel);
+    elements.tutorialNextBtn.addEventListener('click', nextTutorialStep); // ADICIONE ESTA LINHA
     const controls = {
         left: 'left',
         right: 'right',

@@ -33,28 +33,19 @@
                         <div class="game-area" id="gameArea">
                             <canvas id="gameCanvas"></canvas>
                             <div id="rechargeCountdown" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 48px; display: none;">5</div>
-
+                            
+                            <div id="tutorialOverlay" class="popup-overlay" style="display: none; background: rgba(0, 0, 0, 0.6); z-index: 2000;">
+                                <div id="tutorialStep" class="tutorial-step" data-step="1">                            
+                                    <div class="tutorial-content">
+                                        <h2 id="tutorialTitle" data-i18n="tutorial.step1.title"></h2>
+                                        <p id="tutorialText" data-i18n="tutorial.step1.text"></p>
+                                        <button id="tutorialNextBtn" class="start-button" style="display: block;" data-i18n="tutorial.next"></button>
+                                    </div>
+                                </div>
+                            </div>
 
                             <div id="win-overlay" class="popup-overlay" style="display: none;">
                                 <div class="popup-content">
-                                    <div id="ads-mobile-container" class="mb-4">
-                                        <div class="ads-container" id="ads-mobile"
-                                            style="min-width:300px; height: 300px; overflow: hidden; width:100%; z-index: 10;">
-                                            <div id="adsterra" style="min-width:300px; height: 300px; width:100%; display: block;">
-                                                <script type="text/javascript">
-                                                    atOptions = {
-                                                        'key': 'e34d003d97f47c1239d4c474839ae338',
-                                                        'format': 'iframe',
-                                                        'height': 250,
-                                                        'width': 300,
-                                                        'params': {}
-                                                    };
-                                                </script>
-                                                <script type="text/javascript"
-                                                    src="//www.highperformanceformat.com/e34d003d97f47c1239d4c474839ae338/invoke.js"></script>
-                                            </div>
-                                            </div>
-                                    </div>
                                     <button id="next-level-btn" class="start-button" style="display: block;" data-i18n="game.next_level">Next Level</button>
                                 </div>
                             </div>

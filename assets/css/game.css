@@ -380,3 +380,58 @@ body {
 .header-title {
     display: block;
 }
+
+
+/* ... (estilos existentes) ... */
+
+/* ===== ESTILOS DO TUTORIAL ===== */
+.tutorial-step {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 400px;
+}
+
+.tutorial-content {
+    background: rgba(26, 26, 26, 0.95);
+    padding: 25px;
+    border-radius: 15px;
+    text-align: center;
+    border: 2px solid #fff73b; /* Borda amarela */
+    color: #fff73b;
+    font-family: 'Orbitron', monospace;
+    position: relative; /* Para contexto de empilhamento */
+    z-index: 2002; /* Garante que o texto fique sobre os destaques */
+}
+
+.tutorial-content h2 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.tutorial-content p {
+    font-size: 16px;
+    color: #ffffff;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.tutorial-highlight {
+    position: fixed; /* Posição relativa à janela de visualização */
+    border: 4px dashed #fff73b;
+    border-radius: 50%; /* Destaque circular por padrão */
+    box-shadow: 0 0 25px 10px #fff73b;
+    display: none; /* Oculto por padrão */
+    z-index: 2001; /* Atrás do texto, mas sobre o jogo */
+    pointer-events: none; /* Impede que o destaque bloqueie cliques */
+    transition: all 0.3s ease-in-out;
+}
+
+/* Destaque retangular para os controles */
+#tutorialHighlightControls {
+    border-radius: 15px;
+}
+/* ============================= */
